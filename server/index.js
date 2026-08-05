@@ -84,6 +84,12 @@ app.use((err, req, res, next) => {
   res.status(err.status || 500).json({ error: err.message || 'Internal server error' });
 });
 
-app.listen(PORT, () => {
-  console.log(`\n  LexSecure AI running at http://localhost:${PORT}\n`);
-});
+// Local dev: start HTTP server. On Vercel, the file is imported as a module.
+if (require.main === module) {
+  app.listen(PORT, () => {
+    console.log(`\n  LexSecure AI running at http://localhost:${PORT}\n`);
+  });
+}
+
+// Export for Vercel serverless
+module.exports = app;
