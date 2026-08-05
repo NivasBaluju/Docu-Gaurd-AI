@@ -16,6 +16,27 @@ const shareRoutes = require('./routes/share');
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+// --- CORS -------------------------------------------------------------------
+// Allow the Vercel-hosted frontend and local dev to reach the API.
+const ALLOWED_ORIGINS = [
+  process.env.CLIENT_URL,           // e.g. https://lex-secure-ai.vercel.app
+  'http://localhost:5000',
+  'http://localhost:3000',
+].filter(Boolean);
+
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+  if (!origin || ALLOWED_ORIGINS.includes(origin)) {
+    res.setHeader('Access-Control-Allow-Origin', origin || '*');
+  }
+  res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
+  if (req.method === 'OPTIONS') return res.sendStatus(204);
+  next();
+});
+// ---------------------------------------------------------------------------
+
 app.use(express.json({ limit: '10mb' }));
 app.use(cookieParser());
 
