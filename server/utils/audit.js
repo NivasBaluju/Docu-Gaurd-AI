@@ -63,6 +63,16 @@ async function logThreat(userId, ip, severity, category, message) {
        VALUES ($1, $2, $3, $4, $5, $6)`,
       [id, userId || null, ip || null, severity, category, message]
     );
+
+    if (severity === 'high' && userId) {
+      const { sendSecurityAlertEmail } = require('./email');
+      db.query('SELECT email FROM users WHERE id = $1', [userId])
+        .then(({ rows }) => {
+          if (rows[0]?.email) sendSecurityAlertEmail(rows[0].email, category, message);
+        })
+        .catch(() => {});
+    }
+
     return id;
   } catch (err) {
     console.error('logThreat error:', err.message);

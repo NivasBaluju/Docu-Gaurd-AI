@@ -9,32 +9,12 @@ const nodemailer = require('nodemailer');
 const db = require('../db');
 const { fingerprint, JWT_SECRET, requireAuth } = require('../middleware/auth');
 const { recordAudit, logThreat } = require('../utils/audit');
+const { sendOtpEmail, sendWelcomeEmail } = require('../utils/email');
 
 const router = express.Router();
 
 function issueToken(sessionId, userId) {
   return jwt.sign({ sessionId, userId }, JWT_SECRET, { expiresIn: '7d' });
-}
-
-async function sendOtpEmail(toEmail, code) {
-  const { SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS, SMTP_FROM } = process.env;
-  if (!SMTP_HOST || !SMTP_USER || !SMTP_PASS) {
-    console.log(`[DEV MODE] OTP for ${toEmail}: ${code} (no SMTP configured — set SMTP_* in .env to send real emails)`);
-    return { devMode: true };
-  }
-  const transporter = nodemailer.createTransport({
-    host: SMTP_HOST,
-    port: Number(SMTP_PORT) || 587,
-    secure: Number(SMTP_PORT) === 465,
-    auth: { user: SMTP_USER, pass: SMTP_PASS }
-  });
-  await transporter.sendMail({
-    from: SMTP_FROM || SMTP_USER,
-    to: toEmail,
-    subject: 'Your LexSecure AI verification code',
-    text: `Your one-time verification code is: ${code}\nIt expires in 10 minutes.`
-  });
-  return { devMode: false };
 }
 
 // --- Register ---------------------------------------------------------------
@@ -56,6 +36,7 @@ router.post('/register', async (req, res) => {
     );
 
     await recordAudit(id, 'USER_REGISTERED', { email: email.toLowerCase(), mfaEnabled });
+    sendWelcomeEmail(email.toLowerCase(), name).catch(err => console.error('Welcome email error:', err.message));
     res.json({ ok: true, message: 'Account created. Please log in.' });
   } catch (err) {
     console.error('Register error:', err);
@@ -177,6 +158,25 @@ router.post('/mfa/totp/enable', async (req, res) => {
   }
 });
 
+async function verifyOtpCode(userId, inputCode) {
+  const cleanInput = String(inputCode || '').trim();
+  if (!cleanInput) return false;
+  const { rows: otpRows } = await db.query(
+    `SELECT * FROM otp_codes
+     WHERE user_id = $1 AND purpose = 'login' AND used = false AND expires_at > NOW()
+     ORDER BY created_at DESC LIMIT 1`,
+    [userId]
+  );
+  const otp = otpRows[0];
+  if (!otp) return false;
+  const isCodeMatch = String(otp.code).trim() === cleanInput;
+  if (isCodeMatch) {
+    await db.query('UPDATE otp_codes SET used = true WHERE id = $1', [otp.id]);
+    return true;
+  }
+  return false;
+}
+
 router.post('/mfa/totp/verify', async (req, res) => {
   try {
     const { preToken, code } = req.body;
@@ -190,9 +190,23 @@ router.post('/mfa/totp/verify', async (req, res) => {
 
     const { rows } = await db.query('SELECT * FROM users WHERE id = $1', [payload.userId]);
     const user = rows[0];
-    const valid = authenticator.check(code || '', user.totp_secret || '');
+    if (!user) return res.status(404).json({ error: 'User not found' });
+
+    const cleanCode = String(code || '').trim();
+    let valid = false;
+
+    if (user.totp_secret) {
+      try {
+        valid = authenticator.check(cleanCode, user.totp_secret);
+      } catch (e) { }
+    }
+
     if (!valid) {
-      await logThreat(user.id, req.ip, 'high', 'mfa', 'Failed TOTP verification attempt');
+      valid = await verifyOtpCode(user.id, cleanCode);
+    }
+
+    if (!valid) {
+      await logThreat(user.id, req.ip, 'high', 'mfa', 'Failed MFA verification attempt');
       return res.status(401).json({ error: 'Invalid authentication code' });
     }
 
@@ -222,12 +236,14 @@ router.post('/mfa/otp/request', async (req, res) => {
     }
     const { rows } = await db.query('SELECT * FROM users WHERE id = $1', [payload.userId]);
     const user = rows[0];
+    if (!user) return res.status(404).json({ error: 'User not found' });
+
     const code = String(Math.floor(100000 + Math.random() * 900000));
     const id = uuidv4();
-    const expiresAt = new Date(Date.now() + 10 * 60 * 1000).toISOString();
     await db.query(
-      'INSERT INTO otp_codes (id, user_id, code, purpose, expires_at) VALUES ($1, $2, $3, $4, $5)',
-      [id, user.id, code, 'login', expiresAt]
+      `INSERT INTO otp_codes (id, user_id, code, purpose, expires_at)
+       VALUES ($1, $2, $3, $4, NOW() + INTERVAL '15 minutes')`,
+      [id, user.id, code, 'login']
     );
 
     const result = await sendOtpEmail(user.email, code);
@@ -248,21 +264,24 @@ router.post('/mfa/otp/verify', async (req, res) => {
       return res.status(401).json({ error: 'Login session expired' });
     }
 
-    const { rows: otpRows } = await db.query(
-      `SELECT * FROM otp_codes
-       WHERE user_id = $1 AND purpose = 'login' AND used = false
-       ORDER BY created_at DESC LIMIT 1`,
-      [payload.userId]
-    );
-    const otp = otpRows[0];
-
-    if (!otp || otp.code !== code || new Date(otp.expires_at) < new Date()) {
-      return res.status(401).json({ error: 'Invalid or expired code' });
-    }
-    await db.query('UPDATE otp_codes SET used = true WHERE id = $1', [otp.id]);
-
     const { rows: userRows } = await db.query('SELECT * FROM users WHERE id = $1', [payload.userId]);
     const user = userRows[0];
+    if (!user) return res.status(404).json({ error: 'User not found' });
+
+    const cleanCode = String(code || '').trim();
+    let valid = await verifyOtpCode(user.id, cleanCode);
+
+    if (!valid && user.totp_secret) {
+      try {
+        valid = authenticator.check(cleanCode, user.totp_secret);
+      } catch (e) { }
+    }
+
+    if (!valid) {
+      await logThreat(user.id, req.ip, 'high', 'mfa', 'Failed OTP verification attempt');
+      return res.status(401).json({ error: 'Invalid or expired code' });
+    }
+
     const sessionId = uuidv4();
     await db.query(
       'INSERT INTO sessions (id, user_id, device_fingerprint, ip, mfa_verified) VALUES ($1, $2, $3, $4, true)',
