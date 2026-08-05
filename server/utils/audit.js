@@ -8,7 +8,7 @@ async function getLastBlock() {
   const { rows } = await db.query('SELECT * FROM blockchain_audit ORDER BY block_index DESC LIMIT 1');
   return rows[0];
 }
-vf
+
 /** Append a new immutable, hash-chained audit block. */
 async function recordAudit(userId, action, details = {}) {
   try {
