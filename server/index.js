@@ -39,12 +39,16 @@ app.get('/api/health', (req, res) => {
 });
 
 // Bootstrap genesis audit block on first run.
-try {
-  const existing = db.prepare('SELECT COUNT(*) c FROM blockchain_audit').get();
-  if (existing.c === 0) recordAudit(null, 'SYSTEM_INITIALIZED', { message: 'LexSecure AI audit ledger initialized' });
-} catch (e) {
-  console.error('Failed to initialize audit ledger:', e.message);
-}
+(async () => {
+  try {
+    const { rows } = await db.query('SELECT COUNT(*) AS c FROM blockchain_audit');
+    if (Number(rows[0].c) === 0) {
+      await recordAudit(null, 'SYSTEM_INITIALIZED', { message: 'LexSecure AI audit ledger initialized' });
+    }
+  } catch (e) {
+    console.error('Failed to initialize audit ledger:', e.message);
+  }
+})();
 
 // Serve frontend SPA
 app.use(express.static(path.join(__dirname, '..', 'public')));

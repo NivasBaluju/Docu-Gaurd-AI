@@ -27,7 +27,8 @@ function trustScore(session, req) {
     score -= 20;
     reasons.push('MFA not completed this session');
   }
-  const ageMs = Date.now() - new Date(session.created_at + 'Z').getTime();
+  const createdAtTime = new Date(session.created_at).getTime();
+  const ageMs = Date.now() - createdAtTime;
   const hours = ageMs / 36e5;
   if (hours > 12) {
     score -= 15;
@@ -40,7 +41,7 @@ function trustScore(session, req) {
   return { score: Math.max(0, score), reasons };
 }
 
-function requireAuth(req, res, next) {
+async function requireAuth(req, res, next) {
   const authHeader = req.headers.authorization || '';
   const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : req.cookies?.token;
   if (!token) return res.status(401).json({ error: 'Not authenticated' });
@@ -52,26 +53,33 @@ function requireAuth(req, res, next) {
     return res.status(401).json({ error: 'Invalid or expired token' });
   }
 
-  const session = db.prepare('SELECT * FROM sessions WHERE id = ?').get(payload.sessionId);
-  if (!session || session.revoked) {
-    return res.status(401).json({ error: 'Session invalid or revoked' });
+  try {
+    const { rows: sessionRows } = await db.query('SELECT * FROM sessions WHERE id = $1', [payload.sessionId]);
+    const session = sessionRows[0];
+    if (!session || session.revoked) {
+      return res.status(401).json({ error: 'Session invalid or revoked' });
+    }
+
+    const { score, reasons } = trustScore(session, req);
+    await db.query('UPDATE sessions SET trust_score = $1, last_seen = NOW() WHERE id = $2', [score, session.id]);
+
+    if (score < 30) {
+      await logThreat(payload.userId, req.ip, 'high', 'zero_trust', `Blocked low-trust request (score ${score}): ${reasons.join(', ')}`);
+      return res.status(403).json({ error: 'Zero-trust evaluation failed', score, reasons });
+    }
+
+    const { rows: userRows } = await db.query('SELECT id, name, email, role, mfa_enabled FROM users WHERE id = $1', [payload.userId]);
+    const user = userRows[0];
+    if (!user) return res.status(401).json({ error: 'User not found' });
+
+    req.user = user;
+    req.session = session;
+    req.trust = { score, reasons };
+    next();
+  } catch (err) {
+    console.error('requireAuth error:', err);
+    return res.status(500).json({ error: 'Authentication processing error' });
   }
-
-  const { score, reasons } = trustScore(session, req);
-  db.prepare('UPDATE sessions SET trust_score = ?, last_seen = datetime(\'now\') WHERE id = ?').run(score, session.id);
-
-  if (score < 30) {
-    logThreat(payload.userId, req.ip, 'high', 'zero_trust', `Blocked low-trust request (score ${score}): ${reasons.join(', ')}`);
-    return res.status(403).json({ error: 'Zero-trust evaluation failed', score, reasons });
-  }
-
-  const user = db.prepare('SELECT id, name, email, role, mfa_enabled FROM users WHERE id = ?').get(payload.userId);
-  if (!user) return res.status(401).json({ error: 'User not found' });
-
-  req.user = user;
-  req.session = session;
-  req.trust = { score, reasons };
-  next();
 }
 
 module.exports = { requireAuth, fingerprint, trustScore, JWT_SECRET };

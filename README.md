@@ -101,7 +101,7 @@ emails, fill in `SMTP_HOST`, `SMTP_USER`, `SMTP_PASS`, etc. in `.env`
 lexsecure-ai/
   server/
     index.js              Express app entrypoint
-    db.js                 SQLite schema (better-sqlite3)
+    db.js                 PostgreSQL connection pool and schema initialization (pg)
     middleware/auth.js     JWT + zero-trust session middleware
     routes/                auth, documents, ai, contracts, security, share
     utils/
@@ -120,5 +120,4 @@ lexsecure-ai/
 
 - This build uses plain JavaScript/HTML/CSS on the frontend (no build step,
   no bundler) — just open the served page and it works.
-- `better-sqlite3` is a native module; `npm install` compiles/fetches a
-  prebuilt binary for your platform automatically.
+- Database connection is configured via `DATABASE_URL` in `.env` using PostgreSQL (`pg`).

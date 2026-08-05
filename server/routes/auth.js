@@ -39,190 +39,242 @@ async function sendOtpEmail(toEmail, code) {
 
 // --- Register ---------------------------------------------------------------
 router.post('/register', async (req, res) => {
-  const { name, email, password } = req.body;
-  if (!name || !email || !password) return res.status(400).json({ error: 'name, email, password are required' });
-  if (password.length < 8) return res.status(400).json({ error: 'Password must be at least 8 characters' });
+  try {
+    const { name, email, password } = req.body;
+    if (!name || !email || !password) return res.status(400).json({ error: 'name, email, password are required' });
+    if (password.length < 8) return res.status(400).json({ error: 'Password must be at least 8 characters' });
 
-  const existing = db.prepare('SELECT id FROM users WHERE email = ?').get(email.toLowerCase());
-  if (existing) return res.status(409).json({ error: 'An account with that email already exists' });
+    const { rows: existingRows } = await db.query('SELECT id FROM users WHERE email = $1', [email.toLowerCase()]);
+    if (existingRows[0]) return res.status(409).json({ error: 'An account with that email already exists' });
 
-  const id = uuidv4();
-  const hash = await bcrypt.hash(password, 12);
-  const mfaEnabled = (process.env.REQUIRE_MFA !== 'false') ? 1 : 0;
-  db.prepare('INSERT INTO users (id, name, email, password_hash, mfa_enabled) VALUES (?, ?, ?, ?, ?)')
-    .run(id, name, email.toLowerCase(), hash, mfaEnabled);
+    const id = uuidv4();
+    const hash = await bcrypt.hash(password, 12);
+    const mfaEnabled = process.env.REQUIRE_MFA !== 'false';
+    await db.query(
+      'INSERT INTO users (id, name, email, password_hash, mfa_enabled) VALUES ($1, $2, $3, $4, $5)',
+      [id, name, email.toLowerCase(), hash, mfaEnabled]
+    );
 
-  recordAudit(id, 'USER_REGISTERED', { email: email.toLowerCase(), mfaEnabled: !!mfaEnabled });
-  res.json({ ok: true, message: 'Account created. Please log in.' });
+    await recordAudit(id, 'USER_REGISTERED', { email: email.toLowerCase(), mfaEnabled });
+    res.json({ ok: true, message: 'Account created. Please log in.' });
+  } catch (err) {
+    console.error('Register error:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
 });
 
 // --- Login (step 1: password) -----------------------------------------------
 router.post('/login', async (req, res) => {
-  const { email, password } = req.body;
-  const user = db.prepare('SELECT * FROM users WHERE email = ?').get((email || '').toLowerCase());
-  if (!user) {
-    logThreat(null, req.ip, 'medium', 'auth', `Failed login attempt for unknown email ${email}`);
-    return res.status(401).json({ error: 'Invalid email or password' });
-  }
-  const ok = await bcrypt.compare(password || '', user.password_hash);
-  if (!ok) {
-    logThreat(user.id, req.ip, 'medium', 'auth', 'Failed login attempt: wrong password');
-    return res.status(401).json({ error: 'Invalid email or password' });
-  }
+  try {
+    const { email, password } = req.body;
+    const { rows } = await db.query('SELECT * FROM users WHERE email = $1', [(email || '').toLowerCase()]);
+    const user = rows[0];
+    if (!user) {
+      await logThreat(null, req.ip, 'medium', 'auth', `Failed login attempt for unknown email ${email}`);
+      return res.status(401).json({ error: 'Invalid email or password' });
+    }
+    const ok = await bcrypt.compare(password || '', user.password_hash);
+    if (!ok) {
+      await logThreat(user.id, req.ip, 'medium', 'auth', 'Failed login attempt: wrong password');
+      return res.status(401).json({ error: 'Invalid email or password' });
+    }
 
-  const requireMfa = !!user.mfa_enabled || process.env.REQUIRE_MFA !== 'false';
-  if (requireMfa) {
-    // Issue a short-lived pre-auth token; MFA verification completes login.
-    const preToken = jwt.sign({ preauth: true, userId: user.id }, JWT_SECRET, { expiresIn: '10m' });
-    return res.json({ mfaRequired: true, method: 'totp', preToken });
+    const requireMfa = !!user.mfa_enabled || process.env.REQUIRE_MFA !== 'false';
+    if (requireMfa) {
+      // Issue a short-lived pre-auth token; MFA verification completes login.
+      const preToken = jwt.sign({ preauth: true, userId: user.id }, JWT_SECRET, { expiresIn: '10m' });
+      return res.json({ mfaRequired: true, method: 'totp', preToken });
+    }
+
+    const sessionId = uuidv4();
+    await db.query(
+      'INSERT INTO sessions (id, user_id, device_fingerprint, ip, mfa_verified) VALUES ($1, $2, $3, $4, false)',
+      [sessionId, user.id, fingerprint(req), req.ip]
+    );
+
+    const token = issueToken(sessionId, user.id);
+    await recordAudit(user.id, 'LOGIN_SUCCESS', { mfa: false });
+    res.json({ token, user: { id: user.id, name: user.name, email: user.email, mfaEnabled: !!user.mfa_enabled } });
+  } catch (err) {
+    console.error('Login error:', err);
+    res.status(500).json({ error: 'Internal server error' });
   }
-
-  const sessionId = uuidv4();
-  db.prepare('INSERT INTO sessions (id, user_id, device_fingerprint, ip, mfa_verified) VALUES (?, ?, ?, ?, 0)')
-    .run(sessionId, user.id, fingerprint(req), req.ip);
-
-  const token = issueToken(sessionId, user.id);
-  recordAudit(user.id, 'LOGIN_SUCCESS', { mfa: false });
-  res.json({ token, user: { id: user.id, name: user.name, email: user.email, mfaEnabled: !!user.mfa_enabled } });
 });
-
 
 // --- TOTP MFA setup ----------------------------------------------------------
 router.post('/mfa/totp/setup', async (req, res) => {
-  let userId;
-  const { preToken } = req.body || {};
-  if (preToken) {
-    try {
-      const payload = jwt.verify(preToken, JWT_SECRET);
-      if (payload.preauth) userId = payload.userId;
-    } catch (e) {}
-  }
-  if (!userId) {
-    const authHeader = req.headers.authorization || '';
-    const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : req.cookies?.token;
-    if (token) {
-      try {
-        const payload = jwt.verify(token, JWT_SECRET);
-        userId = payload.userId;
-      } catch (e) {}
-    }
-  }
-  if (!userId) return res.status(401).json({ error: 'Not authenticated' });
-
-  const user = db.prepare('SELECT * FROM users WHERE id = ?').get(userId);
-  if (!user) return res.status(404).json({ error: 'User not found' });
-
-  const secret = authenticator.generateSecret();
-  db.prepare('UPDATE users SET totp_secret = ? WHERE id = ?').run(secret, user.id);
-  const otpauth = authenticator.keyuri(user.email, 'LexSecure AI', secret);
-  const qrDataUrl = await QRCode.toDataURL(otpauth);
-  res.json({ secret, qrDataUrl });
-});
-
-
-router.post('/mfa/totp/enable', (req, res) => {
-  let userId;
-  const { code, preToken } = req.body || {};
-  if (preToken) {
-    try {
-      const payload = jwt.verify(preToken, JWT_SECRET);
-      if (payload.preauth) userId = payload.userId;
-    } catch (e) {}
-  }
-  if (!userId) {
-    const authHeader = req.headers.authorization || '';
-    const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : req.cookies?.token;
-    if (token) {
-      try {
-        const payload = jwt.verify(token, JWT_SECRET);
-        userId = payload.userId;
-      } catch (e) {}
-    }
-  }
-  if (!userId) return res.status(401).json({ error: 'Not authenticated' });
-
-  const user = db.prepare('SELECT * FROM users WHERE id = ?').get(userId);
-  if (!user) return res.status(404).json({ error: 'User not found' });
-  if (!user.totp_secret) return res.status(400).json({ error: 'Run setup first' });
-
-  const valid = authenticator.check(code || '', user.totp_secret);
-  if (!valid) return res.status(400).json({ error: 'Invalid code' });
-  db.prepare('UPDATE users SET mfa_enabled = 1 WHERE id = ?').run(user.id);
-  recordAudit(user.id, 'MFA_ENABLED', { method: 'totp' });
-  res.json({ ok: true });
-});
-
-
-router.post('/mfa/totp/verify', (req, res) => {
-  const { preToken, code } = req.body;
-  let payload;
   try {
-    payload = jwt.verify(preToken, JWT_SECRET);
-  } catch (e) {
-    return res.status(401).json({ error: 'Login session expired, please log in again' });
-  }
-  if (!payload.preauth) return res.status(400).json({ error: 'Invalid pre-auth token' });
+    let userId;
+    const { preToken } = req.body || {};
+    if (preToken) {
+      try {
+        const payload = jwt.verify(preToken, JWT_SECRET);
+        if (payload.preauth) userId = payload.userId;
+      } catch (e) { }
+    }
+    if (!userId) {
+      const authHeader = req.headers.authorization || '';
+      const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : req.cookies?.token;
+      if (token) {
+        try {
+          const payload = jwt.verify(token, JWT_SECRET);
+          userId = payload.userId;
+        } catch (e) { }
+      }
+    }
+    if (!userId) return res.status(401).json({ error: 'Not authenticated' });
 
-  const user = db.prepare('SELECT * FROM users WHERE id = ?').get(payload.userId);
-  const valid = authenticator.check(code || '', user.totp_secret || '');
-  if (!valid) {
-    logThreat(user.id, req.ip, 'high', 'mfa', 'Failed TOTP verification attempt');
-    return res.status(401).json({ error: 'Invalid authentication code' });
-  }
+    const { rows } = await db.query('SELECT * FROM users WHERE id = $1', [userId]);
+    const user = rows[0];
+    if (!user) return res.status(404).json({ error: 'User not found' });
 
-  const sessionId = uuidv4();
-  db.prepare('INSERT INTO sessions (id, user_id, device_fingerprint, ip, mfa_verified) VALUES (?, ?, ?, ?, 1)')
-    .run(sessionId, user.id, fingerprint(req), req.ip);
-  const token = issueToken(sessionId, user.id);
-  recordAudit(user.id, 'LOGIN_SUCCESS', { mfa: true });
-  res.json({ token, user: { id: user.id, name: user.name, email: user.email, mfaEnabled: true } });
+    const secret = authenticator.generateSecret();
+    await db.query('UPDATE users SET totp_secret = $1 WHERE id = $2', [secret, user.id]);
+    const otpauth = authenticator.keyuri(user.email, 'LexSecure AI', secret);
+    const qrDataUrl = await QRCode.toDataURL(otpauth);
+    res.json({ secret, qrDataUrl });
+  } catch (err) {
+    console.error('TOTP setup error:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+router.post('/mfa/totp/enable', async (req, res) => {
+  try {
+    let userId;
+    const { code, preToken } = req.body || {};
+    if (preToken) {
+      try {
+        const payload = jwt.verify(preToken, JWT_SECRET);
+        if (payload.preauth) userId = payload.userId;
+      } catch (e) { }
+    }
+    if (!userId) {
+      const authHeader = req.headers.authorization || '';
+      const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : req.cookies?.token;
+      if (token) {
+        try {
+          const payload = jwt.verify(token, JWT_SECRET);
+          userId = payload.userId;
+        } catch (e) { }
+      }
+    }
+    if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+
+    const { rows } = await db.query('SELECT * FROM users WHERE id = $1', [userId]);
+    const user = rows[0];
+    if (!user) return res.status(404).json({ error: 'User not found' });
+    if (!user.totp_secret) return res.status(400).json({ error: 'Run setup first' });
+
+    const valid = authenticator.check(code || '', user.totp_secret);
+    if (!valid) return res.status(400).json({ error: 'Invalid code' });
+    await db.query('UPDATE users SET mfa_enabled = true WHERE id = $1', [user.id]);
+    await recordAudit(user.id, 'MFA_ENABLED', { method: 'totp' });
+    res.json({ ok: true });
+  } catch (err) {
+    console.error('TOTP enable error:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+router.post('/mfa/totp/verify', async (req, res) => {
+  try {
+    const { preToken, code } = req.body;
+    let payload;
+    try {
+      payload = jwt.verify(preToken, JWT_SECRET);
+    } catch (e) {
+      return res.status(401).json({ error: 'Login session expired, please log in again' });
+    }
+    if (!payload.preauth) return res.status(400).json({ error: 'Invalid pre-auth token' });
+
+    const { rows } = await db.query('SELECT * FROM users WHERE id = $1', [payload.userId]);
+    const user = rows[0];
+    const valid = authenticator.check(code || '', user.totp_secret || '');
+    if (!valid) {
+      await logThreat(user.id, req.ip, 'high', 'mfa', 'Failed TOTP verification attempt');
+      return res.status(401).json({ error: 'Invalid authentication code' });
+    }
+
+    const sessionId = uuidv4();
+    await db.query(
+      'INSERT INTO sessions (id, user_id, device_fingerprint, ip, mfa_verified) VALUES ($1, $2, $3, $4, true)',
+      [sessionId, user.id, fingerprint(req), req.ip]
+    );
+    const token = issueToken(sessionId, user.id);
+    await recordAudit(user.id, 'LOGIN_SUCCESS', { mfa: true });
+    res.json({ token, user: { id: user.id, name: user.name, email: user.email, mfaEnabled: true } });
+  } catch (err) {
+    console.error('TOTP verify error:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
 });
 
 // --- Email OTP (alternative second factor) ----------------------------------
 router.post('/mfa/otp/request', async (req, res) => {
-  const { preToken } = req.body;
-  let payload;
   try {
-    payload = jwt.verify(preToken, JWT_SECRET);
-  } catch (e) {
-    return res.status(401).json({ error: 'Login session expired' });
-  }
-  const user = db.prepare('SELECT * FROM users WHERE id = ?').get(payload.userId);
-  const code = String(Math.floor(100000 + Math.random() * 900000));
-  const id = uuidv4();
-  const expiresAt = new Date(Date.now() + 10 * 60 * 1000).toISOString();
-  db.prepare('INSERT INTO otp_codes (id, user_id, code, purpose, expires_at) VALUES (?, ?, ?, ?, ?)')
-    .run(id, user.id, code, 'login', expiresAt);
+    const { preToken } = req.body;
+    let payload;
+    try {
+      payload = jwt.verify(preToken, JWT_SECRET);
+    } catch (e) {
+      return res.status(401).json({ error: 'Login session expired' });
+    }
+    const { rows } = await db.query('SELECT * FROM users WHERE id = $1', [payload.userId]);
+    const user = rows[0];
+    const code = String(Math.floor(100000 + Math.random() * 900000));
+    const id = uuidv4();
+    const expiresAt = new Date(Date.now() + 10 * 60 * 1000).toISOString();
+    await db.query(
+      'INSERT INTO otp_codes (id, user_id, code, purpose, expires_at) VALUES ($1, $2, $3, $4, $5)',
+      [id, user.id, code, 'login', expiresAt]
+    );
 
-  const result = await sendOtpEmail(user.email, code);
-  res.json({ ok: true, devMode: result.devMode, devCode: result.devMode ? code : undefined });
+    const result = await sendOtpEmail(user.email, code);
+    res.json({ ok: true, devMode: result.devMode, devCode: result.devMode ? code : undefined });
+  } catch (err) {
+    console.error('OTP request error:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
 });
 
-router.post('/mfa/otp/verify', (req, res) => {
-  const { preToken, code } = req.body;
-  let payload;
+router.post('/mfa/otp/verify', async (req, res) => {
   try {
-    payload = jwt.verify(preToken, JWT_SECRET);
-  } catch (e) {
-    return res.status(401).json({ error: 'Login session expired' });
-  }
-  const otp = db.prepare(`
-    SELECT * FROM otp_codes WHERE user_id = ? AND purpose = 'login' AND used = 0
-    ORDER BY created_at DESC LIMIT 1
-  `).get(payload.userId);
+    const { preToken, code } = req.body;
+    let payload;
+    try {
+      payload = jwt.verify(preToken, JWT_SECRET);
+    } catch (e) {
+      return res.status(401).json({ error: 'Login session expired' });
+    }
 
-  if (!otp || otp.code !== code || new Date(otp.expires_at) < new Date()) {
-    return res.status(401).json({ error: 'Invalid or expired code' });
-  }
-  db.prepare('UPDATE otp_codes SET used = 1 WHERE id = ?').run(otp.id);
+    const { rows: otpRows } = await db.query(
+      `SELECT * FROM otp_codes
+       WHERE user_id = $1 AND purpose = 'login' AND used = false
+       ORDER BY created_at DESC LIMIT 1`,
+      [payload.userId]
+    );
+    const otp = otpRows[0];
 
-  const user = db.prepare('SELECT * FROM users WHERE id = ?').get(payload.userId);
-  const sessionId = uuidv4();
-  db.prepare('INSERT INTO sessions (id, user_id, device_fingerprint, ip, mfa_verified) VALUES (?, ?, ?, ?, 1)')
-    .run(sessionId, user.id, fingerprint(req), req.ip);
-  const token = issueToken(sessionId, user.id);
-  recordAudit(user.id, 'LOGIN_SUCCESS', { mfa: 'email_otp' });
-  res.json({ token, user: { id: user.id, name: user.name, email: user.email, mfaEnabled: !!user.mfa_enabled } });
+    if (!otp || otp.code !== code || new Date(otp.expires_at) < new Date()) {
+      return res.status(401).json({ error: 'Invalid or expired code' });
+    }
+    await db.query('UPDATE otp_codes SET used = true WHERE id = $1', [otp.id]);
+
+    const { rows: userRows } = await db.query('SELECT * FROM users WHERE id = $1', [payload.userId]);
+    const user = userRows[0];
+    const sessionId = uuidv4();
+    await db.query(
+      'INSERT INTO sessions (id, user_id, device_fingerprint, ip, mfa_verified) VALUES ($1, $2, $3, $4, true)',
+      [sessionId, user.id, fingerprint(req), req.ip]
+    );
+    const token = issueToken(sessionId, user.id);
+    await recordAudit(user.id, 'LOGIN_SUCCESS', { mfa: 'email_otp' });
+    res.json({ token, user: { id: user.id, name: user.name, email: user.email, mfaEnabled: !!user.mfa_enabled } });
+  } catch (err) {
+    console.error('OTP verify error:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
 });
 
 // --- Session info / logout ---------------------------------------------------
@@ -230,10 +282,15 @@ router.get('/me', requireAuth, (req, res) => {
   res.json({ user: req.user, trust: req.trust, session: { id: req.session.id, createdAt: req.session.created_at } });
 });
 
-router.post('/logout', requireAuth, (req, res) => {
-  db.prepare('UPDATE sessions SET revoked = 1 WHERE id = ?').run(req.session.id);
-  recordAudit(req.user.id, 'LOGOUT', {});
-  res.json({ ok: true });
+router.post('/logout', requireAuth, async (req, res) => {
+  try {
+    await db.query('UPDATE sessions SET revoked = true WHERE id = $1', [req.session.id]);
+    await recordAudit(req.user.id, 'LOGOUT', {});
+    res.json({ ok: true });
+  } catch (err) {
+    console.error('Logout error:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
 });
 
 module.exports = router;
