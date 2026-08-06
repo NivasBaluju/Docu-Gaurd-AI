@@ -1,11 +1,25 @@
 const { Pool } = require("pg");
 require("dotenv").config();
 
+// Strip parameters that are unsupported by pg on Vercel's Node runtime
+// (channel_binding=require causes FUNCTION_INVOCATION_FAILED)
+function sanitizeDbUrl(url) {
+  if (!url) return url;
+  try {
+    const u = new URL(url);
+    u.searchParams.delete('channel_binding');
+    return u.toString();
+  } catch {
+    return url;
+  }
+}
+
+const connectionString = sanitizeDbUrl(process.env.DATABASE_URL);
+const isLocal = connectionString && connectionString.includes('localhost');
+
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl: process.env.DATABASE_URL && process.env.DATABASE_URL.includes("localhost")
-    ? false
-    : { rejectUnauthorized: false }
+  connectionString,
+  ssl: isLocal ? false : { rejectUnauthorized: false }
 });
 
 async function initDb() {
