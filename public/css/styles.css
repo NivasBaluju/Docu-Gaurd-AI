@@ -117,8 +117,8 @@ h1, h2, h3, h4 { font-family: var(--font-head); font-weight: 700; letter-spacing
 
 .topbar-actions { display: flex; gap: 10px; align-items: center; }
 
-/* ── Main app area ── */
-main#app { /* sizing handled by .public-container or .authenticated-layout */ }
+/* ── Main app area (sizing handled by inner route layouts) ── */
+
 
 /* ── Footer ── */
 .footer {
