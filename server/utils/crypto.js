@@ -3,18 +3,30 @@ const fs = require('fs');
 const path = require('path');
 
 // --- AES-256-GCM master key management -------------------------------------
-const keyFile = path.join(__dirname, '..', '..', 'data', 'db', 'master.key');
+// On Vercel (read-only fs), AES_MASTER_KEY env var MUST be set.
+// Locally, falls back to a file in data/db/master.key (auto-created).
 
 function loadOrCreateMasterKey() {
+  // 1. Prefer env var (required on Vercel / any read-only host)
   if (process.env.AES_MASTER_KEY && process.env.AES_MASTER_KEY.length === 64) {
     return Buffer.from(process.env.AES_MASTER_KEY, 'hex');
   }
-  if (fs.existsSync(keyFile)) {
-    return Buffer.from(fs.readFileSync(keyFile, 'utf8').trim(), 'hex');
+  // 2. Try reading from file (local dev only)
+  const keyFile = path.join(__dirname, '..', '..', 'data', 'db', 'master.key');
+  try {
+    if (fs.existsSync(keyFile)) {
+      return Buffer.from(fs.readFileSync(keyFile, 'utf8').trim(), 'hex');
+    }
+    // 3. Create new key and save to file (local dev only)
+    const key = crypto.randomBytes(32);
+    fs.mkdirSync(path.dirname(keyFile), { recursive: true });
+    fs.writeFileSync(keyFile, key.toString('hex'));
+    return key;
+  } catch {
+    // 4. Vercel / read-only: generate an in-memory key (ephemeral, fine for sessions)
+    console.warn('[crypto] No AES_MASTER_KEY env var and filesystem is read-only — using ephemeral key. Set AES_MASTER_KEY in Vercel env vars for persistence.');
+    return crypto.randomBytes(32);
   }
-  const key = crypto.randomBytes(32);
-  fs.writeFileSync(keyFile, key.toString('hex'));
-  return key;
 }
 
 const MASTER_KEY = loadOrCreateMasterKey();
@@ -43,25 +55,50 @@ function sha256(bufferOrString) {
 }
 
 // --- RSA keypair for digital signature verification demo -------------------
-const rsaKeyDir = path.join(__dirname, '..', '..', 'data', 'db');
-const privKeyPath = path.join(rsaKeyDir, 'signing_private.pem');
-const pubKeyPath = path.join(rsaKeyDir, 'signing_public.pem');
+// On Vercel, use RSA_PRIVATE_KEY / RSA_PUBLIC_KEY env vars (PEM strings).
+// Locally, falls back to files in data/db/.
 
 function loadOrCreateSigningKeys() {
-  if (fs.existsSync(privKeyPath) && fs.existsSync(pubKeyPath)) {
+  // 1. Prefer env vars (Vercel / production)
+  if (process.env.RSA_PRIVATE_KEY && process.env.RSA_PUBLIC_KEY) {
     return {
-      privateKey: fs.readFileSync(privKeyPath, 'utf8'),
-      publicKey: fs.readFileSync(pubKeyPath, 'utf8')
+      privateKey: process.env.RSA_PRIVATE_KEY.replace(/\\n/g, '\n'),
+      publicKey: process.env.RSA_PUBLIC_KEY.replace(/\\n/g, '\n')
     };
   }
-  const { publicKey, privateKey } = crypto.generateKeyPairSync('rsa', {
-    modulusLength: 2048,
-    publicKeyEncoding: { type: 'spki', format: 'pem' },
-    privateKeyEncoding: { type: 'pkcs8', format: 'pem' }
-  });
-  fs.writeFileSync(privKeyPath, privateKey);
-  fs.writeFileSync(pubKeyPath, publicKey);
-  return { publicKey, privateKey };
+
+  // 2. Try reading from files (local dev)
+  const rsaKeyDir = path.join(__dirname, '..', '..', 'data', 'db');
+  const privKeyPath = path.join(rsaKeyDir, 'signing_private.pem');
+  const pubKeyPath = path.join(rsaKeyDir, 'signing_public.pem');
+
+  try {
+    if (fs.existsSync(privKeyPath) && fs.existsSync(pubKeyPath)) {
+      return {
+        privateKey: fs.readFileSync(privKeyPath, 'utf8'),
+        publicKey: fs.readFileSync(pubKeyPath, 'utf8')
+      };
+    }
+    // 3. Generate and save locally
+    const { publicKey, privateKey } = crypto.generateKeyPairSync('rsa', {
+      modulusLength: 2048,
+      publicKeyEncoding: { type: 'spki', format: 'pem' },
+      privateKeyEncoding: { type: 'pkcs8', format: 'pem' }
+    });
+    fs.mkdirSync(rsaKeyDir, { recursive: true });
+    fs.writeFileSync(privKeyPath, privateKey);
+    fs.writeFileSync(pubKeyPath, publicKey);
+    return { publicKey, privateKey };
+  } catch {
+    // 4. Vercel / read-only: generate ephemeral keys
+    console.warn('[crypto] Filesystem read-only — generating ephemeral RSA keys. Set RSA_PRIVATE_KEY and RSA_PUBLIC_KEY in Vercel env vars for persistence.');
+    const { publicKey, privateKey } = crypto.generateKeyPairSync('rsa', {
+      modulusLength: 2048,
+      publicKeyEncoding: { type: 'spki', format: 'pem' },
+      privateKeyEncoding: { type: 'pkcs8', format: 'pem' }
+    });
+    return { publicKey, privateKey };
+  }
 }
 
 const SIGNING_KEYS = loadOrCreateSigningKeys();
