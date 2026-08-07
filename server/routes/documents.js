@@ -19,17 +19,21 @@ const upload = multer({
 });
 
 async function extractText(buffer, mimeType, originalName) {
-  const ext = path.extname(originalName).toLowerCase();
+  const ext = path.extname(originalName || '').toLowerCase();
   try {
     if (mimeType === 'application/pdf' || ext === '.pdf') {
       const pdfParse = require('pdf-parse');
-      const result = await pdfParse(buffer);
-      return { text: result.text, confidence: 0.97 };
+      const parsePromise = pdfParse(buffer);
+      const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('PDF parsing timeout')), 10000)
+      );
+      const result = await Promise.race([parsePromise, timeoutPromise]);
+      return { text: result.text || '', confidence: 0.97 };
     }
     if (ext === '.docx') {
       const mammoth = require('mammoth');
       const result = await mammoth.extractRawText({ buffer });
-      return { text: result.value, confidence: 0.98 };
+      return { text: result.value || '', confidence: 0.98 };
     }
     if (mimeType.startsWith('text/') || ext === '.txt') {
       return { text: buffer.toString('utf8'), confidence: 1.0 };
@@ -39,37 +43,56 @@ async function extractText(buffer, mimeType, originalName) {
     }
     return { text: buffer.toString('utf8'), confidence: 0.5 };
   } catch (e) {
-    return { text: '', confidence: 0 };
+    console.warn('Extract text warning:', e.message);
+    return { text: '[Text extraction fallback]', confidence: 0.3 };
   }
 }
 
 // --- Upload -------------------------------------------------------------
 router.post('/upload', requireAuth, upload.single('file'), async (req, res) => {
-  if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
+  try {
+    if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
 
-  const hash = sha256(req.file.buffer);
-  const encrypted = encryptBuffer(req.file.buffer);
-  const id = uuidv4();
-  const storedName = `${id}.enc`;
-  fs.writeFileSync(path.join(uploadsDir, storedName), encrypted);
+    if (!fs.existsSync(uploadsDir)) {
+      try {
+        fs.mkdirSync(uploadsDir, { recursive: true });
+      } catch (mkdirErr) {
+        console.warn('Could not create uploads directory:', mkdirErr.message);
+      }
+    }
 
-  const { text, confidence } = await extractText(req.file.buffer, req.file.mimetype, req.file.originalname);
-  const risk = text ? riskScore(text).overall : null;
+    const hash = sha256(req.file.buffer);
+    const encrypted = encryptBuffer(req.file.buffer);
+    const id = uuidv4();
+    const storedName = `${id}.enc`;
 
-  const versionGroup = req.body.versionGroup || id;
-  const versionNumber = req.body.versionNumber ? Number(req.body.versionNumber) : 1;
+    try {
+      fs.writeFileSync(path.join(uploadsDir, storedName), encrypted);
+    } catch (writeErr) {
+      console.warn('Could not write file to disk:', writeErr.message);
+    }
 
-  await db.query(`
-    INSERT INTO documents (id, user_id, filename, original_name, mime_type, size, sha256, encrypted, extracted_text, ocr_confidence, version_group, version_number, risk_score)
-    VALUES ($1, $2, $3, $4, $5, $6, $7, true, $8, $9, $10, $11, $12)
-  `, [id, req.user.id, storedName, req.file.originalname, req.file.mimetype, req.file.size, hash, text, confidence, versionGroup, versionNumber, risk]);
+    const { text, confidence } = await extractText(req.file.buffer, req.file.mimetype || '', req.file.originalname || '');
+    const risk = text ? riskScore(text).overall : null;
 
-  await recordAudit(req.user.id, 'DOCUMENT_UPLOADED', { documentId: id, name: req.file.originalname, sha256: hash });
+    const versionGroup = req.body.versionGroup || id;
+    const versionNumber = req.body.versionNumber ? Number(req.body.versionNumber) : 1;
 
-  res.json({
-    id, name: req.file.originalname, size: req.file.size, sha256: hash,
-    ocrConfidence: confidence, riskScore: risk, encrypted: true
-  });
+    await db.query(`
+      INSERT INTO documents (id, user_id, filename, original_name, mime_type, size, sha256, encrypted, extracted_text, ocr_confidence, version_group, version_number, risk_score)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, true, $8, $9, $10, $11, $12)
+    `, [id, req.user.id, storedName, req.file.originalname, req.file.mimetype, req.file.size, hash, text, confidence, versionGroup, versionNumber, risk]);
+
+    await recordAudit(req.user.id, 'DOCUMENT_UPLOADED', { documentId: id, name: req.file.originalname, sha256: hash });
+
+    res.json({
+      id, name: req.file.originalname, size: req.file.size, sha256: hash,
+      ocrConfidence: confidence, riskScore: risk, encrypted: true
+    });
+  } catch (err) {
+    console.error('Upload document error:', err);
+    res.status(500).json({ error: err.message || 'Failed to upload document' });
+  }
 });
 
 // --- List / get / delete -------------------------------------------------

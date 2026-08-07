@@ -5,17 +5,31 @@ const Api = (() => {
   function setToken(t) { localStorage.setItem(TOKEN_KEY, t); }
   function clearToken() { localStorage.removeItem(TOKEN_KEY); }
 
-  async function request(method, url, body, isForm = false) {
+  async function request(method, url, body, isForm = false, timeoutMs = 30000) {
     const headers = {};
     const token = getToken();
     if (token) headers['Authorization'] = `Bearer ${token}`;
     if (!isForm && body) headers['Content-Type'] = 'application/json';
 
-    const res = await fetch(url, {
-      method,
-      headers,
-      body: body ? (isForm ? body : JSON.stringify(body)) : undefined
-    });
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), timeoutMs);
+
+    let res;
+    try {
+      res = await fetch(url, {
+        method,
+        headers,
+        body: body ? (isForm ? body : JSON.stringify(body)) : undefined,
+        signal: controller.signal
+      });
+    } catch (fetchErr) {
+      clearTimeout(timer);
+      if (fetchErr.name === 'AbortError') {
+        throw new Error('Request timed out. Please check your network or try again.');
+      }
+      throw fetchErr;
+    }
+    clearTimeout(timer);
 
     let data;
     const contentType = res.headers.get('content-type') || '';
