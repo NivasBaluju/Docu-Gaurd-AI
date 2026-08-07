@@ -777,7 +777,7 @@ function emptyState(icon, title, sub) {
 // ---------------------------------------------------------------------------
 // VIEW: Document detail (split-screen + AI tabs)
 // ---------------------------------------------------------------------------
-const DOC_TABS = ['overview', 'chat', 'negotiation', 'risk', 'compliance', 'deadlines', 'pii', 'share'];
+const DOC_TABS = ['overview', 'chat', 'negotiation', 'risk', 'compliance', 'deadlines', 'pii'];
 
 Router.register('#/document', async (parts) => {
   const id = parts[0];
@@ -812,7 +812,6 @@ Router.register('#/document', async (parts) => {
     case 'compliance':  await renderComplianceTab(doc, content); break;
     case 'deadlines':   await renderDeadlinesTab(doc, content); break;
     case 'pii':         await renderPiiTab(doc, content); break;
-    case 'share':       await renderShareTab(doc, content); break;
   }
 });
 

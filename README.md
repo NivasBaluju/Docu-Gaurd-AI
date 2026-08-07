@@ -50,7 +50,7 @@ matching the original implementation plan.
 3. Upload a `.txt`, `.pdf`, or `.docx` contract from **Upload**.
 4. Explore the document's tabs: Overview (clause extraction + plain-language
    translation), Chat (RAG Q&A), Negotiation, Risk, Compliance, Deadlines,
-   PII, and Share.
+   and PII.
 5. Generate a contract from **Contract Generator**, compare two document
    versions from **Documents**, and review the immutable audit ledger and
    active sessions in **Security Center**.
