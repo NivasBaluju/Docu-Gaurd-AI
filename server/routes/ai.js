@@ -8,6 +8,7 @@ const {
   negotiationSuggestions, complianceCheck, extractDeadlines,
   detectPII, redactPII, diffDocuments
 } = require('../utils/aiEngine');
+const { askGeminiOrFallback } = require('../utils/gemini');
 
 const router = express.Router();
 
@@ -34,7 +35,7 @@ router.post('/documents/:id/chat', requireAuth, async (req, res) => {
   const { question } = req.body;
   if (!question) return res.status(400).json({ error: 'question is required' });
 
-  const result = ragAnswer(question, doc.extracted_text || '');
+  const result = await askGeminiOrFallback(question, doc.extracted_text || '');
 
   await db.query(
     `INSERT INTO chat_messages (id, document_id, user_id, role, content) VALUES ($1, $2, $3, 'user', $4)`,
@@ -42,7 +43,7 @@ router.post('/documents/:id/chat', requireAuth, async (req, res) => {
   );
   await db.query(
     `INSERT INTO chat_messages (id, document_id, user_id, role, content, confidence, source_ref) VALUES ($1, $2, $3, 'assistant', $4, $5, $6)`,
-    [uuidv4(), doc.id, req.user.id, result.answer, result.confidence, JSON.stringify(result.sources)]
+    [uuidv4(), doc.id, req.user.id, result.answer, result.confidence, JSON.stringify(result.sources || [])]
   );
 
   res.json(result);

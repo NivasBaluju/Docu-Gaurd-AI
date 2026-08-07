@@ -905,8 +905,8 @@ async function renderChatTab(doc, content) {
       if (typing) typing.remove();
       win.innerHTML += `<div class="chat-msg assistant">${esc(r.answer)}
         <div class="mt-8">
-          <span class="badge ${r.confidence > 0.6 ? 'badge-ok' : 'badge-warn'}">Confidence ${Math.round(r.confidence * 100)}%</span>
-          ${r.sources.map(s => `<span class="source-tag">pg. ${s.pageRef}</span>`).join('')}
+          <span class="badge badge-ok">${r.provider === 'gemini' ? '✨ Gemini AI' : 'AI Engine'} · Confidence ${Math.round(r.confidence * 100)}%</span>
+          ${(r.sources || []).map(s => `<span class="source-tag">${s.text || ('pg. ' + s.pageRef)}</span>`).join('')}
         </div>
       </div>`;
       win.scrollTop = win.scrollHeight;
@@ -922,8 +922,8 @@ function chatMsgHtml(m) {
   try { sources = JSON.parse(m.source_ref || '[]'); } catch (e) {}
   return `<div class="chat-msg assistant">${esc(m.content)}
     <div class="mt-8">
-      ${m.confidence != null ? `<span class="badge ${m.confidence > 0.6 ? 'badge-ok' : 'badge-warn'}">Confidence ${Math.round(m.confidence * 100)}%</span>` : ''}
-      ${sources.map(s => `<span class="source-tag">pg. ${s.pageRef}</span>`).join('')}
+      ${m.confidence != null ? `<span class="badge badge-ok">AI Response · Confidence ${Math.round(m.confidence * 100)}%</span>` : ''}
+      ${sources.map(s => `<span class="source-tag">${s.text || ('pg. ' + s.pageRef)}</span>`).join('')}
     </div>
   </div>`;
 }
