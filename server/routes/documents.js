@@ -105,7 +105,15 @@ router.delete('/:id', requireAuth, async (req, res) => {
     const doc = rows[0];
     if (!doc) return res.status(404).json({ error: 'Document not found' });
     const filePath = path.join(uploadsDir, doc.filename);
-    if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+    if (fs.existsSync(filePath)) {
+      try {
+        fs.unlinkSync(filePath);
+      } catch (fileErr) {
+        console.warn('Could not delete file from disk:', fileErr.message);
+      }
+    }
+    await db.query('DELETE FROM chat_messages WHERE document_id = $1', [doc.id]);
+    await db.query('DELETE FROM share_links WHERE document_id = $1', [doc.id]);
     await db.query('DELETE FROM documents WHERE id = $1', [doc.id]);
     await recordAudit(req.user.id, 'DOCUMENT_DELETED', { documentId: doc.id });
     res.json({ ok: true });

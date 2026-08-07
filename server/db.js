@@ -130,6 +130,14 @@ async function initDb() {
   `;
   try {
     await pool.query(schema);
+    // Ensure foreign key constraints cascade on delete for existing database tables
+    await pool.query(`
+      ALTER TABLE chat_messages DROP CONSTRAINT IF EXISTS chat_messages_document_id_fkey;
+      ALTER TABLE chat_messages ADD CONSTRAINT chat_messages_document_id_fkey FOREIGN KEY (document_id) REFERENCES documents(id) ON DELETE CASCADE;
+
+      ALTER TABLE share_links DROP CONSTRAINT IF EXISTS share_links_document_id_fkey;
+      ALTER TABLE share_links ADD CONSTRAINT share_links_document_id_fkey FOREIGN KEY (document_id) REFERENCES documents(id) ON DELETE CASCADE;
+    `);
     console.log("✅ PostgreSQL schema initialized successfully");
   } catch (err) {
     console.error("❌ PostgreSQL Schema Initialization Error:", err);
