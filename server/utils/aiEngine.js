@@ -208,11 +208,89 @@ function ragAnswer(question, docText) {
     }
   }
 
-  // E. Document Summary / Overview
+  // E. Risk Assessment & Vulnerabilities
+  if (/\b(risk[s]?|danger|liability|liabilities|exposure|vulnerab|threat[s]?|penalty|penalties|hazard|safe)\b/i.test(qLower)) {
+    const riskData = riskScore(docText);
+    const riskSentences = sentences.filter(s =>
+      /\b(sole discretion|unlimited liability|indemnif|penalty|without cause|late fee|non-?refundable|interest|breach|loss)\b/i.test(s)
+    );
+
+    let responseText = `Here is the AI Risk Assessment for this document:\n\n• Overall Risk Exposure: ${riskData.overall}%`;
+    const categories = Object.entries(riskData.breakdown).map(([cat, score]) => `• ${cat.charAt(0).toUpperCase() + cat.slice(1)} Risk: ${score}%`).join('\n');
+    responseText += `\n${categories}`;
+
+    if (riskSentences.length > 0) {
+      responseText += `\n\nKey Risk Provisions Identified:\n"${riskSentences.slice(0, 3).join(' ')}"`;
+    }
+
+    return {
+      answer: responseText,
+      confidence: 0.94,
+      sources: [{ text: `Risk Assessment (${riskData.overall}% score)`, pageRef: 'Risk Module' }]
+    };
+  }
+
+  // F. Deadlines & Important Dates
+  if (/\b(deadline[s]?|due date[s]?|timeline|date[s]?|schedule|calendar|when is|effective date)\b/i.test(qLower)) {
+    const deadlines = extractDeadlines(docText);
+    if (deadlines.length > 0) {
+      const list = deadlines.map(d => `• ${d.type.toUpperCase()}: ${d.text} (${d.dateStr || 'Specified in text'})`).join('\n');
+      return {
+        answer: `Important dates and deadlines detected in this document:\n\n${list}`,
+        confidence: 0.92,
+        sources: deadlines.map(d => ({ text: d.text.slice(0, 60), pageRef: 'Deadlines' }))
+      };
+    }
+  }
+
+  // G. Negotiation & Recommendations
+  if (/\b(negotiat|recommend|suggestion[s]?|advice|improve|clause advice|change[s]? needed|counter)\b/i.test(qLower)) {
+    const suggestions = negotiationSuggestions(docText);
+    if (suggestions.length > 0) {
+      const text = suggestions.map(s => `• Issue: ${s.issue}\n  Risk: ${s.risk.toUpperCase()}\n  Recommendation: ${s.recommendation}`).join('\n\n');
+      return {
+        answer: `Negotiation Recommendations for this document:\n\n${text}`,
+        confidence: 0.93,
+        sources: [{ text: "Negotiation Engine", pageRef: "Analysis" }]
+      };
+    }
+  }
+
+  // H. Compliance & Frameworks
+  if (/\b(complian(?:ce|t)|gdpr|hipaa|soc2|ccpa|regulation[s]?|framework[s]?|legal standards)\b/i.test(qLower)) {
+    const compliance = complianceCheck(docText);
+    const items = Object.entries(compliance).map(([fw, data]) => `• ${fw.toUpperCase()}: ${data.status === 'compliant' ? 'Compliant' : 'Needs Review'} — ${data.notes || ''}`).join('\n');
+    return {
+      answer: `Compliance Assessment against legal frameworks:\n\n${items}`,
+      confidence: 0.91,
+      sources: [{ text: "Compliance Checker", pageRef: "Audit" }]
+    };
+  }
+
+  // I. PII & Data Privacy
+  if (/\b(pii|privacy|sensitive|personal info|data protection|ssn|redact)\b/i.test(qLower)) {
+    const piiItems = detectPII(docText);
+    if (piiItems.length > 0) {
+      const summary = piiItems.map(p => `• ${p.type.toUpperCase()}: ${p.value}`).join('\n');
+      return {
+        answer: `Detected PII and sensitive data items in this document:\n\n${summary}`,
+        confidence: 0.95,
+        sources: [{ text: `${piiItems.length} PII items detected`, pageRef: "Privacy Engine" }]
+      };
+    } else {
+      return {
+        answer: "No obvious PII (Personally Identifiable Information) like SSNs, emails, or credit card numbers were detected in this document text.",
+        confidence: 0.90,
+        sources: [{ text: "PII Scanner", pageRef: "Privacy Engine" }]
+      };
+    }
+  }
+
+  // J. Document Summary / Overview
   if (/\b(summar(?:y|ize)|overview|explain|what is this|about)\b/i.test(qLower)) {
     const firstFew = sentences.slice(0, 4).join(' ');
     return {
-      answer: `Here is a summary of the document based on its initial sections:\n\n"${firstFew}"\n\nFor deeper analysis, ask about specific areas such as parties, payment terms, or termination clauses.`,
+      answer: `Here is a summary of the document based on its initial sections:\n\n"${firstFew}"\n\nFor deeper analysis, ask about specific areas such as parties, payment terms, risk evaluation, or termination clauses.`,
       confidence: 0.88,
       sources: [{ text: "Document Summary", pageRef: "Preamble" }]
     };
