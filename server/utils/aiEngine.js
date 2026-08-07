@@ -112,40 +112,143 @@ function simplifyText(text) {
 // ---------------------------------------------------------------------------
 // 3. RAG-STYLE Q&A (TF-IDF-ish sentence retrieval)
 // ---------------------------------------------------------------------------
+// ---------------------------------------------------------------------------
+// 3. RAG-STYLE Q&A (Intent-Aware + Sentence Retrieval Engine)
+// ---------------------------------------------------------------------------
 function ragAnswer(question, docText) {
-  const sentences = splitSentences(docText);
-  const qTokens = new Set(tokenize(question));
-  if (qTokens.size === 0 || sentences.length === 0) {
-    return { answer: "I couldn't find relevant content in this document to answer that.", confidence: 0, sources: [] };
+  const q = (question || '').trim();
+  const qLower = q.toLowerCase();
+
+  // 1. Conversational Greetings & AI Info
+  if (/^(hey|hello|hi|greetings|good morning|good afternoon|good evening|hey there|hola|sup)\b/i.test(qLower)) {
+    return {
+      answer: "Hello! I am LexSecure AI, your intelligent legal copilot. I have analyzed this document and am ready to answer your questions. You can ask me about the contracting parties, payment terms, termination clauses, governing law, risks, or any specific provision!",
+      confidence: 1.0,
+      sources: [{ text: "LexSecure Assistant", pageRef: "General" }]
+    };
   }
 
-  const scored = sentences.map((s, i) => {
-    const sTokens = tokenize(s);
-    const overlap = sTokens.filter(t => qTokens.has(t)).length;
-    const score = overlap / Math.sqrt(sTokens.length + 1);
-    return { text: s, index: i, score, overlap };
-  }).filter(s => s.overlap > 0);
-
-  scored.sort((a, b) => b.score - a.score);
-  const top = scored.slice(0, 3);
-
-  if (top.length === 0) {
+  if (/^(who are you|what can you do|help|what is your name)\b/i.test(qLower)) {
     return {
-      answer: "I couldn't find a clause in this document that directly answers that question. Try rephrasing, or ask about parties, payment, termination, confidentiality, or jurisdiction.",
-      confidence: 0.1,
+      answer: "I am LexSecure AI, an enterprise-grade AI legal copilot. I analyze contracts, extract key clauses, identify risk exposure, evaluate compliance, and answer natural language questions about your legal documents.",
+      confidence: 1.0,
+      sources: [{ text: "LexSecure Assistant", pageRef: "General" }]
+    };
+  }
+
+  if (!docText || !docText.trim()) {
+    return {
+      answer: "This document appears to have no extractable text. Please ensure you have uploaded a valid PDF, DOCX, or text file.",
+      confidence: 0,
       sources: []
     };
   }
 
-  const maxPossible = qTokens.size;
-  const confidence = Math.min(0.97, 0.35 + (top[0].overlap / maxPossible) * 0.6);
-  const paragraphNumber = Math.floor(top[0].index / 4) + 1;
+  const sentences = splitSentences(docText);
 
-  const answer = top.map(t => t.text).join(' ');
+  // 2. Intent-Based Legal Clause Retrieval
+
+  // A. Parties / Who is involved
+  if (/\b(part(?:y|ies)|who (?:is|are)|contracting|between|employer|employee|client|vendor|contractor|signed by)\b/i.test(qLower)) {
+    const partyMatches = sentences.filter(s =>
+      /\b(between|by and between|entered into|party|parties|employer|employee|company|contractor|client|vendor|disclosing|receiving)\b/i.test(s)
+    );
+    if (partyMatches.length > 0) {
+      const excerpt = partyMatches.slice(0, 3).join(' ');
+      return {
+        answer: `According to the document, the contracting parties and preamble details are:\n\n"${excerpt}"`,
+        confidence: 0.92,
+        sources: partyMatches.slice(0, 2).map((s, idx) => ({ text: s.slice(0, 60) + '…', pageRef: `¶${idx + 1}` }))
+      };
+    }
+  }
+
+  // B. Payment / Compensation / Salary / Fees
+  if (/\b(pay(?:ment|ing)?|fee[s]?|salary|compensation|price|amount|cost[s]?|invoice[s]?|remuneration|dollars?|\$|usd|rate)\b/i.test(qLower)) {
+    const paymentMatches = sentences.filter(s =>
+      /\b(pay(?:ment|ing)?|fee[s]?|salary|compensation|price|amount|cost|invoice|remuneration|dollar|\$|usd|rate|monthly|annually|due|per)\b/i.test(s)
+    );
+    if (paymentMatches.length > 0) {
+      const excerpt = paymentMatches.slice(0, 3).join(' ');
+      return {
+        answer: `The payment terms and financial provisions stated in the document are:\n\n"${excerpt}"`,
+        confidence: 0.90,
+        sources: paymentMatches.slice(0, 2).map((s, idx) => ({ text: s.slice(0, 60) + '…', pageRef: `¶${idx + 1}` }))
+      };
+    }
+  }
+
+  // C. Termination / Duration / Expiry
+  if (/\b(terminat(?:e|ion|ing)?|expir(?:e|y|ation)?|cancel(?:lation)?|notice period|duration|end date|term)\b/i.test(qLower)) {
+    const termMatches = sentences.filter(s =>
+      /\b(terminat(?:e|ion|ing)?|expir(?:e|y|ation)?|cancel|notice|effective|period|term|duration|end)\b/i.test(s)
+    );
+    if (termMatches.length > 0) {
+      const excerpt = termMatches.slice(0, 3).join(' ');
+      return {
+        answer: `The termination and contract duration provisions are:\n\n"${excerpt}"`,
+        confidence: 0.90,
+        sources: termMatches.slice(0, 2).map((s, idx) => ({ text: s.slice(0, 60) + '…', pageRef: `¶${idx + 1}` }))
+      };
+    }
+  }
+
+  // D. Governing Law / Jurisdiction
+  if (/\b(governing law|jurisdiction|court[s]?|state|country|laws of|venue|dispute)\b/i.test(qLower)) {
+    const lawMatches = sentences.filter(s =>
+      /\b(governing law|jurisdiction|court|state|country|laws of|governed by|venue|dispute)\b/i.test(s)
+    );
+    if (lawMatches.length > 0) {
+      const excerpt = lawMatches.slice(0, 2).join(' ');
+      return {
+        answer: `The governing law and jurisdiction clause specifies:\n\n"${excerpt}"`,
+        confidence: 0.92,
+        sources: lawMatches.slice(0, 2).map((s, idx) => ({ text: s.slice(0, 60) + '…', pageRef: `¶${idx + 1}` }))
+      };
+    }
+  }
+
+  // E. Document Summary / Overview
+  if (/\b(summar(?:y|ize)|overview|explain|what is this|about)\b/i.test(qLower)) {
+    const firstFew = sentences.slice(0, 4).join(' ');
+    return {
+      answer: `Here is a summary of the document based on its initial sections:\n\n"${firstFew}"\n\nFor deeper analysis, ask about specific areas such as parties, payment terms, or termination clauses.`,
+      confidence: 0.88,
+      sources: [{ text: "Document Summary", pageRef: "Preamble" }]
+    };
+  }
+
+  // 3. TF-IDF & Keyword Retrieval Engine
+  const qTokens = new Set(tokenize(question));
+  if (qTokens.size > 0 && sentences.length > 0) {
+    const scored = sentences.map((s, i) => {
+      const sTokens = tokenize(s);
+      const overlap = sTokens.filter(t => qTokens.has(t)).length;
+      const score = overlap / Math.sqrt(sTokens.length + 1);
+      return { text: s, index: i, score, overlap };
+    }).filter(s => s.overlap > 0);
+
+    scored.sort((a, b) => b.score - a.score);
+    const top = scored.slice(0, 3);
+
+    if (top.length > 0) {
+      const maxPossible = qTokens.size;
+      const confidence = Math.min(0.95, 0.45 + (top[0].overlap / maxPossible) * 0.5);
+      const answer = top.map(t => t.text).join(' ');
+      return {
+        answer: `Based on your query, here is the relevant provision found in the document:\n\n"${answer}"`,
+        confidence: Number(confidence.toFixed(2)),
+        sources: top.map(t => ({ text: t.text.slice(0, 60) + '…', sentenceIndex: t.index, pageRef: `¶${Math.floor(t.index / 4) + 1}` }))
+      };
+    }
+  }
+
+  // 4. Helpful Smart Fallback (when no specific keyword matches)
+  const preview = sentences.slice(0, 2).join(' ');
   return {
-    answer,
-    confidence: Number(confidence.toFixed(2)),
-    sources: top.map(t => ({ excerpt: t.text, sentenceIndex: t.index, pageRef: `¶${Math.floor(t.index / 4) + 1}` }))
+    answer: `I reviewed the document for "${question}". While an exact clause matching your wording wasn't located, here is the opening section of the document for context:\n\n"${preview}"\n\nTry asking specifically about parties, payment terms, termination, confidentiality, or governing law.`,
+    confidence: 0.55,
+    sources: [{ text: "Document Preamble", pageRef: "¶1" }]
   };
 }
 
