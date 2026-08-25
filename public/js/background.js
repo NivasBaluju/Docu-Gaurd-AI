@@ -1,4 +1,4 @@
-// LexSecure AI — Background script
+// Docu-Gaurd AI — Background script
 // The dark particle canvas has been replaced by a clean CSS dot-grid background.
 // This file intentionally disables the canvas animation.
 (function () {

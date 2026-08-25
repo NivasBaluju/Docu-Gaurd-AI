@@ -19,7 +19,7 @@ const PORT = process.env.PORT || 5000;
 // --- CORS -------------------------------------------------------------------
 // Allow the Vercel-hosted frontend and local dev to reach the API.
 const ALLOWED_ORIGINS = [
-  process.env.CLIENT_URL,           // e.g. https://lex-secure-ai.vercel.app
+  process.env.CLIENT_URL,           // e.g. https://docu-gaurd-ai.vercel.app
   'http://localhost:5000',
   'http://localhost:3000',
 ].filter(Boolean);
@@ -56,7 +56,7 @@ app.use('/api/security', securityRoutes);
 app.use('/api/share', shareRoutes);
 
 app.get('/api/health', (req, res) => {
-  res.json({ status: 'ok', service: 'LexSecure AI', time: new Date().toISOString() });
+  res.json({ status: 'ok', service: 'Docu-Gaurd AI', time: new Date().toISOString() });
 });
 
 // Bootstrap genesis audit block on first run.
@@ -64,7 +64,7 @@ app.get('/api/health', (req, res) => {
   try {
     const { rows } = await db.query('SELECT COUNT(*) AS c FROM blockchain_audit');
     if (Number(rows[0].c) === 0) {
-      await recordAudit(null, 'SYSTEM_INITIALIZED', { message: 'LexSecure AI audit ledger initialized' });
+      await recordAudit(null, 'SYSTEM_INITIALIZED', { message: 'Docu-Gaurd AI audit ledger initialized' });
     }
   } catch (e) {
     console.error('Failed to initialize audit ledger:', e.message);
@@ -87,7 +87,7 @@ app.use((err, req, res, next) => {
 // Local dev: start HTTP server. On Vercel, the file is imported as a module.
 if (require.main === module) {
   app.listen(PORT, () => {
-    console.log(`\n  LexSecure AI running at http://localhost:${PORT}\n`);
+    console.log(`\n  Docu-Gaurd AI running at http://localhost:${PORT}\n`);
   });
 }
 

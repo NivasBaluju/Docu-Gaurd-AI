@@ -1,7 +1,7 @@
 {
-  "name": "lexsecure-ai",
+  "name": "docu-gaurd-ai",
   "version": "1.0.0",
-  "description": "LexSecure AI — Enterprise AI Legal Copilot with SOC-grade security",
+  "description": "Docu-Gaurd AI — Enterprise AI Legal Copilot with SOC-grade security",
   "main": "server/index.js",
   "type": "commonjs",
   "scripts": {

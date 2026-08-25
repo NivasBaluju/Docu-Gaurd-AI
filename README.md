@@ -1,4 +1,4 @@
-# LexSecure AI — Enterprise AI Legal Copilot
+# Docu-Gaurd AI — Enterprise AI Legal Copilot
 
 A full-stack, security-first AI legal copilot: clause extraction, plain-language
 translation, a RAG chatbot, a negotiation assistant, a compliance checker, a
@@ -21,7 +21,7 @@ in Claude for deeper analysis.
 ## 2. Setup
 
 ```bash
-cd lexsecure-ai
+cd docu-gaurd-ai
 npm install
 cp .env.example .env
 ```
@@ -98,7 +98,7 @@ emails, fill in `SMTP_HOST`, `SMTP_USER`, `SMTP_PASS`, etc. in `.env`
 ## 8. Project structure
 
 ```
-lexsecure-ai/
+docu-gaurd-ai/
   server/
     index.js              Express app entrypoint
     db.js                 PostgreSQL connection pool and schema initialization (pg)
