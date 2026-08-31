@@ -2,7 +2,6 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { useAuth } from '../context/AuthContext';
-import IntelligenceShowcase from '../components/landing/IntelligenceShowcase';
 import Icon from '../components/common/Icon';
 import PageTransition from '../components/common/PageTransition';
 import { buttonMotion, EASE_OUT, cardHoverMotion } from '../styles/motion';
@@ -17,14 +16,14 @@ export const Landing = () => {
 
   return (
     <PageTransition>
-      <div className="landing-container" style={{ paddingBottom: '96px' }}>
+      <div className="landing-container" style={{ paddingBottom: '72px' }}>
         {/* =========================================================
             SECTION 1: APPLE KEYNOTE HERO
             ========================================================= */}
         <section
           className="hero-section"
           style={{
-            padding: '64px 24px 48px',
+            padding: '72px 24px 56px',
             maxWidth: '1120px',
             margin: '0 auto',
             textAlign: 'center'
@@ -40,14 +39,14 @@ export const Landing = () => {
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: '8px',
-                padding: '4px 14px',
+                padding: '5px 16px',
                 borderRadius: '980px',
                 background: 'rgba(0, 113, 227, 0.08)',
                 color: '#0071E3',
-                fontSize: '12.5px',
+                fontSize: '13px',
                 fontWeight: '600',
                 letterSpacing: '-0.01em',
-                marginBottom: '16px'
+                marginBottom: '20px'
               }}
             >
               <Icon.shield /> Introducing Docu-Gaurd AI 2.0
@@ -56,12 +55,12 @@ export const Landing = () => {
 
           <motion.h1
             style={{
-              fontSize: 'clamp(38px, 6vw, 68px)',
+              fontSize: 'clamp(42px, 6.5vw, 76px)',
               fontWeight: 800,
-              letterSpacing: '-0.038em',
-              lineHeight: 1.08,
-              margin: '12px auto 18px',
-              maxWidth: '960px',
+              letterSpacing: '-0.04em',
+              lineHeight: 1.06,
+              margin: '12px auto 20px',
+              maxWidth: '980px',
               color: '#1D1D1F'
             }}
             initial={{ opacity: 0, y: 12 }}
@@ -82,11 +81,11 @@ export const Landing = () => {
 
           <motion.p
             style={{
-              fontSize: 'clamp(17px, 2.2vw, 21px)',
+              fontSize: 'clamp(18px, 2.3vw, 22px)',
               lineHeight: 1.5,
               color: '#6E6E73',
-              maxWidth: '660px',
-              margin: '0 auto 32px',
+              maxWidth: '680px',
+              margin: '0 auto 36px',
               letterSpacing: '-0.018em'
             }}
             initial={{ opacity: 0, y: 10 }}
@@ -96,11 +95,11 @@ export const Landing = () => {
             Understand, dissect, and cryptographically verify complex contracts in seconds. Built for counsel who demand perfection.
           </motion.p>
 
-          {/* Apple Action Pills */}
+          {/* Action Pills */}
           <motion.div
             style={{
               display: 'flex',
-              gap: '12px',
+              gap: '14px',
               justifyContent: 'center',
               alignItems: 'center',
               flexWrap: 'wrap'
@@ -120,9 +119,6 @@ export const Landing = () => {
               Sign In to Firm →
             </motion.button>
           </motion.div>
-
-          {/* Living Document Intelligence Showcase */}
-          <IntelligenceShowcase />
         </section>
 
         {/* =========================================================
@@ -131,48 +127,48 @@ export const Landing = () => {
         <section
           style={{
             maxWidth: '1120px',
-            margin: '80px auto 0',
+            margin: '40px auto 0',
             padding: '0 24px'
           }}
         >
-          <div style={{ textAlign: 'center', marginBottom: '40px' }}>
+          <div style={{ textAlign: 'center', marginBottom: '44px' }}>
             <span className="eyebrow-bullet">Core Innovations</span>
-            <h2 style={{ fontSize: '34px', letterSpacing: '-0.03em', marginTop: '6px', color: '#1D1D1F' }}>
+            <h2 style={{ fontSize: '36px', letterSpacing: '-0.03em', marginTop: '8px', color: '#1D1D1F' }}>
               Engineered with unmatched legal rigor.
             </h2>
-            <p style={{ maxWidth: '580px', margin: '6px auto 0', color: '#6E6E73', fontSize: '16px' }}>
+            <p style={{ maxWidth: '580px', margin: '8px auto 0', color: '#6E6E73', fontSize: '16px' }}>
               Four pillars of intelligence and trust powering modern corporate law teams.
             </p>
           </div>
 
-          <div className="grid grid-2" style={{ gap: '20px' }}>
+          <div className="grid grid-2" style={{ gap: '22px' }}>
             {/* Bento Card 1: Neural Reasoner */}
             <motion.div
               className="card"
               style={{
                 background: '#FFFFFF',
-                borderRadius: '24px',
-                padding: '36px',
+                borderRadius: '26px',
+                padding: '38px',
                 border: '1px solid rgba(0, 0, 0, 0.06)'
               }}
               {...cardHoverMotion}
             >
               <div
                 style={{
-                  width: '48px',
-                  height: '48px',
-                  borderRadius: '12px',
+                  width: '50px',
+                  height: '50px',
+                  borderRadius: '14px',
                   background: 'rgba(0, 113, 227, 0.1)',
                   color: '#0071E3',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  marginBottom: '20px'
+                  marginBottom: '22px'
                 }}
               >
                 <Icon.chat />
               </div>
-              <h3 style={{ fontSize: '22px', marginBottom: '8px', letterSpacing: '-0.024em', color: '#1D1D1F' }}>
+              <h3 style={{ fontSize: '23px', marginBottom: '10px', letterSpacing: '-0.024em', color: '#1D1D1F' }}>
                 Multi-Pass Neural Reasoner
               </h3>
               <p style={{ fontSize: '15px', lineHeight: '1.6', color: '#6E6E73' }}>
@@ -185,32 +181,32 @@ export const Landing = () => {
               className="card"
               style={{
                 background: '#FFFFFF',
-                borderRadius: '24px',
-                padding: '36px',
+                borderRadius: '26px',
+                padding: '38px',
                 border: '1px solid rgba(0, 0, 0, 0.06)'
               }}
               {...cardHoverMotion}
             >
               <div
                 style={{
-                  width: '48px',
-                  height: '48px',
-                  borderRadius: '12px',
+                  width: '50px',
+                  height: '50px',
+                  borderRadius: '14px',
                   background: 'rgba(52, 199, 89, 0.1)',
                   color: '#34C759',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  marginBottom: '20px'
+                  marginBottom: '22px'
                 }}
               >
                 <Icon.lock />
               </div>
-              <h3 style={{ fontSize: '22px', marginBottom: '8px', letterSpacing: '-0.024em', color: '#1D1D1F' }}>
+              <h3 style={{ fontSize: '23px', marginBottom: '10px', letterSpacing: '-0.024em', color: '#1D1D1F' }}>
                 AES-256-GCM Envelope Security
               </h3>
               <p style={{ fontSize: '15px', lineHeight: '1.6', color: '#6E6E73' }}>
-                Every uploaded brief, contract, and addendum is symmetrically encrypted at rest with hardware-backed keys and evidentiary SHA-256 checksums.
+                Every brief, contract, and addendum is symmetrically encrypted at rest with hardware-backed keys and evidentiary SHA-256 checksums.
               </p>
             </motion.div>
 
@@ -219,28 +215,28 @@ export const Landing = () => {
               className="card"
               style={{
                 background: '#FFFFFF',
-                borderRadius: '24px',
-                padding: '36px',
+                borderRadius: '26px',
+                padding: '38px',
                 border: '1px solid rgba(0, 0, 0, 0.06)'
               }}
               {...cardHoverMotion}
             >
               <div
                 style={{
-                  width: '48px',
-                  height: '48px',
-                  borderRadius: '12px',
+                  width: '50px',
+                  height: '50px',
+                  borderRadius: '14px',
                   background: 'rgba(255, 149, 0, 0.1)',
                   color: '#FF9500',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  marginBottom: '20px'
+                  marginBottom: '22px'
                 }}
               >
                 <Icon.pen />
               </div>
-              <h3 style={{ fontSize: '22px', marginBottom: '8px', letterSpacing: '-0.024em', color: '#1D1D1F' }}>
+              <h3 style={{ fontSize: '23px', marginBottom: '10px', letterSpacing: '-0.024em', color: '#1D1D1F' }}>
                 Negotiation Assistant &amp; Redlines
               </h3>
               <p style={{ fontSize: '15px', lineHeight: '1.6', color: '#6E6E73' }}>
@@ -253,28 +249,28 @@ export const Landing = () => {
               className="card"
               style={{
                 background: '#FFFFFF',
-                borderRadius: '24px',
-                padding: '36px',
+                borderRadius: '26px',
+                padding: '38px',
                 border: '1px solid rgba(0, 0, 0, 0.06)'
               }}
               {...cardHoverMotion}
             >
               <div
                 style={{
-                  width: '48px',
-                  height: '48px',
-                  borderRadius: '12px',
+                  width: '50px',
+                  height: '50px',
+                  borderRadius: '14px',
                   background: 'rgba(175, 82, 222, 0.1)',
                   color: '#AF52DE',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  marginBottom: '20px'
+                  marginBottom: '22px'
                 }}
               >
                 <Icon.shield />
               </div>
-              <h3 style={{ fontSize: '22px', marginBottom: '8px', letterSpacing: '-0.024em', color: '#1D1D1F' }}>
+              <h3 style={{ fontSize: '23px', marginBottom: '10px', letterSpacing: '-0.024em', color: '#1D1D1F' }}>
                 Immutable Audit Ledger
               </h3>
               <p style={{ fontSize: '15px', lineHeight: '1.6', color: '#6E6E73' }}>
@@ -290,7 +286,7 @@ export const Landing = () => {
         <section
           style={{
             maxWidth: '1120px',
-            margin: '80px auto 0',
+            margin: '72px auto 0',
             padding: '0 24px'
           }}
         >
@@ -302,12 +298,12 @@ export const Landing = () => {
                     display: 'inline-flex',
                     alignItems: 'center',
                     gap: '6px',
-                    padding: '3px 10px',
+                    padding: '4px 12px',
                     borderRadius: '980px',
                     background: 'rgba(255, 255, 255, 0.12)',
-                    fontSize: '12px',
+                    fontSize: '12.5px',
                     color: '#FFFFFF',
-                    marginBottom: '16px'
+                    marginBottom: '18px'
                   }}
                 >
                   <Icon.shield /> Zero-Trust Security Sentinel
@@ -335,25 +331,25 @@ export const Landing = () => {
                 style={{
                   background: 'rgba(0, 0, 0, 0.4)',
                   border: '1px solid rgba(255, 255, 255, 0.12)',
-                  borderRadius: '18px',
-                  padding: '24px',
+                  borderRadius: '20px',
+                  padding: '28px',
                   textAlign: 'left'
                 }}
               >
-                <div className="mono small" style={{ color: '#6E6E73', borderBottom: '1px solid rgba(255, 255, 255, 0.08)', paddingBottom: '10px', marginBottom: '14px' }}>
+                <div className="mono small" style={{ color: '#6E6E73', borderBottom: '1px solid rgba(255, 255, 255, 0.08)', paddingBottom: '10px', marginBottom: '16px' }}>
                   SECURITY_ASSURANCE_SUMMARY
                 </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span style={{ color: '#D2D2D7', fontSize: '13.5px' }}>Zero-Trust Confidence:</span>
+                    <span style={{ color: '#D2D2D7', fontSize: '14px' }}>Zero-Trust Confidence:</span>
                     <span className="badge badge-ok">100% Score</span>
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span style={{ color: '#D2D2D7', fontSize: '13.5px' }}>Data Encryption:</span>
+                    <span style={{ color: '#D2D2D7', fontSize: '14px' }}>Data Encryption:</span>
                     <span className="badge badge-info">AES-256-GCM</span>
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span style={{ color: '#D2D2D7', fontSize: '13.5px' }}>Audit Ledger Blocks:</span>
+                    <span style={{ color: '#D2D2D7', fontSize: '14px' }}>Audit Ledger Blocks:</span>
                     <span className="badge badge-ok">Chain Verified</span>
                   </div>
                 </div>
@@ -367,9 +363,9 @@ export const Landing = () => {
             ========================================================= */}
         <section
           style={{
-            maxWidth: '860px',
-            margin: '80px auto 0',
-            padding: '48px 32px',
+            maxWidth: '880px',
+            margin: '72px auto 0',
+            padding: '52px 36px',
             background: '#FFFFFF',
             border: '1px solid rgba(0, 0, 0, 0.06)',
             borderRadius: '32px',
@@ -377,10 +373,10 @@ export const Landing = () => {
             boxShadow: '0 20px 48px rgba(0, 0, 0, 0.04)'
           }}
         >
-          <h2 style={{ fontSize: '36px', letterSpacing: '-0.035em', margin: '0 0 12px', color: '#1D1D1F' }}>
+          <h2 style={{ fontSize: '38px', letterSpacing: '-0.035em', margin: '0 0 12px', color: '#1D1D1F' }}>
             Elevate your firm's legal intelligence.
           </h2>
-          <p style={{ fontSize: '16px', color: '#6E6E73', maxWidth: '520px', margin: '0 auto 28px', letterSpacing: '-0.016em' }}>
+          <p style={{ fontSize: '16.5px', color: '#6E6E73', maxWidth: '540px', margin: '0 auto 30px', letterSpacing: '-0.016em' }}>
             Start analyzing contracts with automated risk detection and cryptographic verification in under 30 seconds.
           </p>
           <motion.button className="btn-hero" onClick={handleCta} {...buttonMotion}>

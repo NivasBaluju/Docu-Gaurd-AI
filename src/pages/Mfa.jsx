@@ -78,113 +78,132 @@ export const Mfa = () => {
 
   return (
     <PageTransition>
-      <div className="auth-cinematic">
-        <div className="auth-visual">
-          <div className="auth-visual-inner">
-            <div className="auth-visual-logo">
-              <div className="avc-icon">
-                <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5" width="22" height="22">
-                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-                </svg>
-              </div>
-              <span className="avc-brand">Docu-Gaurd AI</span>
+      <div className="glass-auth-wrapper">
+        {/* Ethereal Frosted Glass Ambient Light Orbs */}
+        <div className="glass-orb glass-orb-1" />
+        <div className="glass-orb glass-orb-2" />
+
+        {/* Translucent Frosted Glass Card */}
+        <motion.div
+          className="glass-auth-card"
+          initial={{ opacity: 0, scale: 0.96, y: 10 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          transition={{ duration: 0.32, ease: [0.16, 1, 0.3, 1] }}
+        >
+          <div style={{ textAlign: 'center', marginBottom: '24px' }}>
+            <div
+              style={{
+                width: '44px',
+                height: '44px',
+                borderRadius: '12px',
+                background: '#1D1D1F',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                margin: '0 auto 14px',
+                color: '#FFFFFF',
+                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)'
+              }}
+            >
+              <Icon.lock />
             </div>
-            <div className="auth-visual-quote">
-              <div className="auth-visual-mark">"</div>
-              <p>Two-factor verification active for zero-trust enterprise security.</p>
-              <div className="auth-visual-rule" />
-              <div className="auth-trust-pills">
-                <span className="auth-pill">TOTP MFA</span>
-                <span className="auth-pill">AES-256-GCM</span>
-                <span className="auth-pill">Zero-Trust</span>
-              </div>
-            </div>
+            <span
+              style={{
+                fontSize: '12px',
+                fontWeight: '600',
+                letterSpacing: '0.02em',
+                color: '#0071E3',
+                textTransform: 'uppercase'
+              }}
+            >
+              Zero-Trust Verification
+            </span>
+            <h1 style={{ fontSize: '26px', fontWeight: '700', letterSpacing: '-0.03em', color: '#1D1D1F', margin: '4px 0 6px' }}>
+              Two-Factor Auth
+            </h1>
+            <p style={{ fontSize: '13.5px', color: '#6E6E73', margin: 0 }}>
+              Enter the 6-digit code from your authenticator app.
+            </p>
           </div>
-        </div>
 
-        <div className="auth-panel">
-          <div className="auth-form-card">
-            <p className="auth-step-label">Verification</p>
-            <h2 className="auth-form-title">Two-Factor Authentication</h2>
-            <p className="auth-form-sub">Enter the 6-digit code from your authenticator app.</p>
-
-            <form id="totpForm" className="auth-form" onSubmit={handleTotpSubmit}>
-              <div className="input-group">
-                <label htmlFor="mfa-code">Authenticator Code</label>
-                <input
-                  id="mfa-code"
-                  name="code"
-                  maxLength={6}
-                  inputMode="numeric"
-                  required
-                  autoFocus
-                  placeholder="000000"
-                  className="mfa-code-input"
-                  value={totpCode}
-                  onChange={(e) => setTotpCode(e.target.value)}
-                />
-              </div>
-              <motion.button
-                className="btn-auth-submit"
-                type="submit"
-                disabled={submitting}
-                {...buttonMotion}
-              >
-                {submitting ? 'Verifying…' : 'Verify & Sign In'}
-              </motion.button>
-            </form>
-
+          <form id="totpForm" onSubmit={handleTotpSubmit}>
+            <div className="glass-input-group">
+              <label htmlFor="mfa-code">Authenticator Code</label>
+              <input
+                id="mfa-code"
+                name="code"
+                maxLength={6}
+                inputMode="numeric"
+                required
+                autoFocus
+                placeholder="000000"
+                className="glass-input"
+                style={{ textAlign: 'center', letterSpacing: '8px', fontSize: '20px', fontWeight: '700' }}
+                value={totpCode}
+                onChange={(e) => setTotpCode(e.target.value)}
+              />
+            </div>
             <motion.button
-              className="btn btn-outline btn-block mt-12"
-              id="reqOtpBtn"
-              style={{ borderRadius: 'var(--radius)', padding: '12px' }}
-              onClick={handleRequestOtp}
-              type="button"
+              className="glass-btn-submit"
+              type="submit"
+              disabled={submitting}
               {...buttonMotion}
             >
-              <Icon.chat /> Send Email OTP instead
+              {submitting ? 'Verifying…' : 'Verify & Sign In'}
             </motion.button>
+          </form>
 
-            <AnimatePresence>
-              {otpSent && (
-                <motion.div
-                  id="otpArea"
-                  initial={{ opacity: 0, y: 8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.22, ease: EASE_OUT }}
-                >
-                  <form id="otpForm" className="mt-16 auth-form" onSubmit={handleOtpSubmit}>
-                    <div className="input-group">
-                      <label>
-                        Email OTP{' '}
-                        {devModeInfo && <span className="badge badge-warn">DEV: {devModeInfo}</span>}
-                      </label>
-                      <input
-                        name="code"
-                        maxLength={6}
-                        inputMode="numeric"
-                        required
-                        placeholder="000000"
-                        className="mfa-code-input"
-                        value={otpCode}
-                        onChange={(e) => setOtpCode(e.target.value)}
-                      />
-                    </div>
-                    <motion.button
-                      className="btn-auth-submit"
-                      type="submit"
-                      disabled={submitting}
-                      {...buttonMotion}
-                    >
-                      {submitting ? 'Verifying OTP…' : 'Verify OTP'}
-                    </motion.button>
-                  </form>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
-        </div>
+          <motion.button
+            className="btn btn-outline btn-block mt-12"
+            id="reqOtpBtn"
+            style={{ borderRadius: 'var(--radius-pill)', padding: '10px' }}
+            onClick={handleRequestOtp}
+            type="button"
+            {...buttonMotion}
+          >
+            <Icon.chat /> Send Email OTP instead
+          </motion.button>
+
+          <AnimatePresence>
+            {otpSent && (
+              <motion.div
+                id="otpArea"
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.22, ease: EASE_OUT }}
+              >
+                <form id="otpForm" className="mt-16" onSubmit={handleOtpSubmit}>
+                  <div className="glass-input-group">
+                    <label>
+                      Email OTP{' '}
+                      {devModeInfo && <span className="badge badge-warn">DEV: {devModeInfo}</span>}
+                    </label>
+                    <input
+                      name="code"
+                      maxLength={6}
+                      inputMode="numeric"
+                      required
+                      placeholder="000000"
+                      className="glass-input"
+                      style={{ textAlign: 'center', letterSpacing: '8px', fontSize: '20px', fontWeight: '700' }}
+                      value={otpCode}
+                      onChange={(e) => setOtpCode(e.target.value)}
+                    />
+                  </div>
+                  <motion.button
+                    className="glass-btn-submit"
+                    type="submit"
+                    disabled={submitting}
+                    {...buttonMotion}
+                  >
+                    {submitting ? 'Verifying OTP…' : 'Verify OTP'}
+                  </motion.button>
+                </form>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </motion.div>
       </div>
     </PageTransition>
   );
