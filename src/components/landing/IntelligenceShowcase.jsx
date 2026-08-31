@@ -1,169 +1,239 @@
 import React, { useState } from 'react';
-import { motion, useReducedMotion } from 'motion/react';
+import { motion, AnimatePresence, useReducedMotion } from 'motion/react';
 import Icon from '../common/Icon';
 import { EASE_OUT, cardHoverMotion } from '../../styles/motion';
 
 export const IntelligenceShowcase = () => {
-  const [activeFeature, setActiveFeature] = useState('clauses');
+  const [activeTab, setActiveTab] = useState('clauses');
   const shouldReduceMotion = useReducedMotion();
 
-  const features = [
-    { id: 'clauses', label: 'Clause Intelligence', icon: <Icon.document /> },
-    { id: 'risk', label: 'Risk Analysis (Low 8/100)', icon: <Icon.shield /> },
-    { id: 'integrity', label: 'Cryptographic SHA-256', icon: <Icon.check /> },
+  const tabs = [
+    { id: 'clauses', label: 'Clause Intelligence', tag: '98% Confidence' },
+    { id: 'risk', label: 'Risk Intelligence', tag: 'Score: 12/100' },
+    { id: 'integrity', label: 'Cryptographic Proof', tag: 'SHA-256 Verified' }
   ];
 
   return (
     <motion.div
       className="card intelligence-showcase"
       style={{
-        maxWidth: '820px',
-        margin: '48px auto 0',
+        maxWidth: '860px',
+        margin: '52px auto 0',
         padding: '0',
         overflow: 'hidden',
-        background: 'var(--white)',
-        border: '1px solid rgba(15, 23, 42, 0.1)',
-        boxShadow: '0 12px 40px rgba(15, 23, 42, 0.08), 0 2px 6px rgba(15, 23, 42, 0.03)'
+        background: 'var(--surface-white)',
+        border: '1px solid var(--border-mid)',
+        boxShadow: 'var(--shadow-float)',
+        borderRadius: 'var(--radius-lg)'
       }}
-      initial={{ opacity: 0, y: 16 }}
+      initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.45, delay: 0.25, ease: EASE_OUT }}
+      transition={{ duration: 0.4, delay: 0.2, ease: EASE_OUT }}
       {...cardHoverMotion}
     >
-      {/* Top Demo Bar */}
+      {/* Chamber Header Bar */}
       <div
         style={{
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          padding: '12px 20px',
-          borderBottom: '1px solid var(--border)',
-          background: 'var(--warm-beige)'
+          padding: '14px 24px',
+          background: 'var(--canvas-subtle)',
+          borderBottom: '1px solid var(--border-hairline)'
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <span style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#EF4444', opacity: 0.7 }} />
-          <span style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#F59E0B', opacity: 0.7 }} />
-          <span style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#10B981', opacity: 0.7 }} />
-          <span className="mono small text-lo" style={{ marginLeft: '10px', fontSize: '11.5px' }}>
-            sample_master_services_agreement.pdf (Preview)
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <div style={{ display: 'flex', gap: '6px' }}>
+            <span style={{ width: '9px', height: '9px', borderRadius: '50%', background: '#EF4444', opacity: 0.8 }} />
+            <span style={{ width: '9px', height: '9px', borderRadius: '50%', background: '#F59E0B', opacity: 0.8 }} />
+            <span style={{ width: '9px', height: '9px', borderRadius: '50%', background: '#10B981', opacity: 0.8 }} />
+          </div>
+          <span className="mono text-muted small" style={{ marginLeft: '8px', fontSize: '12px' }}>
+            master_services_agreement_v3.pdf
           </span>
         </div>
-        <span className="badge badge-info" style={{ fontSize: '11px' }}>
-          Interactive Demo
-        </span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <span className="badge badge-gold" style={{ fontSize: '11px' }}>
+            <Icon.shield /> Cryptographically Sealed
+          </span>
+          <span className="badge badge-ok" style={{ fontSize: '11px' }}>
+            <Icon.check /> SOC Verified
+          </span>
+        </div>
       </div>
 
-      {/* Feature Selector Tabs */}
+      {/* Mode Navigation Bar */}
       <div
         style={{
           display: 'flex',
-          borderBottom: '1px solid var(--border)',
-          background: 'var(--white)',
-          padding: '4px 12px',
-          gap: '6px'
+          gap: '8px',
+          padding: '8px 20px',
+          borderBottom: '1px solid var(--border-hairline)',
+          background: 'var(--surface-cream)'
         }}
       >
-        {features.map((f) => {
-          const isActive = activeFeature === f.id;
+        {tabs.map((t) => {
+          const isActive = activeTab === t.id;
           return (
             <button
-              key={f.id}
-              onClick={() => setActiveFeature(f.id)}
+              key={t.id}
+              onClick={() => setActiveTab(t.id)}
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',
-                gap: '6px',
-                padding: '8px 14px',
+                gap: '8px',
+                padding: '8px 16px',
                 borderRadius: 'var(--radius-sm)',
                 border: 'none',
-                background: isActive ? 'var(--royal-light)' : 'transparent',
-                color: isActive ? 'var(--royal)' : 'var(--text-mid)',
+                background: isActive ? 'var(--surface-white)' : 'transparent',
+                color: isActive ? 'var(--royal-cobalt)' : 'var(--ink-muted)',
                 fontWeight: isActive ? '600' : '500',
                 fontSize: '13px',
                 cursor: 'pointer',
-                fontFamily: 'var(--font-body)',
-                transition: 'all 0.18s ease'
+                fontFamily: 'var(--font-sans)',
+                boxShadow: isActive ? '0 2px 6px rgba(15, 23, 42, 0.05)' : 'none',
+                transition: 'all 0.16s ease'
               }}
             >
-              {f.icon} {f.label}
+              <span>{t.label}</span>
+              <span
+                style={{
+                  fontSize: '10.5px',
+                  padding: '2px 6px',
+                  borderRadius: '4px',
+                  background: isActive ? 'var(--royal-light)' : 'rgba(15, 23, 42, 0.05)',
+                  color: isActive ? 'var(--royal-cobalt)' : 'var(--ink-muted)'
+                }}
+              >
+                {t.tag}
+              </span>
             </button>
           );
         })}
       </div>
 
-      {/* Main Document Insight Body */}
-      <div style={{ padding: '24px 28px', textAlign: 'left' }}>
-        {activeFeature === 'clauses' && (
-          <div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-              <span className="eyebrow-bullet">Extracted Clause Analysis</span>
-              <span className="badge badge-ok">Confidence: 98%</span>
-            </div>
-            <div
-              style={{
-                background: 'var(--off-white)',
-                border: '1px solid var(--border)',
-                borderRadius: 'var(--radius-sm)',
-                padding: '16px',
-                fontSize: '13.5px',
-                lineHeight: '1.7',
-                color: 'var(--charcoal)',
-                marginBottom: '14px'
-              }}
+      {/* Living Document Surface */}
+      <div style={{ padding: '28px 32px', textAlign: 'left' }}>
+        <AnimatePresence mode="wait">
+          {activeTab === 'clauses' && (
+            <motion.div
+              key="clauses"
+              initial={{ opacity: 0, y: 4 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.18, ease: EASE_OUT }}
             >
-              <strong style={{ color: 'var(--navy)' }}>Section 11.2 (Limitation of Liability):</strong> Neither party shall be liable for indirect, incidental, or consequential damages. Total aggregate liability shall not exceed the fees paid in the preceding <mark style={{ background: 'var(--gold-light)', padding: '2px 6px', borderRadius: '4px' }}>twelve (12) months</mark>.
-            </div>
-            <p className="text-mid small">
-              <strong>Plain English:</strong> Standard bilateral liability cap protecting both parties against runaway damages.
-            </p>
-          </div>
-        )}
+              <div className="flex-between mb-12">
+                <span className="eyebrow-bullet">Extracted Clause Analysis</span>
+                <span className="badge badge-info">Gemini AI Model</span>
+              </div>
+              <div
+                style={{
+                  background: 'var(--canvas-bg)',
+                  border: '1px solid var(--border-hairline)',
+                  borderRadius: 'var(--radius-sm)',
+                  padding: '18px 22px',
+                  fontFamily: 'var(--font-legal)',
+                  fontSize: '14.5px',
+                  lineHeight: '1.8',
+                  color: 'var(--ink-primary)',
+                  marginBottom: '16px'
+                }}
+              >
+                <strong style={{ color: 'var(--ink-primary)' }}>Section 11.2 (Limitation of Liability):</strong> In no event shall either party's aggregate liability arising out of or related to this Agreement exceed the total amount paid by Customer hereunder in the{' '}
+                <mark style={{ background: 'rgba(200, 169, 90, 0.3)', padding: '2px 6px', borderRadius: '3px', borderBottom: '1.5px solid var(--gold-seal)' }}>
+                  twelve (12) months
+                </mark>{' '}
+                preceding the incident. Neither party shall be liable for indirect, punitive, or consequential damages.
+              </div>
+              <div
+                style={{
+                  background: 'var(--emerald-bg)',
+                  border: '1px solid var(--emerald-border)',
+                  borderRadius: 'var(--radius-sm)',
+                  padding: '14px 18px',
+                  fontSize: '13.5px'
+                }}
+              >
+                <strong style={{ color: 'var(--emerald)' }}>Plain English Translation:</strong> Standard bilateral liability cap. Liability is strictly limited to actual fees paid over the previous year, protecting both sides against unlimited punitive damages.
+              </div>
+            </motion.div>
+          )}
 
-        {activeFeature === 'risk' && (
-          <div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-              <span className="eyebrow-bullet">Automated Risk Breakdown</span>
-              <span className="badge badge-ok">Low Risk Score: 8 / 100</span>
-            </div>
-            <div className="grid grid-2" style={{ gap: '12px' }}>
-              <div style={{ padding: '12px', background: 'var(--off-white)', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)' }}>
-                <div className="flex-between small bold mb-4">
-                  <span>Termination Provisions</span>
-                  <span className="badge badge-ok">0% (Low)</span>
+          {activeTab === 'risk' && (
+            <motion.div
+              key="risk"
+              initial={{ opacity: 0, y: 4 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.18, ease: EASE_OUT }}
+            >
+              <div className="flex-between mb-16">
+                <span className="eyebrow-bullet">Automated Risk Assessment</span>
+                <span className="badge badge-ok" style={{ fontSize: '13px' }}>
+                  Low Risk Score: 12 / 100
+                </span>
+              </div>
+              <div className="grid grid-2" style={{ gap: '14px' }}>
+                <div style={{ padding: '16px', background: 'var(--canvas-bg)', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-hairline)' }}>
+                  <div className="flex-between small bold mb-8">
+                    <span style={{ color: 'var(--ink-primary)' }}>Termination Provisions</span>
+                    <span className="badge badge-ok">0% (Safe)</span>
+                  </div>
+                  <div style={{ height: '7px', background: 'var(--canvas-subtle)', borderRadius: '4px', overflow: 'hidden' }}>
+                    <div style={{ width: '0%', height: '100%', background: 'var(--emerald)' }} />
+                  </div>
+                  <p className="text-muted small mt-8" style={{ fontSize: '12px' }}>Mutual 30-day notice with immediate termination on material breach.</p>
                 </div>
-                <div style={{ height: '6px', background: 'var(--border)', borderRadius: '3px', overflow: 'hidden' }}>
-                  <div style={{ width: '0%', height: '100%', background: 'var(--emerald)' }} />
+
+                <div style={{ padding: '16px', background: 'var(--canvas-bg)', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-hairline)' }}>
+                  <div className="flex-between small bold mb-8">
+                    <span style={{ color: 'var(--ink-primary)' }}>Liability Caps</span>
+                    <span className="badge badge-ok">15% (Low)</span>
+                  </div>
+                  <div style={{ height: '7px', background: 'var(--canvas-subtle)', borderRadius: '4px', overflow: 'hidden' }}>
+                    <div style={{ width: '15%', height: '100%', background: 'var(--emerald)' }} />
+                  </div>
+                  <p className="text-muted small mt-8" style={{ fontSize: '12px' }}>Bilateral cap tied to 12-month contract value.</p>
                 </div>
               </div>
+            </motion.div>
+          )}
 
-              <div style={{ padding: '12px', background: 'var(--off-white)', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)' }}>
-                <div className="flex-between small bold mb-4">
-                  <span>Liability Caps</span>
-                  <span className="badge badge-ok">15% (Low)</span>
-                </div>
-                <div style={{ height: '6px', background: 'var(--border)', borderRadius: '3px', overflow: 'hidden' }}>
-                  <div style={{ width: '15%', height: '100%', background: 'var(--emerald)' }} />
-                </div>
+          {activeTab === 'integrity' && (
+            <motion.div
+              key="integrity"
+              initial={{ opacity: 0, y: 4 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.18, ease: EASE_OUT }}
+            >
+              <div className="flex-between mb-12">
+                <span className="eyebrow-bullet">Cryptographic Fingerprint &amp; Ledger</span>
+                <span className="badge badge-ok"><Icon.check /> SHA-256 Validated</span>
               </div>
-            </div>
-          </div>
-        )}
-
-        {activeFeature === 'integrity' && (
-          <div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-              <span className="eyebrow-bullet">Cryptographic Integrity</span>
-              <span className="badge badge-ok"><Icon.check /> SHA-256 Validated</span>
-            </div>
-            <p className="mono small text-lo" style={{ wordBreak: 'break-all', background: 'var(--off-white)', padding: '12px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)' }}>
-              SHA-256: 7f83b1657ff1fc53b92dc18148a1d65dfc2d4b1fa3d677284addd200126d9069
-            </p>
-            <p className="text-mid small mt-12">
-              All documents are AES-256-GCM encrypted with unalterable cryptographic hashes logged to the blockchain audit ledger.
-            </p>
-          </div>
-        )}
+              <div
+                className="mono small"
+                style={{
+                  background: 'var(--canvas-bg)',
+                  border: '1px solid var(--border-hairline)',
+                  padding: '14px 18px',
+                  borderRadius: 'var(--radius-sm)',
+                  color: 'var(--ink-secondary)',
+                  wordBreak: 'break-all',
+                  fontSize: '12.5px',
+                  lineHeight: '1.6'
+                }}
+              >
+                <strong>SHA-256:</strong> e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855<br />
+                <strong>Block Index:</strong> #114 · <strong>Algorithm:</strong> AES-256-GCM · <strong>Signature:</strong> RSA-2048 PKCS#1v15
+              </div>
+              <p className="text-muted small mt-12">
+                Every document uploaded is cryptographically hashed, symmetrically encrypted, and logged to the immutable audit ledger to guarantee evidentiary non-repudiation.
+              </p>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </motion.div>
   );

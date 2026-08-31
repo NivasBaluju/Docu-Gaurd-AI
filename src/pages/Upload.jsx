@@ -6,7 +6,7 @@ import { useToast } from '../context/ToastContext';
 import Icon from '../components/common/Icon';
 import PageTransition from '../components/common/PageTransition';
 import { fmtBytes } from '../utils/formatters';
-import { buttonMotion, EASE_OUT } from '../styles/motion';
+import { buttonMotion, EASE_OUT, cardHoverMotion } from '../styles/motion';
 
 export const Upload = () => {
   const [isDragging, setIsDragging] = useState(false);
@@ -19,10 +19,10 @@ export const Upload = () => {
   const navigate = useNavigate();
 
   const pipelineSteps = [
-    { label: 'Securing Document with AES-256-GCM', icon: <Icon.lock /> },
-    { label: 'Computing SHA-256 Cryptographic Fingerprint', icon: <Icon.check /> },
-    { label: 'Extracting Legal Text & OCR', icon: <Icon.document /> },
-    { label: 'Running AI Risk & Compliance Intelligence', icon: <Icon.shield /> }
+    { label: 'Symmetric Envelope: AES-256-GCM Encryption', icon: <Icon.lock /> },
+    { label: 'Evidentiary Cryptographic Fingerprint (SHA-256)', icon: <Icon.check /> },
+    { label: 'Neural Legal Text Extraction & OCR Parsing', icon: <Icon.document /> },
+    { label: 'Automated Heuristic Risk & Compliance Intelligence', icon: <Icon.shield /> }
   ];
 
   const handleFile = async (file) => {
@@ -32,7 +32,6 @@ export const Upload = () => {
     setResult(null);
     setCurrentStepIndex(0);
 
-    // Simulate meaningful progress checkpoint progression alongside real upload
     const stepInterval = setInterval(() => {
       setCurrentStepIndex((prev) => (prev < 3 ? prev + 1 : prev));
     }, 450);
@@ -45,7 +44,7 @@ export const Upload = () => {
       clearInterval(stepInterval);
       setCurrentStepIndex(4);
       setResult(res);
-      toast('Document uploaded and secured', 'ok');
+      toast('Document ingested and cryptographically sealed', 'ok');
     } catch (err) {
       clearInterval(stepInterval);
       setUploading(false);
@@ -72,30 +71,47 @@ export const Upload = () => {
 
   return (
     <PageTransition>
-      <h1 className="page-title">Upload Document</h1>
-      <p className="page-sub">
-        Files are hashed (SHA-256), encrypted at rest (AES-256-GCM), and text-extracted for AI analysis. Supported: .txt, .pdf, .docx
-      </p>
+      <div className="mb-24">
+        <span className="eyebrow-bullet">Secure Document Ingestion</span>
+        <h1 className="page-title" style={{ marginTop: '4px' }}>Document Arrival Chamber</h1>
+        <p className="page-sub" style={{ maxWidth: '640px' }}>
+          Every file is cryptographically fingerprinted (SHA-256), encrypted at rest (AES-256-GCM), and structured for multi-pass AI reasoning. Supported: PDF, DOCX, TXT (up to 25 MB).
+        </p>
+      </div>
 
-      <div className="card" style={{ maxWidth: '680px' }}>
+      <div style={{ maxWidth: '740px' }}>
         {!uploading && !result && (
-          <div
+          <motion.div
             className={`dropzone ${isDragging ? 'drag' : ''}`}
             id="dropzone"
             onClick={() => fileInputRef.current?.click()}
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
             onDrop={handleDrop}
+            {...cardHoverMotion}
             style={{
-              transition: 'border-color 0.2s ease, background 0.2s ease',
-              background: isDragging ? 'var(--royal-light)' : 'transparent'
+              padding: '64px 32px',
+              background: isDragging ? 'var(--royal-light)' : 'var(--surface-white)',
+              borderColor: isDragging ? 'var(--royal-cobalt)' : 'var(--border-mid)',
+              boxShadow: 'var(--shadow-md)',
+              borderRadius: 'var(--radius-lg)'
             }}
           >
             <div className="dropzone-icon">
               <Icon.upload />
             </div>
-            <h3>Drag &amp; drop a file here</h3>
-            <p>or click to browse — max 25 MB</p>
+            <h3 style={{ fontSize: '20px', marginBottom: '8px', color: 'var(--ink-primary)' }}>
+              Place legal instrument into the Chamber
+            </h3>
+            <p style={{ color: 'var(--ink-muted)', fontSize: '14px' }}>
+              Drag &amp; drop file here, or <strong style={{ color: 'var(--royal-cobalt)' }}>browse your computer</strong>
+            </p>
+            <div style={{ display: 'flex', justifyContent: 'center', gap: '8px', marginTop: '24px' }}>
+              <span className="badge badge-neutral">PDF</span>
+              <span className="badge badge-neutral">DOCX</span>
+              <span className="badge badge-neutral">TXT</span>
+              <span className="badge badge-gold"><Icon.shield /> AES-256-GCM</span>
+            </div>
             <input
               type="file"
               ref={fileInputRef}
@@ -108,24 +124,25 @@ export const Upload = () => {
                 }
               }}
             />
-          </div>
+          </motion.div>
         )}
 
         {/* Meaningful Pipeline Checkpoints */}
         {uploading && !result && (
           <motion.div
+            className="card"
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.25, ease: EASE_OUT }}
-            style={{ padding: '8px 0' }}
+            style={{ padding: '32px', boxShadow: 'var(--shadow-lg)' }}
           >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px' }}>
-              <div className="brand-icon" style={{ width: '38px', height: '38px' }}>
-                <Icon.document stroke="white" />
+            <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '24px' }}>
+              <div className="metric-icon-wrap metric-icon-blue">
+                <Icon.document />
               </div>
               <div>
-                <strong style={{ color: 'var(--navy)' }}>{selectedFile?.name}</strong>
-                <p className="text-lo small">{fmtBytes(selectedFile?.size || 0)}</p>
+                <strong style={{ fontSize: '16px', color: 'var(--ink-primary)' }}>{selectedFile?.name}</strong>
+                <p className="small text-muted">{fmtBytes(selectedFile?.size || 0)} · Cryptographic Pipeline Active</p>
               </div>
             </div>
 
@@ -140,25 +157,26 @@ export const Upload = () => {
                     style={{
                       display: 'flex',
                       alignItems: 'center',
-                      gap: '12px',
-                      padding: '10px 14px',
+                      gap: '14px',
+                      padding: '12px 18px',
                       borderRadius: 'var(--radius-sm)',
-                      background: isCurrent ? 'var(--royal-light)' : 'var(--off-white)',
-                      border: isCurrent ? '1px solid var(--royal)' : '1px solid var(--border)',
+                      background: isCurrent ? 'var(--royal-light)' : 'var(--canvas-bg)',
+                      border: isCurrent ? '1px solid var(--royal-border)' : '1px solid var(--border-hairline)',
                       transition: 'all 0.2s ease'
                     }}
                   >
                     <div
                       style={{
-                        width: '20px',
-                        height: '20px',
+                        width: '22px',
+                        height: '22px',
                         borderRadius: '50%',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        background: isComplete ? 'var(--emerald)' : isCurrent ? 'var(--royal)' : 'var(--mid-gray)',
+                        background: isComplete ? 'var(--emerald)' : isCurrent ? 'var(--royal-cobalt)' : 'var(--ink-subtle)',
                         color: '#FFFFFF',
                         fontSize: '11px',
+                        fontWeight: '700',
                         flexShrink: 0
                       }}
                     >
@@ -166,9 +184,9 @@ export const Upload = () => {
                     </div>
                     <span
                       style={{
-                        fontSize: '13.5px',
-                        fontWeight: isCurrent ? '600' : '400',
-                        color: isCurrent ? 'var(--royal)' : isComplete ? 'var(--navy)' : 'var(--text-lo)'
+                        fontSize: '14px',
+                        fontWeight: isCurrent ? '600' : '500',
+                        color: isCurrent ? 'var(--royal-cobalt)' : isComplete ? 'var(--ink-primary)' : 'var(--ink-muted)'
                       }}
                     >
                       {step.label}
@@ -185,26 +203,33 @@ export const Upload = () => {
           {result && (
             <motion.div
               id="uploadResult"
-              className="mt-16"
-              initial={{ opacity: 0, y: 10 }}
+              initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3, ease: EASE_OUT }}
             >
-              <div className="card" style={{ borderColor: 'var(--emerald)', background: 'var(--white)' }}>
-                <div className="card-title">
-                  <span className="dot dot-emerald" />
-                  Upload Secured &amp; Analyzed
-                </div>
-                <p className="bold" style={{ fontSize: '16px', color: 'var(--navy)' }}>{result.name}</p>
-                <p className="text-lo small">
-                  {fmtBytes(result.size)} · SHA-256: {result.sha256 ? result.sha256.slice(0, 24) : ''}…
-                </p>
-                <div className="flex gap-8 mt-12" style={{ flexWrap: 'wrap' }}>
+              <div className="card" style={{ border: '1px solid var(--emerald-border)', padding: '32px', boxShadow: 'var(--shadow-lg)' }}>
+                <div className="flex-between mb-16">
+                  <div className="card-title" style={{ margin: 0 }}>
+                    <span className="dot dot-emerald" />
+                    Document Secured &amp; Analyzed
+                  </div>
                   <span className="badge badge-ok">
-                    <Icon.check /> AES-256 Encrypted
+                    <Icon.check /> Ready for Review
+                  </span>
+                </div>
+                <h3 style={{ fontSize: '20px', color: 'var(--ink-primary)', marginBottom: '4px' }}>
+                  {result.name}
+                </h3>
+                <p className="mono text-muted small" style={{ marginBottom: '16px' }}>
+                  {fmtBytes(result.size)} · SHA-256: {result.sha256 ? result.sha256.slice(0, 32) : ''}…
+                </p>
+
+                <div className="flex gap-8 mb-24" style={{ flexWrap: 'wrap' }}>
+                  <span className="badge badge-ok">
+                    <Icon.check /> AES-256-GCM Encrypted
                   </span>
                   <span className="badge badge-info">
-                    OCR {Math.round((result.ocrConfidence || 0) * 100)}%
+                    OCR Confidence: {Math.round((result.ocrConfidence || 0) * 100)}%
                   </span>
                   <span
                     className={`badge ${
@@ -215,16 +240,17 @@ export const Upload = () => {
                         : 'badge-ok'
                     }`}
                   >
-                    Risk {result.riskScore ?? '—'}/100
+                    Risk Score: {result.riskScore ?? '—'}/100
                   </span>
                 </div>
-                <div style={{ marginTop: '20px', display: 'flex', gap: '10px' }}>
+
+                <div style={{ display: 'flex', gap: '12px' }}>
                   <motion.button
                     className="btn btn-primary"
                     onClick={() => navigate(`/document/${result.id}`)}
                     {...buttonMotion}
                   >
-                    <Icon.eye /> Open AI Analysis Workspace
+                    <Icon.eye /> Launch Document Analysis Workspace
                   </motion.button>
                   <motion.button
                     className="btn btn-outline"
@@ -235,7 +261,7 @@ export const Upload = () => {
                     }}
                     {...buttonMotion}
                   >
-                    Upload Another
+                    Ingest Another File
                   </motion.button>
                 </div>
               </div>
