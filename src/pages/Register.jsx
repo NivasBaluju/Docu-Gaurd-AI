@@ -31,46 +31,48 @@ export const Register = () => {
 
   return (
     <PageTransition>
-      <div className="dark-art-auth-container">
-        {/* Left Side: Minimalist Black Editorial Form */}
-        <div className="dark-art-form-side">
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.32, ease: [0.16, 1, 0.3, 1] }}
-          >
-            {/* Minimalist Brand Symbol */}
-            <div style={{ marginBottom: '32px' }}>
-              <div
-                style={{
-                  width: '40px',
-                  height: '40px',
-                  borderRadius: '50%',
-                  border: '1.5px solid #FFFFFF',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  marginBottom: '24px'
-                }}
-              >
-                <div style={{ width: '12px', height: '12px', borderRadius: '50%', background: '#FFFFFF' }} />
-              </div>
-              <h1 style={{ fontSize: '28px', fontWeight: '700', letterSpacing: '-0.035em', color: '#FFFFFF', margin: '0 0 8px' }}>
-                Establish Firm Vault
+      <div className="auth-minimal-wrapper">
+        {/* Landscape Ambient Background Glow */}
+        <div className="auth-landscape-bg" />
+
+        {/* Compact Centered Minimalist Auth Card */}
+        <motion.div
+          className="auth-compact-card"
+          initial={{ opacity: 0, scale: 0.98, y: 8 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
+        >
+          {/* Landscape Dither Header Banner */}
+          <div className="auth-card-landscape-banner">
+            <img
+              src="/assets/courthouse-hero.jpg"
+              alt="Supreme Court Facade Landscape Art"
+              className="auth-card-banner-img"
+            />
+            <div className="auth-card-banner-overlay" />
+          </div>
+
+          <div style={{ padding: '24px 28px 28px' }}>
+            <div style={{ textAlign: 'center', marginBottom: '22px' }}>
+              <span className="mono" style={{ fontSize: '11px', color: '#71717A', letterSpacing: '0.06em' }}>
+                [FIRM_PROVISIONING]
+              </span>
+              <h1 style={{ fontSize: '22px', fontWeight: '700', letterSpacing: '-0.03em', color: '#FFFFFF', margin: '4px 0 2px' }}>
+                Create Account
               </h1>
-              <p style={{ fontSize: '14px', color: '#71717A', margin: 0, lineHeight: 1.5 }}>
-                Initialize your Zero-Trust encrypted legal intelligence workspace.
+              <p style={{ fontSize: '13px', color: '#A1A1AA', margin: 0 }}>
+                Initialize your firm's encrypted workspace
               </p>
             </div>
 
             <form id="regForm" onSubmit={handleSubmit}>
-              <div style={{ marginBottom: '18px' }}>
-                <label style={{ display: 'block', fontSize: '12px', fontWeight: '500', color: '#A1A1AA', marginBottom: '6px', letterSpacing: '0.02em', textTransform: 'uppercase' }}>
-                  Full name / Senior Counsel
+              <div style={{ marginBottom: '14px' }}>
+                <label style={{ display: 'block', fontSize: '12px', fontWeight: '500', color: '#A1A1AA', marginBottom: '5px' }}>
+                  Full name
                 </label>
                 <input
                   id="reg-name"
-                  className="dark-input-field"
+                  className="auth-input-field"
                   name="name"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
@@ -80,13 +82,13 @@ export const Register = () => {
                 />
               </div>
 
-              <div style={{ marginBottom: '18px' }}>
-                <label style={{ display: 'block', fontSize: '12px', fontWeight: '500', color: '#A1A1AA', marginBottom: '6px', letterSpacing: '0.02em', textTransform: 'uppercase' }}>
-                  Institutional work email
+              <div style={{ marginBottom: '14px' }}>
+                <label style={{ display: 'block', fontSize: '12px', fontWeight: '500', color: '#A1A1AA', marginBottom: '5px' }}>
+                  Work email
                 </label>
                 <input
                   id="reg-email"
-                  className="dark-input-field"
+                  className="auth-input-field"
                   type="email"
                   name="email"
                   value={email}
@@ -97,13 +99,13 @@ export const Register = () => {
                 />
               </div>
 
-              <div style={{ marginBottom: '24px' }}>
-                <label style={{ display: 'block', fontSize: '12px', fontWeight: '500', color: '#A1A1AA', marginBottom: '6px', letterSpacing: '0.02em', textTransform: 'uppercase' }}>
-                  Master passphrase
+              <div style={{ marginBottom: '20px' }}>
+                <label style={{ display: 'block', fontSize: '12px', fontWeight: '500', color: '#A1A1AA', marginBottom: '5px' }}>
+                  Password
                 </label>
                 <input
                   id="reg-pw"
-                  className="dark-input-field"
+                  className="auth-input-field"
                   type="password"
                   name="password"
                   value={password}
@@ -116,72 +118,40 @@ export const Register = () => {
               </div>
 
               <motion.button
-                className="dark-btn-action"
+                className="auth-btn-action"
                 type="submit"
                 disabled={submitting}
                 {...buttonMotion}
               >
-                {submitting ? 'Provisioning Vault…' : 'Create Firm Workspace'}
+                {submitting ? 'Creating Account…' : 'Create Account'}
               </motion.button>
             </form>
 
-            <div style={{ marginTop: '28px', fontSize: '13px', color: '#71717A' }}>
+            <div style={{ textAlign: 'center', marginTop: '20px', fontSize: '12.5px', color: '#71717A' }}>
               Already registered?{' '}
-              <Link to="/login" style={{ color: '#FFFFFF', fontWeight: '600', textDecoration: 'underline', textUnderlineOffset: '4px' }}>
-                Sign in to chamber
+              <Link to="/login" style={{ color: '#FFFFFF', fontWeight: '500' }}>
+                Sign in
               </Link>
             </div>
 
-            {/* Monospace Trust Badges */}
             <div
               style={{
                 display: 'flex',
-                gap: '8px',
-                marginTop: '40px',
-                paddingTop: '20px',
+                justifyContent: 'center',
+                gap: '10px',
+                marginTop: '20px',
+                paddingTop: '16px',
                 borderTop: '1px solid rgba(255, 255, 255, 0.08)'
               }}
             >
-              <span className="mono" style={{ fontSize: '11px', color: '#52525B' }}>
-                [HARDWARE_MFA_READY]
-              </span>
-              <span className="mono" style={{ fontSize: '11px', color: '#52525B' }}>
-                [AES-256-GCM]
-              </span>
-              <span className="mono" style={{ fontSize: '11px', color: '#52525B' }}>
-                [GDPR_COMPLIANT]
-              </span>
+              <span className="mono" style={{ fontSize: '10.5px', color: '#52525B' }}>Hardware MFA</span>
+              <span className="mono" style={{ fontSize: '10.5px', color: '#52525B' }}>·</span>
+              <span className="mono" style={{ fontSize: '10.5px', color: '#52525B' }}>AES-256-GCM</span>
+              <span className="mono" style={{ fontSize: '10.5px', color: '#52525B' }}>·</span>
+              <span className="mono" style={{ fontSize: '10.5px', color: '#52525B' }}>GDPR</span>
             </div>
-          </motion.div>
-        </div>
-
-        {/* Right Side: Dithered Lady Justice Holding Scales of Justice */}
-        <div className="dark-art-display-side">
-          <img
-            src="/assets/lady-justice.jpg"
-            alt="Lady Justice Marble Statue Dither Art"
-            className="dark-art-img"
-          />
-          <div className="dark-art-overlay" />
-          
-          <div
-            style={{
-              position: 'absolute',
-              bottom: '40px',
-              right: '40px',
-              textAlign: 'right',
-              maxWidth: '380px',
-              zIndex: 3
-            }}
-          >
-            <p className="mono" style={{ fontSize: '11px', color: '#71717A', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: '4px' }}>
-              Truth · Balance · Equity
-            </p>
-            <p style={{ fontSize: '13px', color: '#A1A1AA', margin: 0, fontStyle: 'italic' }}>
-              "Fiat justitia ruat caelum — Let justice be done though the heavens fall."
-            </p>
           </div>
-        </div>
+        </motion.div>
       </div>
     </PageTransition>
   );

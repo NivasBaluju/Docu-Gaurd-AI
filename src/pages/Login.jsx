@@ -38,46 +38,48 @@ export const Login = () => {
 
   return (
     <PageTransition>
-      <div className="dark-art-auth-container">
-        {/* Left Side: Minimalist Black Editorial Form */}
-        <div className="dark-art-form-side">
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.32, ease: [0.16, 1, 0.3, 1] }}
-          >
-            {/* Minimalist Brand Symbol */}
-            <div style={{ marginBottom: '32px' }}>
-              <div
-                style={{
-                  width: '40px',
-                  height: '40px',
-                  borderRadius: '50%',
-                  border: '1.5px solid #FFFFFF',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  marginBottom: '24px'
-                }}
-              >
-                <div style={{ width: '12px', height: '12px', borderRadius: '50%', background: '#FFFFFF' }} />
-              </div>
-              <h1 style={{ fontSize: '28px', fontWeight: '700', letterSpacing: '-0.035em', color: '#FFFFFF', margin: '0 0 8px' }}>
-                Chamber Sign In
+      <div className="auth-minimal-wrapper">
+        {/* Landscape Ambient Background Glow */}
+        <div className="auth-landscape-bg" />
+
+        {/* Compact Centered Minimalist Auth Card */}
+        <motion.div
+          className="auth-compact-card"
+          initial={{ opacity: 0, scale: 0.98, y: 8 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
+        >
+          {/* Landscape Dither Header Banner */}
+          <div className="auth-card-landscape-banner">
+            <img
+              src="/assets/courthouse-hero.jpg"
+              alt="Supreme Court Facade Landscape Art"
+              className="auth-card-banner-img"
+            />
+            <div className="auth-card-banner-overlay" />
+          </div>
+
+          <div style={{ padding: '24px 28px 28px' }}>
+            <div style={{ textAlign: 'center', marginBottom: '22px' }}>
+              <span className="mono" style={{ fontSize: '11px', color: '#71717A', letterSpacing: '0.06em' }}>
+                [ZERO-TRUST_CHAMBER]
+              </span>
+              <h1 style={{ fontSize: '22px', fontWeight: '700', letterSpacing: '-0.03em', color: '#FFFFFF', margin: '4px 0 2px' }}>
+                Sign In
               </h1>
-              <p style={{ fontSize: '14px', color: '#71717A', margin: 0, lineHeight: 1.5 }}>
-                Enter your credentials to access encrypted document intelligence.
+              <p style={{ fontSize: '13px', color: '#A1A1AA', margin: 0 }}>
+                Access encrypted legal intelligence workspace
               </p>
             </div>
 
             <form id="loginForm" onSubmit={handleSubmit}>
-              <div style={{ marginBottom: '18px' }}>
-                <label style={{ display: 'block', fontSize: '12px', fontWeight: '500', color: '#A1A1AA', marginBottom: '6px', letterSpacing: '0.02em', textTransform: 'uppercase' }}>
+              <div style={{ marginBottom: '14px' }}>
+                <label style={{ display: 'block', fontSize: '12px', fontWeight: '500', color: '#A1A1AA', marginBottom: '5px' }}>
                   Email address
                 </label>
                 <input
                   id="login-email"
-                  className="dark-input-field"
+                  className="auth-input-field"
                   type="email"
                   name="email"
                   value={email}
@@ -88,13 +90,13 @@ export const Login = () => {
                 />
               </div>
 
-              <div style={{ marginBottom: '24px' }}>
-                <label style={{ display: 'block', fontSize: '12px', fontWeight: '500', color: '#A1A1AA', marginBottom: '6px', letterSpacing: '0.02em', textTransform: 'uppercase' }}>
+              <div style={{ marginBottom: '20px' }}>
+                <label style={{ display: 'block', fontSize: '12px', fontWeight: '500', color: '#A1A1AA', marginBottom: '5px' }}>
                   Password
                 </label>
                 <input
                   id="login-pw"
-                  className="dark-input-field"
+                  className="auth-input-field"
                   type="password"
                   name="password"
                   value={password}
@@ -106,72 +108,40 @@ export const Login = () => {
               </div>
 
               <motion.button
-                className="dark-btn-action"
+                className="auth-btn-action"
                 type="submit"
                 disabled={submitting}
                 {...buttonMotion}
               >
-                {submitting ? 'Authenticating…' : 'Authenticate & Enter'}
+                {submitting ? 'Authenticating…' : 'Sign In'}
               </motion.button>
             </form>
 
-            <div style={{ marginTop: '28px', fontSize: '13px', color: '#71717A' }}>
-              No access key yet?{' '}
-              <Link to="/register" style={{ color: '#FFFFFF', fontWeight: '600', textDecoration: 'underline', textUnderlineOffset: '4px' }}>
-                Register firm
+            <div style={{ textAlign: 'center', marginTop: '20px', fontSize: '12.5px', color: '#71717A' }}>
+              Don't have an account?{' '}
+              <Link to="/register" style={{ color: '#FFFFFF', fontWeight: '500' }}>
+                Create one
               </Link>
             </div>
 
-            {/* Monospace Trust Badges */}
             <div
               style={{
                 display: 'flex',
-                gap: '8px',
-                marginTop: '40px',
-                paddingTop: '20px',
+                justifyContent: 'center',
+                gap: '10px',
+                marginTop: '20px',
+                paddingTop: '16px',
                 borderTop: '1px solid rgba(255, 255, 255, 0.08)'
               }}
             >
-              <span className="mono" style={{ fontSize: '11px', color: '#52525B' }}>
-                [ZERO-TRUST_ACTIVE]
-              </span>
-              <span className="mono" style={{ fontSize: '11px', color: '#52525B' }}>
-                [AES-256-GCM]
-              </span>
-              <span className="mono" style={{ fontSize: '11px', color: '#52525B' }}>
-                [SHA-256_VERIFIED]
-              </span>
+              <span className="mono" style={{ fontSize: '10.5px', color: '#52525B' }}>AES-256-GCM</span>
+              <span className="mono" style={{ fontSize: '10.5px', color: '#52525B' }}>·</span>
+              <span className="mono" style={{ fontSize: '10.5px', color: '#52525B' }}>SHA-256</span>
+              <span className="mono" style={{ fontSize: '10.5px', color: '#52525B' }}>·</span>
+              <span className="mono" style={{ fontSize: '10.5px', color: '#52525B' }}>SOC 2</span>
             </div>
-          </motion.div>
-        </div>
-
-        {/* Right Side: Dithered Pointillist Classical Pillar Art */}
-        <div className="dark-art-display-side">
-          <img
-            src="/assets/justice-pillars.jpg"
-            alt="Classical Roman Columns and Architecture Dither Art"
-            className="dark-art-img"
-          />
-          <div className="dark-art-overlay" />
-          
-          <div
-            style={{
-              position: 'absolute',
-              bottom: '40px',
-              right: '40px',
-              textAlign: 'right',
-              maxWidth: '380px',
-              zIndex: 3
-            }}
-          >
-            <p className="mono" style={{ fontSize: '11px', color: '#71717A', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: '4px' }}>
-              Legal Rigor · Cryptographic Non-Repudiation
-            </p>
-            <p style={{ fontSize: '13px', color: '#A1A1AA', margin: 0, fontStyle: 'italic' }}>
-              "Justice is the constant and perpetual will to allot to every man his due."
-            </p>
           </div>
-        </div>
+        </motion.div>
       </div>
     </PageTransition>
   );

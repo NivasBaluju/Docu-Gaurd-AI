@@ -78,41 +78,43 @@ export const Mfa = () => {
 
   return (
     <PageTransition>
-      <div className="dark-art-auth-container">
-        {/* Left Side: Minimalist Black Editorial Form */}
-        <div className="dark-art-form-side">
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.32, ease: [0.16, 1, 0.3, 1] }}
-          >
-            {/* Minimalist Brand Symbol */}
-            <div style={{ marginBottom: '32px' }}>
-              <div
-                style={{
-                  width: '40px',
-                  height: '40px',
-                  borderRadius: '50%',
-                  border: '1.5px solid #FFFFFF',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  marginBottom: '24px'
-                }}
-              >
-                <div style={{ width: '12px', height: '12px', borderRadius: '50%', background: '#FFFFFF' }} />
-              </div>
-              <h1 style={{ fontSize: '28px', fontWeight: '700', letterSpacing: '-0.035em', color: '#FFFFFF', margin: '0 0 8px' }}>
-                Zero-Trust Verification
+      <div className="auth-minimal-wrapper">
+        {/* Landscape Ambient Background Glow */}
+        <div className="auth-landscape-bg" />
+
+        {/* Compact Centered Minimalist Auth Card */}
+        <motion.div
+          className="auth-compact-card"
+          initial={{ opacity: 0, scale: 0.98, y: 8 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
+        >
+          {/* Landscape Dither Header Banner */}
+          <div className="auth-card-landscape-banner">
+            <img
+              src="/assets/courthouse-hero.jpg"
+              alt="Supreme Court Facade Landscape Art"
+              className="auth-card-banner-img"
+            />
+            <div className="auth-card-banner-overlay" />
+          </div>
+
+          <div style={{ padding: '24px 28px 28px' }}>
+            <div style={{ textAlign: 'center', marginBottom: '22px' }}>
+              <span className="mono" style={{ fontSize: '11px', color: '#71717A', letterSpacing: '0.06em' }}>
+                [ZERO-TRUST_SECURITY]
+              </span>
+              <h1 style={{ fontSize: '22px', fontWeight: '700', letterSpacing: '-0.03em', color: '#FFFFFF', margin: '4px 0 2px' }}>
+                Two-Factor Auth
               </h1>
-              <p style={{ fontSize: '14px', color: '#71717A', margin: 0, lineHeight: 1.5 }}>
-                Enter the 6-digit hardware verification code from your authenticator app.
+              <p style={{ fontSize: '13px', color: '#A1A1AA', margin: 0 }}>
+                Enter the 6-digit code from your authenticator
               </p>
             </div>
 
             <form id="totpForm" onSubmit={handleTotpSubmit}>
-              <div style={{ marginBottom: '20px' }}>
-                <label style={{ display: 'block', fontSize: '12px', fontWeight: '500', color: '#A1A1AA', marginBottom: '6px', letterSpacing: '0.02em', textTransform: 'uppercase' }}>
+              <div style={{ marginBottom: '18px' }}>
+                <label style={{ display: 'block', fontSize: '12px', fontWeight: '500', color: '#A1A1AA', marginBottom: '5px' }}>
                   Authenticator Passcode
                 </label>
                 <input
@@ -123,27 +125,27 @@ export const Mfa = () => {
                   required
                   autoFocus
                   placeholder="000000"
-                  className="dark-input-field"
-                  style={{ textAlign: 'center', letterSpacing: '8px', fontSize: '22px', fontWeight: '700' }}
+                  className="auth-input-field"
+                  style={{ textAlign: 'center', letterSpacing: '6px', fontSize: '18px', fontWeight: '700' }}
                   value={totpCode}
                   onChange={(e) => setTotpCode(e.target.value)}
                 />
               </div>
 
               <motion.button
-                className="dark-btn-action"
+                className="auth-btn-action"
                 type="submit"
                 disabled={submitting}
                 {...buttonMotion}
               >
-                {submitting ? 'Verifying…' : 'Verify & Authorize Session'}
+                {submitting ? 'Verifying…' : 'Verify & Authorize'}
               </motion.button>
             </form>
 
             <motion.button
               className="btn btn-outline btn-block mt-12"
               id="reqOtpBtn"
-              style={{ borderRadius: '10px', padding: '11px', fontSize: '13.5px', marginTop: '12px' }}
+              style={{ borderRadius: '8px', padding: '9px', fontSize: '13px', marginTop: '10px' }}
               onClick={handleRequestOtp}
               type="button"
               {...buttonMotion}
@@ -161,8 +163,8 @@ export const Mfa = () => {
                   transition={{ duration: 0.22, ease: EASE_OUT }}
                 >
                   <form id="otpForm" className="mt-16" onSubmit={handleOtpSubmit}>
-                    <div style={{ marginBottom: '14px' }}>
-                      <label style={{ display: 'block', fontSize: '12px', fontWeight: '500', color: '#A1A1AA', marginBottom: '6px' }}>
+                    <div style={{ marginBottom: '12px' }}>
+                      <label style={{ display: 'block', fontSize: '12px', fontWeight: '500', color: '#A1A1AA', marginBottom: '5px' }}>
                         Email OTP Code{' '}
                         {devModeInfo && <span className="badge badge-warn">DEV: {devModeInfo}</span>}
                       </label>
@@ -172,14 +174,14 @@ export const Mfa = () => {
                         inputMode="numeric"
                         required
                         placeholder="000000"
-                        className="dark-input-field"
-                        style={{ textAlign: 'center', letterSpacing: '8px', fontSize: '20px', fontWeight: '700' }}
+                        className="auth-input-field"
+                        style={{ textAlign: 'center', letterSpacing: '6px', fontSize: '18px', fontWeight: '700' }}
                         value={otpCode}
                         onChange={(e) => setOtpCode(e.target.value)}
                       />
                     </div>
                     <motion.button
-                      className="dark-btn-action"
+                      className="auth-btn-action"
                       type="submit"
                       disabled={submitting}
                       {...buttonMotion}
@@ -190,36 +192,8 @@ export const Mfa = () => {
                 </motion.div>
               )}
             </AnimatePresence>
-          </motion.div>
-        </div>
-
-        {/* Right Side: Classical Pillar Dither Art */}
-        <div className="dark-art-display-side">
-          <img
-            src="/assets/justice-pillars.jpg"
-            alt="Classical Roman Columns Dither Art"
-            className="dark-art-img"
-          />
-          <div className="dark-art-overlay" />
-          
-          <div
-            style={{
-              position: 'absolute',
-              bottom: '40px',
-              right: '40px',
-              textAlign: 'right',
-              maxWidth: '380px',
-              zIndex: 3
-            }}
-          >
-            <p className="mono" style={{ fontSize: '11px', color: '#71717A', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: '4px' }}>
-              Zero-Trust Architecture · Chamber Security
-            </p>
-            <p style={{ fontSize: '13px', color: '#A1A1AA', margin: 0, fontStyle: 'italic' }}>
-              "Integrity is doing the right thing, even when no one is watching."
-            </p>
           </div>
-        </div>
+        </motion.div>
       </div>
     </PageTransition>
   );
