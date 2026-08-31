@@ -16,7 +16,7 @@ async function askGeminiOrFallback(question, documentText) {
   }
 
   // List of models to try in sequence
-  const models = ['gemini-2.0-flash', 'gemini-2.0-flash-lite', 'gemini-2.5-flash'];
+  const models = ['gemini-1.5-flash', 'gemini-1.5-pro', 'gemini-2.0-flash', 'gemini-2.5-flash'];
 
   const prompt = `You are Docu-Gaurd AI, an elite legal intelligence copilot.
 Analyze the following document text and answer the user's question accurately, clearly, and concisely.

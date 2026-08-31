@@ -2,6 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const cookieParser = require('cookie-parser');
 const path = require('path');
+const fs = require('fs');
 
 const db = require('./db'); // eslint-disable-line no-unused-vars -- initializes schema
 const { recordAudit } = require('./utils/audit');
@@ -71,11 +72,15 @@ app.get('/api/health', (req, res) => {
   }
 })();
 
-// Serve frontend SPA
-app.use(express.static(path.join(__dirname, '..', 'public')));
+// Serve frontend SPA (React production build or legacy fallback)
+const distDir = path.join(__dirname, '..', 'dist');
+const publicDir = path.join(__dirname, '..', 'public');
+const staticDir = fs.existsSync(distDir) ? distDir : publicDir;
+
+app.use(express.static(staticDir));
 app.get('*', (req, res) => {
   if (req.path.startsWith('/api/')) return res.status(404).json({ error: 'Not found' });
-  res.sendFile(path.join(__dirname, '..', 'public', 'index.html'));
+  res.sendFile(path.join(staticDir, 'index.html'));
 });
 
 // Central error handler
