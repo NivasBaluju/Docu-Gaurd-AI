@@ -9,15 +9,15 @@ export const Footer = () => {
       id="main-footer"
       role="contentinfo"
       style={{
-        background: '#F5F5F7',
-        borderTop: '1px solid rgba(0, 0, 0, 0.08)',
+        background: '#000000',
+        borderTop: '1px solid rgba(255, 255, 255, 0.08)',
         padding: '56px 24px 36px',
-        color: '#6E6E73',
+        color: '#71717A',
         fontSize: '13px',
         lineHeight: '1.6'
       }}
     >
-      <div style={{ maxWidth: '1120px', margin: '0 auto' }}>
+      <div style={{ maxWidth: '1180px', margin: '0 auto' }}>
         {/* Top 4-Column Directory */}
         <div
           style={{
@@ -35,56 +35,56 @@ export const Footer = () => {
                   width: '28px',
                   height: '28px',
                   borderRadius: '7px',
-                  background: '#1D1D1F',
+                  background: '#FFFFFF',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  color: '#FFFFFF'
+                  color: '#000000'
                 }}
               >
                 <Icon.shield />
               </div>
-              <strong style={{ color: '#1D1D1F', fontSize: '15px', fontWeight: '700' }}>Docu-Gaurd AI</strong>
+              <strong style={{ color: '#FFFFFF', fontSize: '15px', fontWeight: '700' }}>Docu-Gaurd AI</strong>
             </div>
-            <p style={{ color: '#86868B', fontSize: '13px', lineHeight: '1.6' }}>
+            <p style={{ color: '#71717A', fontSize: '13px', lineHeight: '1.6' }}>
               Enterprise legal intelligence &amp; document verification platform. Engineered for law firms and general counsel.
             </p>
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '16px' }}>
-              <span style={{ width: '7px', height: '7px', borderRadius: '50%', background: '#34C759' }} />
-              <span style={{ color: '#1D1D1F', fontWeight: '500', fontSize: '12px' }}>All Systems Operational</span>
+              <span style={{ width: '7px', height: '7px', borderRadius: '50%', background: '#22C55E' }} />
+              <span style={{ color: '#E4E4E7', fontWeight: '500', fontSize: '12px' }}>Chamber Operational</span>
             </div>
           </div>
 
           {/* Column 2: Platform */}
           <div>
-            <div style={{ color: '#1D1D1F', fontWeight: '600', marginBottom: '12px', fontSize: '13px' }}>Platform</div>
+            <div style={{ color: '#FFFFFF', fontWeight: '600', marginBottom: '12px', fontSize: '13px' }}>Platform</div>
             <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              <li><Link to="/upload" style={{ color: '#6E6E73' }}>Document Ingestion</Link></li>
-              <li><Link to="/contracts" style={{ color: '#6E6E73' }}>Contract Authoring Studio</Link></li>
-              <li><Link to="/deadlines" style={{ color: '#6E6E73' }}>Deadline &amp; Expiry Tracker</Link></li>
-              <li><Link to="/security" style={{ color: '#6E6E73' }}>Zero-Trust Security Center</Link></li>
+              <li><Link to="/upload" style={{ color: '#A1A1AA' }}>Document Ingestion</Link></li>
+              <li><Link to="/contracts" style={{ color: '#A1A1AA' }}>Contract Authoring Studio</Link></li>
+              <li><Link to="/deadlines" style={{ color: '#A1A1AA' }}>Deadline &amp; Expiry Tracker</Link></li>
+              <li><Link to="/security" style={{ color: '#A1A1AA' }}>Zero-Trust Security Center</Link></li>
             </ul>
           </div>
 
           {/* Column 3: Cryptography & Security */}
           <div>
-            <div style={{ color: '#1D1D1F', fontWeight: '600', marginBottom: '12px', fontSize: '13px' }}>Security &amp; Standards</div>
+            <div style={{ color: '#FFFFFF', fontWeight: '600', marginBottom: '12px', fontSize: '13px' }}>Security &amp; Standards</div>
             <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              <li style={{ color: '#6E6E73' }}>AES-256-GCM Envelope Encryption</li>
-              <li style={{ color: '#6E6E73' }}>RSA-2048 PKCS#1v15 Signatures</li>
-              <li style={{ color: '#6E6E73' }}>SHA-256 Blockchain Audit Chain</li>
-              <li style={{ color: '#6E6E73' }}>Hardware TOTP Multi-Factor Auth</li>
+              <li style={{ color: '#A1A1AA' }}>AES-256-GCM Envelope Encryption</li>
+              <li style={{ color: '#A1A1AA' }}>RSA-2048 PKCS#1v15 Signatures</li>
+              <li style={{ color: '#A1A1AA' }}>SHA-256 Blockchain Audit Chain</li>
+              <li style={{ color: '#A1A1AA' }}>Hardware TOTP Multi-Factor Auth</li>
             </ul>
           </div>
 
           {/* Column 4: Compliance */}
           <div>
-            <div style={{ color: '#1D1D1F', fontWeight: '600', marginBottom: '12px', fontSize: '13px' }}>Compliance</div>
+            <div style={{ color: '#FFFFFF', fontWeight: '600', marginBottom: '12px', fontSize: '13px' }}>Compliance</div>
             <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              <li style={{ color: '#6E6E73' }}>SOC 2 Type II Certified</li>
-              <li style={{ color: '#6E6E73' }}>GDPR Article 32 Compliant</li>
-              <li style={{ color: '#6E6E73' }}>Indian Information Technology Act</li>
-              <li style={{ color: '#6E6E73' }}>ISO/IEC 27001 Certified</li>
+              <li style={{ color: '#A1A1AA' }}>SOC 2 Type II Certified</li>
+              <li style={{ color: '#A1A1AA' }}>GDPR Article 32 Compliant</li>
+              <li style={{ color: '#A1A1AA' }}>Indian Information Technology Act</li>
+              <li style={{ color: '#A1A1AA' }}>ISO/IEC 27001 Certified</li>
             </ul>
           </div>
         </div>
@@ -92,7 +92,7 @@ export const Footer = () => {
         {/* Bottom Bar */}
         <div
           style={{
-            borderTop: '1px solid rgba(0, 0, 0, 0.06)',
+            borderTop: '1px solid rgba(255, 255, 255, 0.08)',
             paddingTop: '24px',
             display: 'flex',
             alignItems: 'center',
@@ -101,14 +101,14 @@ export const Footer = () => {
             gap: '12px'
           }}
         >
-          <div style={{ color: '#86868B', fontSize: '12px' }}>
+          <div style={{ color: '#71717A', fontSize: '12px' }}>
             Copyright © {new Date().getFullYear()} Docu-Gaurd AI Inc. All rights reserved.
           </div>
           <div style={{ display: 'flex', gap: '18px', fontSize: '12px' }}>
-            <span style={{ color: '#86868B' }}>Privacy Policy</span>
-            <span style={{ color: '#86868B' }}>Terms of Service</span>
-            <span style={{ color: '#86868B' }}>Security Disclosure</span>
-            <span style={{ color: '#86868B' }}>Legal Notice</span>
+            <span style={{ color: '#71717A' }}>Privacy Policy</span>
+            <span style={{ color: '#71717A' }}>Terms of Service</span>
+            <span style={{ color: '#71717A' }}>Security Disclosure</span>
+            <span style={{ color: '#71717A' }}>Legal Notice</span>
           </div>
         </div>
       </div>

@@ -31,135 +31,157 @@ export const Register = () => {
 
   return (
     <PageTransition>
-      <div className="glass-auth-wrapper">
-        {/* Ethereal Frosted Glass Ambient Light Orbs */}
-        <div className="glass-orb glass-orb-1" />
-        <div className="glass-orb glass-orb-2" />
+      <div className="dark-art-auth-container">
+        {/* Left Side: Minimalist Black Editorial Form */}
+        <div className="dark-art-form-side">
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.32, ease: [0.16, 1, 0.3, 1] }}
+          >
+            {/* Minimalist Brand Symbol */}
+            <div style={{ marginBottom: '32px' }}>
+              <div
+                style={{
+                  width: '40px',
+                  height: '40px',
+                  borderRadius: '50%',
+                  border: '1.5px solid #FFFFFF',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  marginBottom: '24px'
+                }}
+              >
+                <div style={{ width: '12px', height: '12px', borderRadius: '50%', background: '#FFFFFF' }} />
+              </div>
+              <h1 style={{ fontSize: '28px', fontWeight: '700', letterSpacing: '-0.035em', color: '#FFFFFF', margin: '0 0 8px' }}>
+                Establish Firm Vault
+              </h1>
+              <p style={{ fontSize: '14px', color: '#71717A', margin: 0, lineHeight: 1.5 }}>
+                Initialize your Zero-Trust encrypted legal intelligence workspace.
+              </p>
+            </div>
 
-        {/* Translucent Frosted Glass Card */}
-        <motion.div
-          className="glass-auth-card"
-          initial={{ opacity: 0, scale: 0.96, y: 10 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          transition={{ duration: 0.32, ease: [0.16, 1, 0.3, 1] }}
-        >
-          <div style={{ textAlign: 'center', marginBottom: '28px' }}>
+            <form id="regForm" onSubmit={handleSubmit}>
+              <div style={{ marginBottom: '18px' }}>
+                <label style={{ display: 'block', fontSize: '12px', fontWeight: '500', color: '#A1A1AA', marginBottom: '6px', letterSpacing: '0.02em', textTransform: 'uppercase' }}>
+                  Full name / Senior Counsel
+                </label>
+                <input
+                  id="reg-name"
+                  className="dark-input-field"
+                  name="name"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="Jane Smith, Esq."
+                  autoComplete="name"
+                  required
+                />
+              </div>
+
+              <div style={{ marginBottom: '18px' }}>
+                <label style={{ display: 'block', fontSize: '12px', fontWeight: '500', color: '#A1A1AA', marginBottom: '6px', letterSpacing: '0.02em', textTransform: 'uppercase' }}>
+                  Institutional work email
+                </label>
+                <input
+                  id="reg-email"
+                  className="dark-input-field"
+                  type="email"
+                  name="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="jane@lawfirm.com"
+                  autoComplete="email"
+                  required
+                />
+              </div>
+
+              <div style={{ marginBottom: '24px' }}>
+                <label style={{ display: 'block', fontSize: '12px', fontWeight: '500', color: '#A1A1AA', marginBottom: '6px', letterSpacing: '0.02em', textTransform: 'uppercase' }}>
+                  Master passphrase
+                </label>
+                <input
+                  id="reg-pw"
+                  className="dark-input-field"
+                  type="password"
+                  name="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Min. 8 characters"
+                  minLength={8}
+                  autoComplete="new-password"
+                  required
+                />
+              </div>
+
+              <motion.button
+                className="dark-btn-action"
+                type="submit"
+                disabled={submitting}
+                {...buttonMotion}
+              >
+                {submitting ? 'Provisioning Vault…' : 'Create Firm Workspace'}
+              </motion.button>
+            </form>
+
+            <div style={{ marginTop: '28px', fontSize: '13px', color: '#71717A' }}>
+              Already registered?{' '}
+              <Link to="/login" style={{ color: '#FFFFFF', fontWeight: '600', textDecoration: 'underline', textUnderlineOffset: '4px' }}>
+                Sign in to chamber
+              </Link>
+            </div>
+
+            {/* Monospace Trust Badges */}
             <div
               style={{
-                width: '44px',
-                height: '44px',
-                borderRadius: '12px',
-                background: '#1D1D1F',
                 display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                margin: '0 auto 14px',
-                color: '#FFFFFF',
-                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)'
+                gap: '8px',
+                marginTop: '40px',
+                paddingTop: '20px',
+                borderTop: '1px solid rgba(255, 255, 255, 0.08)'
               }}
             >
-              <Icon.shield />
+              <span className="mono" style={{ fontSize: '11px', color: '#52525B' }}>
+                [HARDWARE_MFA_READY]
+              </span>
+              <span className="mono" style={{ fontSize: '11px', color: '#52525B' }}>
+                [AES-256-GCM]
+              </span>
+              <span className="mono" style={{ fontSize: '11px', color: '#52525B' }}>
+                [GDPR_COMPLIANT]
+              </span>
             </div>
-            <span
-              style={{
-                fontSize: '12px',
-                fontWeight: '600',
-                letterSpacing: '0.02em',
-                color: '#0071E3',
-                textTransform: 'uppercase'
-              }}
-            >
-              New Firm Workspace
-            </span>
-            <h1 style={{ fontSize: '28px', fontWeight: '700', letterSpacing: '-0.03em', color: '#1D1D1F', margin: '4px 0 6px' }}>
-              Create Account
-            </h1>
-            <p style={{ fontSize: '14px', color: '#6E6E73', margin: 0 }}>
-              Start your free trial. No credit card required.
-            </p>
-          </div>
+          </motion.div>
+        </div>
 
-          <form id="regForm" onSubmit={handleSubmit}>
-            <div className="glass-input-group">
-              <label htmlFor="reg-name">Full name</label>
-              <input
-                id="reg-name"
-                className="glass-input"
-                name="name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="Jane Smith"
-                autoComplete="name"
-                required
-              />
-            </div>
-
-            <div className="glass-input-group">
-              <label htmlFor="reg-email">Work email</label>
-              <input
-                id="reg-email"
-                className="glass-input"
-                type="email"
-                name="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="jane@lawfirm.com"
-                autoComplete="email"
-                required
-              />
-            </div>
-
-            <div className="glass-input-group">
-              <label htmlFor="reg-pw">Password</label>
-              <input
-                id="reg-pw"
-                className="glass-input"
-                type="password"
-                name="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Min. 8 characters"
-                minLength={8}
-                autoComplete="new-password"
-                required
-              />
-            </div>
-
-            <motion.button
-              className="glass-btn-submit"
-              type="submit"
-              disabled={submitting}
-              {...buttonMotion}
-            >
-              {submitting ? 'Creating Account…' : 'Create Account'}
-            </motion.button>
-          </form>
-
-          <p className="glass-auth-switch">
-            Already have an account? <Link to="/login">Sign in</Link>
-          </p>
-
+        {/* Right Side: Dithered Lady Justice Holding Scales of Justice */}
+        <div className="dark-art-display-side">
+          <img
+            src="/assets/lady-justice.jpg"
+            alt="Lady Justice Marble Statue Dither Art"
+            className="dark-art-img"
+          />
+          <div className="dark-art-overlay" />
+          
           <div
             style={{
-              display: 'flex',
-              justifyContent: 'center',
-              gap: '12px',
-              marginTop: '24px',
-              paddingTop: '18px',
-              borderTop: '1px solid rgba(0, 0, 0, 0.06)'
+              position: 'absolute',
+              bottom: '40px',
+              right: '40px',
+              textAlign: 'right',
+              maxWidth: '380px',
+              zIndex: 3
             }}
           >
-            <span className="badge badge-neutral" style={{ fontSize: '11px' }}>
-              <Icon.lock /> Hardware MFA
-            </span>
-            <span className="badge badge-neutral" style={{ fontSize: '11px' }}>
-              <Icon.shield /> AES-256-GCM
-            </span>
-            <span className="badge badge-neutral" style={{ fontSize: '11px' }}>
-              <Icon.check /> GDPR Ready
-            </span>
+            <p className="mono" style={{ fontSize: '11px', color: '#71717A', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: '4px' }}>
+              Truth · Balance · Equity
+            </p>
+            <p style={{ fontSize: '13px', color: '#A1A1AA', margin: 0, fontStyle: 'italic' }}>
+              "Fiat justitia ruat caelum — Let justice be done though the heavens fall."
+            </p>
           </div>
-        </motion.div>
+        </div>
       </div>
     </PageTransition>
   );

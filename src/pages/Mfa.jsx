@@ -78,132 +78,148 @@ export const Mfa = () => {
 
   return (
     <PageTransition>
-      <div className="glass-auth-wrapper">
-        {/* Ethereal Frosted Glass Ambient Light Orbs */}
-        <div className="glass-orb glass-orb-1" />
-        <div className="glass-orb glass-orb-2" />
-
-        {/* Translucent Frosted Glass Card */}
-        <motion.div
-          className="glass-auth-card"
-          initial={{ opacity: 0, scale: 0.96, y: 10 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          transition={{ duration: 0.32, ease: [0.16, 1, 0.3, 1] }}
-        >
-          <div style={{ textAlign: 'center', marginBottom: '24px' }}>
-            <div
-              style={{
-                width: '44px',
-                height: '44px',
-                borderRadius: '12px',
-                background: '#1D1D1F',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                margin: '0 auto 14px',
-                color: '#FFFFFF',
-                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)'
-              }}
-            >
-              <Icon.lock />
+      <div className="dark-art-auth-container">
+        {/* Left Side: Minimalist Black Editorial Form */}
+        <div className="dark-art-form-side">
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.32, ease: [0.16, 1, 0.3, 1] }}
+          >
+            {/* Minimalist Brand Symbol */}
+            <div style={{ marginBottom: '32px' }}>
+              <div
+                style={{
+                  width: '40px',
+                  height: '40px',
+                  borderRadius: '50%',
+                  border: '1.5px solid #FFFFFF',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  marginBottom: '24px'
+                }}
+              >
+                <div style={{ width: '12px', height: '12px', borderRadius: '50%', background: '#FFFFFF' }} />
+              </div>
+              <h1 style={{ fontSize: '28px', fontWeight: '700', letterSpacing: '-0.035em', color: '#FFFFFF', margin: '0 0 8px' }}>
+                Zero-Trust Verification
+              </h1>
+              <p style={{ fontSize: '14px', color: '#71717A', margin: 0, lineHeight: 1.5 }}>
+                Enter the 6-digit hardware verification code from your authenticator app.
+              </p>
             </div>
-            <span
-              style={{
-                fontSize: '12px',
-                fontWeight: '600',
-                letterSpacing: '0.02em',
-                color: '#0071E3',
-                textTransform: 'uppercase'
-              }}
-            >
-              Zero-Trust Verification
-            </span>
-            <h1 style={{ fontSize: '26px', fontWeight: '700', letterSpacing: '-0.03em', color: '#1D1D1F', margin: '4px 0 6px' }}>
-              Two-Factor Auth
-            </h1>
-            <p style={{ fontSize: '13.5px', color: '#6E6E73', margin: 0 }}>
-              Enter the 6-digit code from your authenticator app.
-            </p>
-          </div>
 
-          <form id="totpForm" onSubmit={handleTotpSubmit}>
-            <div className="glass-input-group">
-              <label htmlFor="mfa-code">Authenticator Code</label>
-              <input
-                id="mfa-code"
-                name="code"
-                maxLength={6}
-                inputMode="numeric"
-                required
-                autoFocus
-                placeholder="000000"
-                className="glass-input"
-                style={{ textAlign: 'center', letterSpacing: '8px', fontSize: '20px', fontWeight: '700' }}
-                value={totpCode}
-                onChange={(e) => setTotpCode(e.target.value)}
-              />
-            </div>
+            <form id="totpForm" onSubmit={handleTotpSubmit}>
+              <div style={{ marginBottom: '20px' }}>
+                <label style={{ display: 'block', fontSize: '12px', fontWeight: '500', color: '#A1A1AA', marginBottom: '6px', letterSpacing: '0.02em', textTransform: 'uppercase' }}>
+                  Authenticator Passcode
+                </label>
+                <input
+                  id="mfa-code"
+                  name="code"
+                  maxLength={6}
+                  inputMode="numeric"
+                  required
+                  autoFocus
+                  placeholder="000000"
+                  className="dark-input-field"
+                  style={{ textAlign: 'center', letterSpacing: '8px', fontSize: '22px', fontWeight: '700' }}
+                  value={totpCode}
+                  onChange={(e) => setTotpCode(e.target.value)}
+                />
+              </div>
+
+              <motion.button
+                className="dark-btn-action"
+                type="submit"
+                disabled={submitting}
+                {...buttonMotion}
+              >
+                {submitting ? 'Verifying…' : 'Verify & Authorize Session'}
+              </motion.button>
+            </form>
+
             <motion.button
-              className="glass-btn-submit"
-              type="submit"
-              disabled={submitting}
+              className="btn btn-outline btn-block mt-12"
+              id="reqOtpBtn"
+              style={{ borderRadius: '10px', padding: '11px', fontSize: '13.5px', marginTop: '12px' }}
+              onClick={handleRequestOtp}
+              type="button"
               {...buttonMotion}
             >
-              {submitting ? 'Verifying…' : 'Verify & Sign In'}
+              <Icon.chat /> Send Email OTP instead
             </motion.button>
-          </form>
 
-          <motion.button
-            className="btn btn-outline btn-block mt-12"
-            id="reqOtpBtn"
-            style={{ borderRadius: 'var(--radius-pill)', padding: '10px' }}
-            onClick={handleRequestOtp}
-            type="button"
-            {...buttonMotion}
+            <AnimatePresence>
+              {otpSent && (
+                <motion.div
+                  id="otpArea"
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.22, ease: EASE_OUT }}
+                >
+                  <form id="otpForm" className="mt-16" onSubmit={handleOtpSubmit}>
+                    <div style={{ marginBottom: '14px' }}>
+                      <label style={{ display: 'block', fontSize: '12px', fontWeight: '500', color: '#A1A1AA', marginBottom: '6px' }}>
+                        Email OTP Code{' '}
+                        {devModeInfo && <span className="badge badge-warn">DEV: {devModeInfo}</span>}
+                      </label>
+                      <input
+                        name="code"
+                        maxLength={6}
+                        inputMode="numeric"
+                        required
+                        placeholder="000000"
+                        className="dark-input-field"
+                        style={{ textAlign: 'center', letterSpacing: '8px', fontSize: '20px', fontWeight: '700' }}
+                        value={otpCode}
+                        onChange={(e) => setOtpCode(e.target.value)}
+                      />
+                    </div>
+                    <motion.button
+                      className="dark-btn-action"
+                      type="submit"
+                      disabled={submitting}
+                      {...buttonMotion}
+                    >
+                      {submitting ? 'Verifying OTP…' : 'Verify OTP'}
+                    </motion.button>
+                  </form>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </motion.div>
+        </div>
+
+        {/* Right Side: Classical Pillar Dither Art */}
+        <div className="dark-art-display-side">
+          <img
+            src="/assets/justice-pillars.jpg"
+            alt="Classical Roman Columns Dither Art"
+            className="dark-art-img"
+          />
+          <div className="dark-art-overlay" />
+          
+          <div
+            style={{
+              position: 'absolute',
+              bottom: '40px',
+              right: '40px',
+              textAlign: 'right',
+              maxWidth: '380px',
+              zIndex: 3
+            }}
           >
-            <Icon.chat /> Send Email OTP instead
-          </motion.button>
-
-          <AnimatePresence>
-            {otpSent && (
-              <motion.div
-                id="otpArea"
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.22, ease: EASE_OUT }}
-              >
-                <form id="otpForm" className="mt-16" onSubmit={handleOtpSubmit}>
-                  <div className="glass-input-group">
-                    <label>
-                      Email OTP{' '}
-                      {devModeInfo && <span className="badge badge-warn">DEV: {devModeInfo}</span>}
-                    </label>
-                    <input
-                      name="code"
-                      maxLength={6}
-                      inputMode="numeric"
-                      required
-                      placeholder="000000"
-                      className="glass-input"
-                      style={{ textAlign: 'center', letterSpacing: '8px', fontSize: '20px', fontWeight: '700' }}
-                      value={otpCode}
-                      onChange={(e) => setOtpCode(e.target.value)}
-                    />
-                  </div>
-                  <motion.button
-                    className="glass-btn-submit"
-                    type="submit"
-                    disabled={submitting}
-                    {...buttonMotion}
-                  >
-                    {submitting ? 'Verifying OTP…' : 'Verify OTP'}
-                  </motion.button>
-                </form>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </motion.div>
+            <p className="mono" style={{ fontSize: '11px', color: '#71717A', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: '4px' }}>
+              Zero-Trust Architecture · Chamber Security
+            </p>
+            <p style={{ fontSize: '13px', color: '#A1A1AA', margin: 0, fontStyle: 'italic' }}>
+              "Integrity is doing the right thing, even when no one is watching."
+            </p>
+          </div>
+        </div>
       </div>
     </PageTransition>
   );
