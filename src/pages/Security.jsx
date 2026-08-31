@@ -9,7 +9,7 @@ import AuditBlock from '../components/common/AuditBlock';
 import SkeletonLoader from '../components/common/SkeletonLoader';
 import PageTransition from '../components/common/PageTransition';
 import { fmtDate } from '../utils/formatters';
-import { buttonMotion, EASE_OUT, cardHoverMotion } from '../styles/motion';
+import { buttonMotion, EASE_OUT } from '../styles/motion';
 
 export const Security = () => {
   const [dash, setDash] = useState(null);
@@ -63,7 +63,7 @@ export const Security = () => {
     try {
       const res = await Api.get('/api/security/signing-key');
       setPublicKey(res.publicKey || '');
-      toast('Public key loaded from cryptographic vault', 'ok');
+      toast('Public key loaded', 'ok');
     } catch (err) {
       toast(err.message || 'Failed to load public key', 'error');
     }
@@ -103,19 +103,18 @@ export const Security = () => {
     <PageTransition>
       <div className="flex-between mb-24">
         <div>
-          <span className="eyebrow-bullet">Institutional Trust &amp; SOC-2 Sentinel</span>
-          <h1 className="page-title" style={{ marginTop: '4px' }}>Security Center</h1>
-          <p className="page-sub" style={{ maxWidth: '640px' }}>
-            Real-time zero-trust posture, active session revocation, cryptographic signing keys, and immutable blockchain ledger verification.
+          <h1 className="page-title">Security Center</h1>
+          <p className="page-sub">
+            Encryption monitor, zero-trust status, sessions, MFA, and the immutable audit ledger.
           </p>
         </div>
         <span
           className={`badge ${dash.auditLedger?.valid ? 'badge-ok' : 'badge-danger'}`}
-          style={{ fontSize: '13px', padding: '6px 12px' }}
+          style={{ fontSize: '13px' }}
         >
           {dash.auditLedger?.valid ? (
             <>
-              <Icon.check /> Chain Verified ({dash.auditLedger?.totalBlocks || 0} Blocks)
+              <Icon.check /> Chain Verified
             </>
           ) : (
             <>
@@ -125,11 +124,11 @@ export const Security = () => {
         </span>
       </div>
 
-      {/* Security Status Row */}
+      {/* Status Row */}
       <div className="grid grid-3">
-        <motion.div className="card" {...cardHoverMotion}>
+        <div className="card">
           <div className="card-title">
-            <span className="dot dot-emerald" />
+            <span className="dot" />
             Zero-Trust Score
           </div>
           <div className="metric-row">
@@ -137,19 +136,19 @@ export const Security = () => {
               <Icon.shield />
             </div>
             <div>
-              <div className="metric-value">{ztScore}%</div>
-              <div className="metric-label">Institutional Assurance</div>
+              <div className="metric-value">{ztScore}</div>
+              <div className="metric-label">out of 100</div>
             </div>
           </div>
-          <p className="small text-muted mt-12" style={{ borderTop: '1px solid var(--border-hairline)', paddingTop: '8px' }}>
-            {zt.reasons?.length ? zt.reasons.join(' · ') : 'All continuous behavioral telemetry checks verified.'}
+          <p className="text-lo small mt-12">
+            {zt.reasons?.length ? zt.reasons.join(' · ') : 'All security checks passed'}
           </p>
-        </motion.div>
+        </div>
 
-        <motion.div className="card" {...cardHoverMotion}>
+        <div className="card">
           <div className="card-title">
             <span className="dot dot-gold" />
-            MFA Authentication
+            MFA Status
           </div>
           <div className="metric-row">
             <div className={`metric-icon-wrap ${zt.mfaEnabled ? 'metric-icon-green' : 'metric-icon-amber'}`}>
@@ -159,31 +158,31 @@ export const Security = () => {
               <span className={`badge ${zt.mfaEnabled ? 'badge-ok' : 'badge-warn'}`}>
                 {zt.mfaEnabled ? (
                   <>
-                    <Icon.check /> Hardware / TOTP Active
+                    <Icon.check /> TOTP Enabled
                   </>
                 ) : (
-                  'Email OTP Fallback'
+                  'Not Enabled'
                 )}
               </span>
               {!zt.mfaEnabled && (
                 <div className="mt-8">
                   <motion.button
-                    className="btn btn-gold btn-sm"
+                    className="btn btn-royal btn-sm"
                     onClick={() => navigate('/security/mfa-setup')}
                     {...buttonMotion}
                   >
-                    Setup Authenticator App
+                    Enable MFA
                   </motion.button>
                 </div>
               )}
             </div>
           </div>
-        </motion.div>
+        </div>
 
-        <motion.div className="card" {...cardHoverMotion}>
+        <div className="card">
           <div className="card-title">
             <span className="dot dot-emerald" />
-            Envelope Encryption
+            Encryption Monitor
           </div>
           <div className="metric-row">
             <div className="metric-icon-wrap metric-icon-green">
@@ -193,162 +192,131 @@ export const Security = () => {
               <span className="badge badge-ok">
                 <Icon.check /> AES-256-GCM Active
               </span>
-              <p className="small text-muted mt-8">
-                All documents encrypted symmetrically at rest. SHA-256 integrity.
+              <p className="text-lo small mt-8">
+                All documents encrypted at rest. Integrity via SHA-256.
               </p>
             </div>
           </div>
-        </motion.div>
+        </div>
       </div>
 
-      {/* Active Sessions Manager */}
-      <motion.div className="card mt-24" {...cardHoverMotion}>
-        <div className="flex-between mb-16">
-          <div className="card-title" style={{ margin: 0 }}>
-            <span className="dot dot-emerald" />
-            Active Sessions &amp; Device Sentinel
-          </div>
-          <span className="badge badge-neutral">{sessions.sessions?.length || 0} Sessions</span>
+      {/* Sessions */}
+      <div className="card mt-24">
+        <div className="card-title">
+          <span className="dot" />
+          Active Sessions Manager
         </div>
-
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '12px' }}>
           <AnimatePresence>
             {sessions.sessions?.map((s) => (
               <motion.div
                 key={s.id}
+                className="session-row"
                 layout
                 initial={{ opacity: 0, y: 4 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.95 }}
                 transition={{ duration: 0.2, ease: EASE_OUT }}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  padding: '14px 18px',
-                  background: 'var(--canvas-bg)',
-                  border: '1px solid var(--border-hairline)',
-                  borderRadius: 'var(--radius-sm)'
-                }}
+                style={{ margin: 0 }}
               >
                 <div>
-                  <strong style={{ color: 'var(--ink-primary)', fontSize: '14px' }}>
-                    {s.id === sessions.currentSessionId ? '📍 Current Active Device' : 'Remote Connected Device'}
+                  <strong>
+                    {s.id === sessions.currentSessionId ? '📍 This device' : 'Remote session'}
                   </strong>
                   {s.mfa_verified && (
-                    <span className="badge badge-ok" style={{ marginLeft: '8px', fontSize: '11px' }}>
-                      MFA Verified
+                    <span className="badge badge-ok" style={{ marginLeft: '8px' }}>
+                      MFA
                     </span>
                   )}
-                  <p className="mono text-muted small" style={{ marginTop: '2px' }}>
-                    IP: {s.ip} · Trust Rating: {s.trust_score}% · Last Seen: {fmtDate(s.last_seen)}
+                  <p className="text-lo small">
+                    IP hash {s.ip} · Trust {s.trust_score} · Last seen {fmtDate(s.last_seen)}
                   </p>
                 </div>
                 {s.revoked ? (
                   <span className="badge badge-danger">Revoked</span>
                 ) : s.id === sessions.currentSessionId ? (
-                  <span className="badge badge-ok">Active Now</span>
+                  <span className="badge badge-ok">Current</span>
                 ) : (
                   <motion.button
                     className="btn btn-sm btn-danger"
                     onClick={() => handleRevokeSession(s.id)}
                     {...buttonMotion}
                   >
-                    Revoke Access
+                    Revoke
                   </motion.button>
                 )}
               </motion.div>
             ))}
           </AnimatePresence>
         </div>
-      </motion.div>
+      </div>
 
-      {/* Threats + Public Key */}
+      {/* Threats + Sig */}
       <div className="grid grid-2 mt-24">
-        <motion.div className="card" {...cardHoverMotion}>
+        <div className="card">
           <div className="card-title">
-            <span className="dot dot-amber" />
-            Threat Alerts &amp; Heuristics
+            <span className="dot" />
+            Threat Alerts
           </div>
           {threats?.threats?.length === 0 ? (
             <EmptyState
               icon={<Icon.shield />}
               title="No threats detected"
-              sub="Zero anomalies, brute-force attempts, or suspicious geographic logins detected."
+              sub="Your account has no active security alerts."
             />
           ) : (
             threats?.threats?.map((t) => (
-              <div
-                key={t.id}
-                style={{
-                  padding: '12px 16px',
-                  background: 'var(--canvas-bg)',
-                  border: '1px solid var(--border-hairline)',
-                  borderRadius: 'var(--radius-sm)',
-                  marginBottom: '8px'
-                }}
-              >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+              <div key={t.id} className="session-row">
+                <div>
                   <span className={`badge ${t.severity === 'high' ? 'badge-danger' : 'badge-warn'}`}>
                     {t.severity}
                   </span>
-                  <span style={{ fontWeight: '600', fontSize: '13.5px', color: 'var(--ink-primary)' }}>{t.message}</span>
+                  <span style={{ marginLeft: '8px' }}>{t.message}</span>
+                  <p className="text-lo small mt-8">{fmtDate(t.created_at)}</p>
                 </div>
-                <p className="text-muted small">{fmtDate(t.created_at)}</p>
               </div>
             ))
           )}
-        </motion.div>
+        </div>
 
-        <motion.div className="card" {...cardHoverMotion}>
+        <div className="card">
           <div className="card-title">
             <span className="dot dot-gold" />
-            Cryptographic Signing Vault
+            Digital Signature Verification
           </div>
-          <p className="text-muted small mb-8">Firm Public Signing Key (RSA-2048):</p>
+          <p className="text-mid small mb-8">Public signing key (RSA-2048):</p>
           <textarea
             readOnly
             rows={5}
             className="mono small"
-            style={{
-              resize: 'none',
-              background: 'var(--canvas-bg)',
-              border: '1px solid var(--border-hairline)',
-              fontSize: '11px',
-              padding: '12px'
-            }}
+            style={{ resize: 'none', background: 'var(--off-white)' }}
             value={publicKey}
-            placeholder="Click below to extract public key from cryptographic keystore..."
+            placeholder="Click below to load public key..."
           />
           <motion.button
-            className="btn btn-outline btn-sm mt-12"
+            className="btn btn-outline btn-sm mt-8"
             onClick={handleLoadKey}
             {...buttonMotion}
           >
-            <Icon.eye /> Retrieve Public Signing Key
+            <Icon.eye /> Load Public Key
           </motion.button>
-        </motion.div>
+        </div>
       </div>
 
-      {/* Immutable Audit Ledger */}
-      <motion.div className="card mt-24" {...cardHoverMotion}>
-        <div className="flex-between mb-16">
-          <div>
-            <div className="card-title" style={{ marginBottom: 0 }}>
-              <span className="dot dot-emerald" />
-              Immutable Blockchain Audit Ledger
-            </div>
-            <p className="text-muted small mt-4">
-              Cryptographically chained SHA-256 blocks recording every document lifecycle event.
-            </p>
+      {/* Audit Ledger */}
+      <div className="card mt-24">
+        <div className="flex-between mb-12">
+          <div className="card-title" style={{ marginBottom: 0 }}>
+            <span className="dot dot-emerald" />
+            Immutable Blockchain Audit Ledger
           </div>
           <motion.button
-            className="btn btn-primary btn-sm"
+            className="btn btn-outline btn-sm"
             onClick={handleVerifyChain}
             disabled={verifyingChain}
             {...buttonMotion}
           >
-            <Icon.eye /> {verifyingChain ? 'Verifying Hashes…' : 'Re-verify Entire Ledger'}
+            <Icon.eye /> {verifyingChain ? 'Verifying…' : 'Re-verify Chain'}
           </motion.button>
         </div>
 
@@ -360,20 +328,12 @@ export const Security = () => {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.2 }}
-              style={{ marginBottom: '16px' }}
             >
-              <div
-                style={{
-                  padding: '14px 18px',
-                  borderRadius: 'var(--radius-sm)',
-                  background: chainVerifyResult.valid ? 'var(--emerald-bg)' : 'var(--crimson-bg)',
-                  border: `1px solid ${chainVerifyResult.valid ? 'var(--emerald-border)' : 'var(--crimson-border)'}`
-                }}
-              >
+              <p className="mt-8">
                 <span className={`badge ${chainVerifyResult.valid ? 'badge-ok' : 'badge-danger'}`}>
                   {chainVerifyResult.valid ? (
                     <>
-                      <Icon.check /> Chain Integrity 100% Confirmed
+                      <Icon.check /> Chain integrity confirmed
                     </>
                   ) : (
                     <>
@@ -381,18 +341,21 @@ export const Security = () => {
                     </>
                   )}
                 </span>{' '}
-                — Verified {chainVerifyResult.totalBlocks} cryptographically linked blocks.
-              </div>
+                — {chainVerifyResult.totalBlocks} blocks checked
+                {chainVerifyResult.problems?.length
+                  ? ': ' + JSON.stringify(chainVerifyResult.problems)
+                  : ''}
+              </p>
             </motion.div>
           )}
         </AnimatePresence>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+        <div className="mt-16">
           {audit?.blocks?.map((block) => (
             <AuditBlock key={block.id || block.block_index} block={block} />
           ))}
         </div>
-      </motion.div>
+      </div>
     </PageTransition>
   );
 };

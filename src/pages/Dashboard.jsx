@@ -9,7 +9,7 @@ import AuditBlock from '../components/common/AuditBlock';
 import SkeletonLoader from '../components/common/SkeletonLoader';
 import PageTransition from '../components/common/PageTransition';
 import { useToast } from '../context/ToastContext';
-import { buttonMotion, staggerContainer, cardHoverMotion } from '../styles/motion';
+import { buttonMotion, staggerContainer } from '../styles/motion';
 
 export const Dashboard = () => {
   const { user } = useAuth();
@@ -50,10 +50,7 @@ export const Dashboard = () => {
         <div className="flex-between mb-24">
           <SkeletonLoader.Text lines={2} width="280px" />
         </div>
-        <SkeletonLoader.Card count={1} height="200px" />
-        <div style={{ marginTop: '20px' }}>
-          <SkeletonLoader.Card count={4} height="90px" />
-        </div>
+        <SkeletonLoader.Card count={4} height="100px" />
         <div style={{ marginTop: '24px' }}>
           <SkeletonLoader.Card count={2} height="240px" />
         </div>
@@ -71,150 +68,95 @@ export const Dashboard = () => {
 
   return (
     <PageTransition>
-      {/* Header Bar */}
       <div className="flex-between mb-24">
         <div>
-          <span className="eyebrow-bullet">Intelligence Chamber Overview</span>
-          <h1 className="page-title" style={{ marginTop: '4px' }}>Executive Dashboard</h1>
+          <h1 className="page-title">Dashboard</h1>
           <p className="page-sub">
-            Welcome back, {firstName}. Here is your live legal intelligence &amp; security posture.
+            Welcome back, {firstName}. Here's your security &amp; activity overview.
           </p>
         </div>
-        <div style={{ display: 'flex', gap: '10px' }}>
-          <motion.button
-            className="btn btn-outline"
-            onClick={() => navigate('/documents')}
-            {...buttonMotion}
-          >
-            <Icon.document /> All Documents
-          </motion.button>
-          <motion.button
-            className="btn btn-primary"
-            onClick={() => navigate('/upload')}
-            {...buttonMotion}
-          >
-            <Icon.upload /> Upload Document
-          </motion.button>
-        </div>
+        <motion.button
+          className="btn btn-primary"
+          onClick={() => navigate('/upload')}
+          {...buttonMotion}
+        >
+          <Icon.upload /> Upload Document
+        </motion.button>
       </div>
 
-      {/* DOMINANT INTELLIGENCE SPOTLIGHT */}
-      <motion.div className="intelligence-spotlight mb-24" {...cardHoverMotion}>
-        <div className="split" style={{ alignItems: 'center' }}>
-          <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
-              <span className="badge badge-gold"><Icon.shield /> Institutional Status</span>
-              <span className="badge badge-ok"><Icon.check /> Chain Active</span>
-            </div>
-            <h2 style={{ fontSize: '28px', color: '#FFFFFF', marginBottom: '10px' }}>
-              {data.documentsUploaded} Protected Documents
-            </h2>
-            <p style={{ color: '#94A3B8', fontSize: '14.5px', lineHeight: '1.6', maxWidth: '520px', marginBottom: '20px' }}>
-              All documents currently verified against tamper heuristics. Average firm risk exposure is currently <strong style={{ color: '#FFFFFF' }}>{data.avgRiskScore}/100 ({data.avgRiskScore > 50 ? 'High' : data.avgRiskScore > 25 ? 'Moderate' : 'Low'})</strong>.
-            </p>
-            <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-              <motion.button
-                className="btn btn-gold btn-sm"
-                onClick={() => navigate('/upload')}
-                {...buttonMotion}
-              >
-                <Icon.upload /> Secure Upload
-              </motion.button>
-              <motion.button
-                className="btn btn-outline btn-sm"
-                style={{ background: 'rgba(255,255,255,0.08)', color: '#FFFFFF', borderColor: 'rgba(255,255,255,0.2)' }}
-                onClick={() => navigate('/security')}
-                {...buttonMotion}
-              >
-                <Icon.shield /> Zero-Trust Center
-              </motion.button>
-            </div>
-          </div>
-
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(2, 1fr)',
-              gap: '14px',
-              background: 'rgba(15, 23, 42, 0.5)',
-              border: '1px solid rgba(255, 255, 255, 0.1)',
-              borderRadius: 'var(--radius)',
-              padding: '20px'
-            }}
-          >
-            <div>
-              <div className="text-lo small" style={{ color: '#94A3B8', marginBottom: '4px' }}>Zero-Trust Score</div>
-              <div style={{ fontSize: '28px', fontWeight: '700', fontFamily: 'var(--font-display)', color: '#34D399' }}>
-                {data.trustScore}%
-              </div>
-              <div className="small" style={{ color: '#94A3B8' }}>SOC 2 Evaluated</div>
-            </div>
-            <div>
-              <div className="text-lo small" style={{ color: '#94A3B8', marginBottom: '4px' }}>Compliance Score</div>
-              <div style={{ fontSize: '28px', fontWeight: '700', fontFamily: 'var(--font-display)', color: '#60A5FA' }}>
-                {data.complianceGauge}%
-              </div>
-              <div className="small" style={{ color: '#94A3B8' }}>GDPR / IT Act</div>
-            </div>
-            <div>
-              <div className="text-lo small" style={{ color: '#94A3B8', marginBottom: '4px' }}>Active Sessions</div>
-              <div style={{ fontSize: '28px', fontWeight: '700', fontFamily: 'var(--font-display)', color: '#F1F5F9' }}>
-                {data.activeSessions}
-              </div>
-              <div className="small" style={{ color: '#94A3B8' }}>MFA Protected</div>
-            </div>
-            <div>
-              <div className="text-lo small" style={{ color: '#94A3B8', marginBottom: '4px' }}>Threat Alerts</div>
-              <div style={{ fontSize: '28px', fontWeight: '700', fontFamily: 'var(--font-display)', color: data.threatAlerts > 0 ? '#F87171' : '#34D399' }}>
-                {data.threatAlerts}
-              </div>
-              <div className="small" style={{ color: '#94A3B8' }}>Real-time Sentinel</div>
-            </div>
-          </div>
-        </div>
-      </motion.div>
-
-      {/* SECONDARY METRICS GRID */}
+      {/* Row 1: 4 metric cards */}
       <motion.div className="grid grid-4" variants={staggerContainer}>
         <MetricCard
           icon={<Icon.document />}
           iconCls="metric-icon-blue"
           value={data.documentsUploaded}
-          label="Total Files"
+          label="Documents Uploaded"
         />
         <MetricCard
           icon={<Icon.alert />}
           iconCls={avgRiskTone}
           value={data.avgRiskScore}
-          label="Avg. Risk Index"
+          label="Avg. Risk Score"
           badgeCls={avgRiskBadge}
         />
+        <MetricCard
+          icon={<Icon.shield />}
+          iconCls={trustTone}
+          value={data.trustScore}
+          label="Zero-Trust Score"
+          badgeCls={trustBadge}
+        />
+        <MetricCard
+          icon={<Icon.alert />}
+          iconCls={threatTone}
+          value={data.threatAlerts}
+          label="Threat Alerts"
+          badgeCls={threatBadge}
+        />
+      </motion.div>
+
+      {/* Row 2: 4 more metrics */}
+      <motion.div className="grid grid-4 mt-16" variants={staggerContainer}>
         <MetricCard
           icon={<Icon.chat />}
           iconCls="metric-icon-blue"
           value={data.chatInteractions}
-          label="AI Chat Inquiries"
+          label="AI Chat Sessions"
         />
         <MetricCard
           icon={<Icon.pen />}
           iconCls="metric-icon-gold"
           value={data.contractsGenerated}
-          label="Generated Contracts"
+          label="Contracts Generated"
+        />
+        <MetricCard
+          icon={<Icon.lock />}
+          iconCls="metric-icon-navy"
+          value={data.activeSessions}
+          label="Active Sessions"
+        />
+        <MetricCard
+          icon={<Icon.check />}
+          iconCls="metric-icon-green"
+          value={data.complianceGauge}
+          label="Compliance Score"
+          badgeCls="badge-ok"
         />
       </motion.div>
 
-      {/* WORKSPACE SECTIONS: AUDIT LEDGER & QUICK ACTIONS */}
+      {/* Row 3: Audit Ledger + Quick Actions */}
       <div className="grid grid-2 mt-24">
-        <motion.div className="card" {...cardHoverMotion}>
+        <div className="card">
+          <div className="card-title">
+            <span className="dot dot-emerald" />
+            Immutable Audit Ledger
+          </div>
           <div className="flex-between mb-16">
-            <div className="card-title" style={{ margin: 0 }}>
-              <span className="dot dot-emerald" />
-              Immutable Audit Ledger
-            </div>
+            <span className="text-lo small">{data.auditLedger?.totalBlocks || 0} blocks</span>
             <span className={`badge ${data.auditLedger?.valid ? 'badge-ok' : 'badge-danger'}`}>
               {data.auditLedger?.valid ? (
                 <>
-                  <Icon.check /> Chain Verified ({data.auditLedger?.totalBlocks || 0})
+                  <Icon.check /> Chain Verified
                 </>
               ) : (
                 <>
@@ -224,25 +166,23 @@ export const Dashboard = () => {
             </span>
           </div>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            {audit?.blocks?.slice(0, 4).map((block) => (
-              <AuditBlock key={block.id || block.block_index} block={block} />
-            ))}
-          </div>
+          {audit?.blocks?.slice(0, 4).map((block) => (
+            <AuditBlock key={block.id || block.block_index} block={block} />
+          ))}
 
           <motion.button
             className="btn btn-ghost btn-sm mt-16"
             onClick={() => navigate('/security')}
             {...buttonMotion}
           >
-            <Icon.shield /> Open Security Center →
+            <Icon.shield /> View Full Ledger
           </motion.button>
-        </motion.div>
+        </div>
 
-        <motion.div className="card" {...cardHoverMotion}>
+        <div className="card">
           <div className="card-title">
             <span className="dot dot-gold" />
-            Command &amp; Workflow Launcher
+            Quick Actions
           </div>
           <div className="grid" style={{ gap: '10px' }}>
             <motion.button
@@ -250,31 +190,31 @@ export const Dashboard = () => {
               onClick={() => navigate('/upload')}
               {...buttonMotion}
             >
-              <Icon.upload /> Ingest &amp; Dissect Document
+              <Icon.upload /> Upload &amp; Analyze Document
             </motion.button>
             <motion.button
               className="btn btn-outline"
               onClick={() => navigate('/contracts')}
               {...buttonMotion}
             >
-              <Icon.pen /> Author &amp; Sign Contract
+              <Icon.pen /> Generate a Contract
             </motion.button>
             <motion.button
               className="btn btn-outline"
               onClick={() => navigate('/deadlines')}
               {...buttonMotion}
             >
-              <Icon.calendar /> Review Contract Milestones &amp; Expirations
+              <Icon.calendar /> View Deadlines
             </motion.button>
             <motion.button
               className="btn btn-outline"
               onClick={() => navigate('/security')}
               {...buttonMotion}
             >
-              <Icon.shield /> Institutional Trust &amp; Hardware MFA
+              <Icon.shield /> Security Center
             </motion.button>
           </div>
-        </motion.div>
+        </div>
       </div>
     </PageTransition>
   );
