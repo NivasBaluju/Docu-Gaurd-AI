@@ -1,7 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
 import Api from '../services/api';
 import { useToast } from '../context/ToastContext';
 import Icon from '../components/common/Icon';
+import PageTransition from '../components/common/PageTransition';
+import SkeletonLoader from '../components/common/SkeletonLoader';
+import { buttonMotion, EASE_OUT } from '../styles/motion';
 
 export const Contracts = () => {
   const [types, setTypes] = useState([]);
@@ -58,7 +62,7 @@ export const Contracts = () => {
         params
       });
       setGeneratedContract(res);
-      toast('Contract generated and signed', 'ok');
+      toast('Contract generated and digitally signed with RSA-2048', 'ok');
     } catch (err) {
       toast(err.message || 'Failed to generate contract', 'error');
     } finally {
@@ -83,14 +87,17 @@ export const Contracts = () => {
 
   if (loading) {
     return (
-      <div className="spinner-center">
-        <div className="spinner" />
-      </div>
+      <PageTransition>
+        <SkeletonLoader.Text lines={2} width="320px" />
+        <div style={{ marginTop: '20px' }}>
+          <SkeletonLoader.Card count={1} height="280px" />
+        </div>
+      </PageTransition>
     );
   }
 
   return (
-    <div>
+    <PageTransition>
       <h1 className="page-title">Contract Generator</h1>
       <p className="page-sub">
         Choose a contract type, fill in the details, and generate a digitally signed document.
@@ -103,7 +110,7 @@ export const Contracts = () => {
         </div>
 
         <div className="input-group">
-          <label htmlFor="ctypeSelect">Contract type</label>
+          <label htmlFor="ctypeSelect">Contract Type</label>
           <select
             id="ctypeSelect"
             value={selectedType}
@@ -120,58 +127,80 @@ export const Contracts = () => {
           </select>
         </div>
 
-        {activeTypeObj && activeTypeObj.fields && (
-          <div id="ctypeFields" className="grid grid-2">
-            {activeTypeObj.fields.map((f) => {
-              const label = f.replace(/([A-Z])/g, ' $1').replace(/^./, (c) => c.toUpperCase());
-              return (
-                <div key={f} className="input-group">
-                  <label>{label}</label>
-                  <input
-                    name={f}
-                    value={formValues[f] || ''}
-                    onChange={(e) => handleFieldChange(f, e.target.value)}
-                  />
-                </div>
-              );
-            })}
-          </div>
-        )}
+        <AnimatePresence mode="wait">
+          {activeTypeObj && activeTypeObj.fields && (
+            <motion.div
+              key={selectedType}
+              id="ctypeFields"
+              className="grid grid-2"
+              initial={{ opacity: 0, y: 4 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.18, ease: EASE_OUT }}
+            >
+              {activeTypeObj.fields.map((f) => {
+                const label = f.replace(/([A-Z])/g, ' $1').replace(/^./, (c) => c.toUpperCase());
+                return (
+                  <div key={f} className="input-group">
+                    <label>{label}</label>
+                    <input
+                      name={f}
+                      value={formValues[f] || ''}
+                      onChange={(e) => handleFieldChange(f, e.target.value)}
+                      placeholder={`Enter ${label.toLowerCase()}`}
+                    />
+                  </div>
+                );
+              })}
+            </motion.div>
+          )}
+        </AnimatePresence>
 
-        <button
+        <motion.button
           className="btn btn-primary mt-16"
           id="genBtn"
           onClick={handleGenerate}
           disabled={generating}
+          {...buttonMotion}
         >
-          <Icon.pen /> {generating ? 'Generating…' : 'Generate Contract'}
-        </button>
+          <Icon.pen /> {generating ? 'Generating & Signing…' : 'Generate Contract'}
+        </motion.button>
       </div>
 
-      {generatedContract && (
-        <div id="contractPreviewWrap" className="mt-24">
-          <div className="card">
-            <div className="flex-between mb-16">
-              <div className="card-title">
-                <span className="dot dot-emerald" />
-                Generated Contract — Digitally Signed
+      <AnimatePresence>
+        {generatedContract && (
+          <motion.div
+            id="contractPreviewWrap"
+            className="mt-24"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3, ease: EASE_OUT }}
+          >
+            <div className="card">
+              <div className="flex-between mb-16">
+                <div className="card-title">
+                  <span className="dot dot-emerald" />
+                  Generated Contract — Digitally Signed (RSA-2048)
+                </div>
+                <motion.button
+                  className="btn btn-outline btn-sm"
+                  onClick={() => handleDownload(generatedContract.id)}
+                  {...buttonMotion}
+                >
+                  <Icon.download /> Download .txt
+                </motion.button>
               </div>
-              <button
-                className="btn btn-outline btn-sm"
-                onClick={() => handleDownload(generatedContract.id)}
-              >
-                <Icon.download /> Download .txt
-              </button>
+              <div className="contract-preview" style={{ lineHeight: '1.7', fontSize: '13.5px' }}>
+                {generatedContract.content}
+              </div>
+              <p className="text-lo small mt-16 mono" style={{ wordBreak: 'break-all', background: 'var(--off-white)', padding: '10px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)' }}>
+                RSA-SHA256 signature: {generatedContract.signature}
+              </p>
             </div>
-            <div className="contract-preview">{generatedContract.content}</div>
-            <p className="text-lo small mt-16 mono">
-              RSA-SHA256 signature:{' '}
-              {generatedContract.signature ? generatedContract.signature.slice(0, 52) : ''}…
-            </p>
-          </div>
-        </div>
-      )}
-    </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </PageTransition>
   );
 };
 

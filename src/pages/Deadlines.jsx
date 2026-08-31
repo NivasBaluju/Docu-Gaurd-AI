@@ -4,6 +4,8 @@ import Api from '../services/api';
 import { useToast } from '../context/ToastContext';
 import Icon from '../components/common/Icon';
 import EmptyState from '../components/common/EmptyState';
+import SkeletonLoader from '../components/common/SkeletonLoader';
+import PageTransition from '../components/common/PageTransition';
 
 export const Deadlines = () => {
   const [deadlines, setDeadlines] = useState([]);
@@ -30,9 +32,12 @@ export const Deadlines = () => {
 
   if (loading) {
     return (
-      <div className="spinner-center">
-        <div className="spinner" />
-      </div>
+      <PageTransition>
+        <SkeletonLoader.Text lines={2} width="300px" />
+        <div style={{ marginTop: '20px' }}>
+          <SkeletonLoader.Card count={2} height="200px" />
+        </div>
+      </PageTransition>
     );
   }
 
@@ -51,7 +56,7 @@ export const Deadlines = () => {
   const activeCategories = Object.entries(grouped).filter(([, v]) => v.length > 0);
 
   return (
-    <div>
+    <PageTransition>
       <h1 className="page-title">Deadline Calendar</h1>
       <p className="page-sub">
         Automatically extracted renewal, expiry, payment, and notice dates across all your documents.
@@ -70,28 +75,31 @@ export const Deadlines = () => {
           {activeCategories.map(([cat, items]) => (
             <div key={cat} className="card">
               <div className="card-title">
-                <span className="dot" />
+                <span className="dot dot-gold" />
                 {cat.replace('_', ' ').toUpperCase()}
               </div>
-              {items.map((d, idx) => (
-                <div key={idx} className="deadline-item">
-                  <div className="deadline-date">{d.date}</div>
-                  <div>
-                    <Link
-                      to={`/document/${d.documentId}/deadlines`}
-                      className="small bold text-royal"
-                    >
-                      {d.documentName}
-                    </Link>
-                    <p className="text-mid small mt-8">{d.context}</p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '14px' }}>
+                {items.map((d, idx) => (
+                  <div key={idx} className="deadline-item" style={{ margin: 0 }}>
+                    <div className="deadline-date">{d.date}</div>
+                    <div>
+                      <Link
+                        to={`/document/${d.documentId}/deadlines`}
+                        className="small bold text-royal"
+                        style={{ display: 'inline-block', marginBottom: '4px' }}
+                      >
+                        {d.documentName}
+                      </Link>
+                      <p className="text-mid small">{d.context}</p>
+                    </div>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
           ))}
         </div>
       )}
-    </div>
+    </PageTransition>
   );
 };
 

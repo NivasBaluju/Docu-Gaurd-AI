@@ -1,68 +1,81 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { motion } from 'motion/react';
 import { useAuth } from '../context/AuthContext';
-
-const FloatCard = ({ emoji, title, sub }) => (
-  <div className="lf-card">
-    <div className="lf-emoji">{emoji}</div>
-    <div className="lf-title">{title}</div>
-    <div className="lf-sub">{sub}</div>
-  </div>
-);
+import IntelligenceShowcase from '../components/landing/IntelligenceShowcase';
+import { buttonMotion, EASE_OUT } from '../styles/motion';
 
 export const Landing = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
 
   return (
-    <div className="landing-root">
-      {/* Scattered floating legal-insight cards */}
-      <div className="landing-float landing-float--tl fade-up">
-        <FloatCard emoji="⚖️" title="Contract Review" sub="AI clause extraction" />
-      </div>
-      <div className="landing-float landing-float--tr fade-up fade-up-1">
-        <FloatCard emoji="🔒" title="AES-256 Encrypted" sub="Zero-trust security" />
-      </div>
-      <div className="landing-float landing-float--ml fade-up fade-up-2">
-        <FloatCard emoji="📄" title="9 AI Capabilities" sub="All in one platform" />
-      </div>
-      <div className="landing-float landing-float--mr fade-up fade-up-1">
-        <FloatCard emoji="🛡️" title="Compliance" sub="GDPR · IT Act · ICA" />
-      </div>
-      <div className="landing-float landing-float--bl fade-up fade-up-3">
-        <FloatCard emoji="✍️" title="e-Contracts" sub="RSA-2048 digital sig" />
-      </div>
-      <div className="landing-float landing-float--br fade-up fade-up-2">
-        <FloatCard emoji="📊" title="Risk Score" sub="0–100 instant analysis" />
-      </div>
+    <div className="landing-root" style={{ minHeight: 'calc(100vh - var(--topbar-h))', padding: '64px 20px 80px' }}>
+      <div className="landing-center" style={{ maxWidth: '860px', margin: '0 auto', textAlign: 'center' }}>
+        {/* Eyebrow Label */}
+        <motion.p
+          className="landing-eyebrow"
+          initial={{ opacity: 0, y: 6 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.28, ease: EASE_OUT }}
+        >
+          Enterprise Legal Intelligence
+        </motion.p>
 
-      {/* Dead-centre content */}
-      <div className="landing-center">
-        <p className="landing-eyebrow fade-up">Enterprise Legal Intelligence</p>
-        <h1 className="landing-headline fade-up fade-up-1">
+        {/* Headline */}
+        <motion.h1
+          className="landing-headline"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.35, delay: 0.06, ease: EASE_OUT }}
+        >
           Secure Legal AI<br />for Modern Law
-        </h1>
-        <p className="landing-tagline fade-up fade-up-2">
+        </motion.h1>
+
+        {/* Tagline */}
+        <motion.p
+          className="landing-tagline"
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.32, delay: 0.12, ease: EASE_OUT }}
+        >
           Analyze, compare &amp; generate legal documents — in seconds.
-        </p>
-        <div className="landing-actions fade-up fade-up-3">
-          <button
+        </motion.p>
+
+        {/* CTAs */}
+        <motion.div
+          className="landing-actions"
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, delay: 0.18, ease: EASE_OUT }}
+        >
+          <motion.button
             className="btn-hero"
             onClick={() => navigate(user ? '/dashboard' : '/register')}
+            {...buttonMotion}
           >
             {user ? 'Open Dashboard' : 'Get Started'}
-          </button>
-          <button
+          </motion.button>
+          <motion.button
             className="btn-hero-ghost"
             onClick={() => navigate('/login')}
+            {...buttonMotion}
           >
             Sign in →
-          </button>
-        </div>
+          </motion.button>
+        </motion.div>
+
+        {/* Signature Intelligence Showcase Visual */}
+        <IntelligenceShowcase />
       </div>
 
-      {/* Bottom security strip */}
-      <div className="landing-bottom fade-up fade-up-4">
+      {/* Bottom Security Strip */}
+      <motion.div
+        className="landing-bottom"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.4, delay: 0.35 }}
+      >
         <span>AES-256-GCM</span>
         <span className="lbar-dot" />
         <span>Zero-Trust Sessions</span>
@@ -72,7 +85,7 @@ export const Landing = () => {
         <span>RSA-2048 Signatures</span>
         <span className="lbar-dot" />
         <span>GDPR · IT Act · ICA</span>
-      </div>
+      </motion.div>
     </div>
   );
 };

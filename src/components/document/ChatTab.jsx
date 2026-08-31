@@ -1,7 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
 import Api from '../../services/api';
 import { useToast } from '../../context/ToastContext';
 import Icon from '../common/Icon';
+import SkeletonLoader from '../common/SkeletonLoader';
+import { buttonMotion, EASE_OUT } from '../../styles/motion';
 
 export const ChatTab = ({ doc }) => {
   const [messages, setMessages] = useState([]);
@@ -76,38 +79,35 @@ export const ChatTab = ({ doc }) => {
   };
 
   if (loading) {
-    return (
-      <div className="spinner-center">
-        <div className="spinner" />
-      </div>
-    );
+    return <SkeletonLoader.Card count={1} height="320px" />;
   }
 
   return (
     <div className="card">
       <div className="card-title">
         <span className="dot" />
-        AI Document Chatbot
+        AI Document Intelligence Assistant
       </div>
 
       <div className="chat-suggestions">
         {suggestions.map((s, idx) => (
-          <button
+          <motion.button
             key={idx}
             className="chat-suggestion-btn"
             onClick={() => setInput(s)}
+            {...buttonMotion}
           >
             {s}
-          </button>
+          </motion.button>
         ))}
       </div>
 
       <div className="divider" />
 
-      <div className="chat-window" id="chatWindow" ref={chatWindowRef}>
+      <div className="chat-window" id="chatWindow" ref={chatWindowRef} style={{ minHeight: '260px' }}>
         {messages.length === 0 ? (
-          <p className="text-lo" style={{ textAlign: 'center', padding: '24px 0' }}>
-            Ask a question about this document — try the suggestions above.
+          <p className="text-lo" style={{ textAlign: 'center', padding: '32px 0' }}>
+            Ask a legal question about this document or select a suggestion above.
           </p>
         ) : (
           messages.map((m, idx) => {
@@ -129,47 +129,63 @@ export const ChatTab = ({ doc }) => {
             }
 
             return (
-              <div key={m.id || idx} className="chat-msg assistant">
+              <motion.div
+                key={m.id || idx}
+                className="chat-msg assistant"
+                initial={{ opacity: 0, y: 6 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.22, ease: EASE_OUT }}
+              >
                 {m.content}
-                <div className="mt-8">
+                <div className="mt-8" style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', alignItems: 'center' }}>
                   {m.confidence != null && (
-                    <span className="badge badge-ok">
-                      {m.provider === 'gemini' ? '✨ Gemini AI' : 'AI Engine'} · Confidence{' '}
+                    <span className="badge badge-ok" style={{ fontSize: '11px' }}>
+                      {m.provider === 'gemini' ? '✨ Gemini AI' : 'Legal AI'} · Confidence{' '}
                       {Math.round(m.confidence * 100)}%
                     </span>
                   )}
                   {parsedSources.map((s, sIdx) => (
-                    <span key={sIdx} className="source-tag">
+                    <span key={sIdx} className="source-tag" style={{ fontSize: '11px' }}>
                       {s.text || `pg. ${s.pageRef}`}
                     </span>
                   ))}
                 </div>
-              </div>
+              </motion.div>
             );
           })
         )}
 
         {sending && (
-          <div
+          <motion.div
             className="chat-msg assistant"
-            style={{ color: 'var(--text-lo)', fontStyle: 'italic' }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            style={{ color: 'var(--royal)', display: 'flex', alignItems: 'center', gap: '8px' }}
           >
-            Thinking…
-          </div>
+            <span className="dot dot-gold" style={{ animation: 'pulse 1s infinite alternate' }} />
+            <span style={{ fontSize: '13px' }}>Analyzing document context…</span>
+          </motion.div>
         )}
       </div>
 
-      <div className="chat-input-row">
+      <div className="chat-input-row" style={{ marginTop: '16px' }}>
         <input
           id="chatInput"
           placeholder="Ask about parties, payment, termination, jurisdiction…"
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={handleKeyDown}
+          style={{ flex: 1 }}
         />
-        <button className="btn btn-primary" id="chatSendBtn" onClick={() => handleSend()}>
+        <motion.button
+          className="btn btn-primary"
+          id="chatSendBtn"
+          onClick={() => handleSend()}
+          disabled={sending || !input.trim()}
+          {...buttonMotion}
+        >
           <Icon.chat /> Send
-        </button>
+        </motion.button>
       </div>
     </div>
   );

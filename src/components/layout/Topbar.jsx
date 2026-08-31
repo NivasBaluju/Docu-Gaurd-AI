@@ -1,18 +1,37 @@
-import React from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { motion } from 'motion/react';
 import { useAuth } from '../../context/AuthContext';
 import Icon from '../common/Icon';
+import { buttonMotion } from '../../styles/motion';
 
 export const Topbar = () => {
   const { user, trust, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const currentPath = location.pathname;
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 12);
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   const trustTone = (trust ?? 100) >= 70 ? 'ok' : (trust ?? 100) >= 40 ? 'warn' : 'danger';
 
   return (
-    <header className="topbar" id="topbar" role="banner">
+    <header
+      className={`topbar ${scrolled ? 'topbar-scrolled' : ''}`}
+      id="topbar"
+      role="banner"
+      style={{
+        boxShadow: scrolled ? '0 4px 20px rgba(15, 23, 42, 0.05)' : 'none',
+        transition: 'box-shadow 0.25s ease, background 0.25s ease'
+      }}
+    >
       <div
         className="brand"
         onClick={() => navigate('/')}
@@ -65,18 +84,30 @@ export const Topbar = () => {
             <span className="text-mid small bold" style={{ fontSize: '13px' }}>
               {user.name}
             </span>
-            <button className="btn btn-ghost btn-sm" onClick={logout}>
+            <motion.button
+              className="btn btn-ghost btn-sm"
+              onClick={logout}
+              {...buttonMotion}
+            >
               <Icon.logout /> Sign out
-            </button>
+            </motion.button>
           </>
         ) : (
           <>
-            <button className="btn btn-ghost btn-sm" onClick={() => navigate('/login')}>
+            <motion.button
+              className="btn btn-ghost btn-sm"
+              onClick={() => navigate('/login')}
+              {...buttonMotion}
+            >
               Log in
-            </button>
-            <button className="btn btn-primary btn-sm" onClick={() => navigate('/register')}>
+            </motion.button>
+            <motion.button
+              className="btn btn-primary btn-sm"
+              onClick={() => navigate('/register')}
+              {...buttonMotion}
+            >
               Get Started
-            </button>
+            </motion.button>
           </>
         )}
       </div>

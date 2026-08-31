@@ -1,10 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'motion/react';
 import Api from '../services/api';
 import { useToast } from '../context/ToastContext';
 import Icon from '../components/common/Icon';
 import EmptyState from '../components/common/EmptyState';
+import SkeletonLoader from '../components/common/SkeletonLoader';
+import PageTransition from '../components/common/PageTransition';
 import { fmtBytes, fmtDate } from '../utils/formatters';
+import { buttonMotion, EASE_OUT } from '../styles/motion';
 
 export const Documents = () => {
   const [documents, setDocuments] = useState([]);
@@ -65,22 +69,29 @@ export const Documents = () => {
 
   if (loading) {
     return (
-      <div className="spinner-center">
-        <div className="spinner" />
-      </div>
+      <PageTransition>
+        <div className="flex-between mb-24">
+          <SkeletonLoader.Text lines={2} width="240px" />
+        </div>
+        <SkeletonLoader.Card count={3} height="72px" />
+      </PageTransition>
     );
   }
 
   return (
-    <div>
+    <PageTransition>
       <div className="flex-between mb-24">
         <div>
           <h1 className="page-title">Documents</h1>
           <p className="page-sub">All files are encrypted at rest with AES-256-GCM.</p>
         </div>
-        <button className="btn btn-primary" onClick={() => navigate('/upload')}>
-          <Icon.upload /> Upload
-        </button>
+        <motion.button
+          className="btn btn-primary"
+          onClick={() => navigate('/upload')}
+          {...buttonMotion}
+        >
+          <Icon.upload /> Upload Document
+        </motion.button>
       </div>
 
       <div className="card" style={{ padding: '8px' }}>
@@ -104,6 +115,7 @@ export const Documents = () => {
                 key={d.id}
                 className="doc-row"
                 onClick={() => navigate(`/document/${d.id}`)}
+                style={{ cursor: 'pointer' }}
               >
                 <div className="doc-row-inner">
                   <div className="doc-row-icon">
@@ -117,7 +129,7 @@ export const Documents = () => {
                     </div>
                   </div>
                 </div>
-                <div className="flex gap-8" style={{ flexShrink: 0, marginLeft: '12px' }}>
+                <div className="flex gap-8" style={{ flexShrink: 0, marginLeft: '12px', alignItems: 'center' }}>
                   {d.risk_score != null && (
                     <span className={`badge ${tone}`}>Risk {d.risk_score}</span>
                   )}
@@ -138,7 +150,7 @@ export const Documents = () => {
       {documents.length >= 2 && (
         <div className="card mt-24">
           <div className="card-title">
-            <span className="dot" />
+            <span className="dot dot-gold" />
             Compare Document Versions
           </div>
           <div className="grid grid-2">
@@ -164,47 +176,50 @@ export const Documents = () => {
             </div>
           </div>
 
-          <button
+          <motion.button
             className="btn btn-royal mt-16"
             onClick={handleCompare}
             disabled={comparing}
+            {...buttonMotion}
           >
-            <Icon.compare /> {comparing ? 'Comparing…' : 'Compare Documents'}
-          </button>
+            <Icon.compare /> {comparing ? 'Comparing versions…' : 'Compare Documents'}
+          </motion.button>
 
-          {comparing && (
-            <div className="spinner-center">
-              <div className="spinner" />
-            </div>
-          )}
-
-          {compareResult && (
-            <div id="compareResult" className="mt-16">
-              <p className="text-mid small mb-16">
-                Comparing <strong>{compareResult.docA}</strong> → <strong>{compareResult.docB}</strong>
-                {' '}· {compareResult.totalChanges} changes detected
-              </p>
-              {compareResult.changes?.length === 0 ? (
-                <p className="text-lo">No differences detected.</p>
-              ) : (
-                compareResult.changes?.map((c, i) => (
-                  <div key={i} className={`diff-item ${c.type}`}>
-                    <span className={`badge ${c.type === 'added' ? 'badge-ok' : 'badge-danger'}`}>
-                      {c.type?.toUpperCase()}
-                    </span>
-                    <span className="badge badge-neutral" style={{ marginLeft: '4px' }}>
-                      {c.section}
-                    </span>
-                    <p style={{ margin: '8px 0 0' }}>{c.text}</p>
-                    <span className="diff-impact">{c.impact}</span>
-                  </div>
-                ))
-              )}
-            </div>
-          )}
+          <AnimatePresence>
+            {compareResult && (
+              <motion.div
+                id="compareResult"
+                className="mt-16"
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.25, ease: EASE_OUT }}
+              >
+                <p className="text-mid small mb-16">
+                  Comparing <strong>{compareResult.docA}</strong> → <strong>{compareResult.docB}</strong>
+                  {' '}· {compareResult.totalChanges} changes detected
+                </p>
+                {compareResult.changes?.length === 0 ? (
+                  <p className="text-lo">No differences detected between selected versions.</p>
+                ) : (
+                  compareResult.changes?.map((c, i) => (
+                    <div key={i} className={`diff-item ${c.type}`}>
+                      <span className={`badge ${c.type === 'added' ? 'badge-ok' : 'badge-danger'}`}>
+                        {c.type?.toUpperCase()}
+                      </span>
+                      <span className="badge badge-neutral" style={{ marginLeft: '4px' }}>
+                        {c.section}
+                      </span>
+                      <p style={{ margin: '8px 0 0', lineHeight: '1.6' }}>{c.text}</p>
+                      <span className="diff-impact">{c.impact}</span>
+                    </div>
+                  ))
+                )}
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       )}
-    </div>
+    </PageTransition>
   );
 };
 

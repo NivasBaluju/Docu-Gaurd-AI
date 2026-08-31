@@ -1,4 +1,6 @@
 import React, { createContext, useContext, useState, useCallback } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
+import { toastVariants } from '../styles/motion';
 
 const ToastContext = createContext({
   showToast: () => {},
@@ -24,11 +26,21 @@ export const ToastProvider = ({ children }) => {
     <ToastContext.Provider value={{ showToast, toast: showToast }}>
       {children}
       <div id="toast-root" className="toast-root" aria-live="polite" aria-atomic="true">
-        {toasts.map((t) => (
-          <div key={t.id} className={`toast badge-${t.type}`}>
-            {t.message}
-          </div>
-        ))}
+        <AnimatePresence mode="popLayout">
+          {toasts.map((t) => (
+            <motion.div
+              key={t.id}
+              className={`toast badge-${t.type}`}
+              layout
+              variants={toastVariants}
+              initial="initial"
+              animate="animate"
+              exit="exit"
+            >
+              {t.message}
+            </motion.div>
+          ))}
+        </AnimatePresence>
       </div>
     </ToastContext.Provider>
   );

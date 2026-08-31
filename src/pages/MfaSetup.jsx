@@ -1,8 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { motion } from 'motion/react';
 import Api from '../services/api';
 import { useToast } from '../context/ToastContext';
 import Icon from '../components/common/Icon';
+import SkeletonLoader from '../components/common/SkeletonLoader';
+import PageTransition from '../components/common/PageTransition';
+import { buttonMotion } from '../styles/motion';
 
 export const MfaSetup = () => {
   const [setupData, setSetupData] = useState(null);
@@ -46,16 +50,19 @@ export const MfaSetup = () => {
 
   if (loading) {
     return (
-      <div className="spinner-center">
-        <div className="spinner" />
-      </div>
+      <PageTransition>
+        <SkeletonLoader.Text lines={2} width="320px" />
+        <div style={{ marginTop: '20px' }}>
+          <SkeletonLoader.Card count={1} height="280px" />
+        </div>
+      </PageTransition>
     );
   }
 
   if (!setupData) return null;
 
   return (
-    <div>
+    <PageTransition>
       <h1 className="page-title">Enable Two-Factor Authentication</h1>
       <p className="page-sub">
         Scan the QR code with your authenticator app, then enter the 6-digit code to confirm.
@@ -96,17 +103,18 @@ export const MfaSetup = () => {
               onChange={(e) => setCode(e.target.value)}
             />
           </div>
-          <button
+          <motion.button
             className="btn btn-primary btn-block mt-8"
             type="submit"
             disabled={submitting}
             style={{ padding: '12px', borderRadius: 'var(--radius)' }}
+            {...buttonMotion}
           >
             <Icon.check /> {submitting ? 'Enabling…' : 'Enable MFA'}
-          </button>
+          </motion.button>
         </form>
       </div>
-    </div>
+    </PageTransition>
   );
 };
 

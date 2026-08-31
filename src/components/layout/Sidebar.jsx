@@ -1,7 +1,9 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { motion } from 'motion/react';
 import { useAuth } from '../../context/AuthContext';
 import Icon from '../common/Icon';
+import { DURATIONS, EASE_OUT } from '../../styles/motion';
 
 export const Sidebar = () => {
   const navigate = useNavigate();
@@ -28,37 +30,45 @@ export const Sidebar = () => {
     return pathname === itemPath || pathname.startsWith(itemPath + '/');
   };
 
+  const renderNavButton = (item) => {
+    const active = isItemActive(item.path);
+    return (
+      <button
+        key={item.path}
+        className={`sidebar-item ${active ? 'active' : ''}`}
+        onClick={() => navigate(item.path)}
+        style={{ position: 'relative' }}
+      >
+        {active && (
+          <motion.div
+            layoutId="activeSidebarIndicator"
+            style={{
+              position: 'absolute',
+              left: 0,
+              top: '15%',
+              bottom: '15%',
+              width: '3px',
+              backgroundColor: 'var(--royal)',
+              borderRadius: '0 4px 4px 0'
+            }}
+            transition={{ duration: DURATIONS.fast, ease: EASE_OUT }}
+          />
+        )}
+        {item.icon}
+        <span style={{ position: 'relative', zIndex: 1 }}>{item.label}</span>
+      </button>
+    );
+  };
+
   return (
     <aside className="sidebar">
       <div className="sidebar-label">Menu</div>
-      {navItems.map((item) => {
-        const active = isItemActive(item.path);
-        return (
-          <button
-            key={item.path}
-            className={`sidebar-item ${active ? 'active' : ''}`}
-            onClick={() => navigate(item.path)}
-          >
-            {item.icon} {item.label}
-          </button>
-        );
-      })}
+      {navItems.map(renderNavButton)}
 
       <div className="sidebar-divider" />
 
       <div className="sidebar-label">Security</div>
-      {secItems.map((item) => {
-        const active = isItemActive(item.path);
-        return (
-          <button
-            key={item.path}
-            className={`sidebar-item ${active ? 'active' : ''}`}
-            onClick={() => navigate(item.path)}
-          >
-            {item.icon} {item.label}
-          </button>
-        );
-      })}
+      {secItems.map(renderNavButton)}
 
       <div className="sidebar-bottom">
         <button className="sidebar-item" onClick={logout}>

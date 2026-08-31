@@ -1030,3 +1030,35 @@ code, .mono-code { font-family: 'Courier New', monospace; font-size: 12.5px; }
   background: var(--royal);
 }
 
+/* ── Skeleton Shimmer Loaders ── */
+.skeleton {
+  background: linear-gradient(90deg, #F0EFED 25%, #FAF9F6 50%, #F0EFED 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.6s infinite ease-in-out;
+  border-radius: var(--radius-sm);
+}
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+.skeleton-text { height: 14px; margin-bottom: 8px; }
+.skeleton-title { height: 22px; width: 60%; margin-bottom: 12px; }
+.skeleton-card { height: 120px; width: 100%; border-radius: var(--radius); }
+
+/* ── Refined Focus Rings ── */
+:focus-visible {
+  outline: 2px solid var(--royal);
+  outline-offset: 2px;
+}
+
+/* ── Accessibility: Prefers Reduced Motion ── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+

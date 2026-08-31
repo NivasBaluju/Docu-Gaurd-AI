@@ -1,11 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { motion } from 'motion/react';
 import Api from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import Icon from '../components/common/Icon';
 import MetricCard from '../components/common/MetricCard';
 import AuditBlock from '../components/common/AuditBlock';
+import SkeletonLoader from '../components/common/SkeletonLoader';
+import PageTransition from '../components/common/PageTransition';
 import { useToast } from '../context/ToastContext';
+import { buttonMotion, staggerContainer } from '../styles/motion';
 
 export const Dashboard = () => {
   const { user } = useAuth();
@@ -42,9 +46,15 @@ export const Dashboard = () => {
 
   if (loading || !data) {
     return (
-      <div className="spinner-center">
-        <div className="spinner" />
-      </div>
+      <PageTransition>
+        <div className="flex-between mb-24">
+          <SkeletonLoader.Text lines={2} width="280px" />
+        </div>
+        <SkeletonLoader.Card count={4} height="100px" />
+        <div style={{ marginTop: '24px' }}>
+          <SkeletonLoader.Card count={2} height="240px" />
+        </div>
+      </PageTransition>
     );
   }
 
@@ -57,7 +67,7 @@ export const Dashboard = () => {
   const threatBadge = data.threatAlerts > 0 ? 'badge-warn' : 'badge-ok';
 
   return (
-    <div>
+    <PageTransition>
       <div className="flex-between mb-24">
         <div>
           <h1 className="page-title">Dashboard</h1>
@@ -65,13 +75,17 @@ export const Dashboard = () => {
             Welcome back, {firstName}. Here's your security &amp; activity overview.
           </p>
         </div>
-        <button className="btn btn-primary" onClick={() => navigate('/upload')}>
+        <motion.button
+          className="btn btn-primary"
+          onClick={() => navigate('/upload')}
+          {...buttonMotion}
+        >
           <Icon.upload /> Upload Document
-        </button>
+        </motion.button>
       </div>
 
       {/* Row 1: 4 metric cards */}
-      <div className="grid grid-4">
+      <motion.div className="grid grid-4" variants={staggerContainer}>
         <MetricCard
           icon={<Icon.document />}
           iconCls="metric-icon-blue"
@@ -81,7 +95,7 @@ export const Dashboard = () => {
         <MetricCard
           icon={<Icon.alert />}
           iconCls={avgRiskTone}
-          value={`${data.avgRiskScore}%`}
+          value={data.avgRiskScore}
           label="Avg. Risk Score"
           badgeCls={avgRiskBadge}
         />
@@ -99,10 +113,10 @@ export const Dashboard = () => {
           label="Threat Alerts"
           badgeCls={threatBadge}
         />
-      </div>
+      </motion.div>
 
       {/* Row 2: 4 more metrics */}
-      <div className="grid grid-4 mt-16">
+      <motion.div className="grid grid-4 mt-16" variants={staggerContainer}>
         <MetricCard
           icon={<Icon.chat />}
           iconCls="metric-icon-blue"
@@ -124,11 +138,11 @@ export const Dashboard = () => {
         <MetricCard
           icon={<Icon.check />}
           iconCls="metric-icon-green"
-          value={`${data.complianceGauge}%`}
+          value={data.complianceGauge}
           label="Compliance Score"
           badgeCls="badge-ok"
         />
-      </div>
+      </motion.div>
 
       {/* Row 3: Audit Ledger + Quick Actions */}
       <div className="grid grid-2 mt-24">
@@ -156,9 +170,13 @@ export const Dashboard = () => {
             <AuditBlock key={block.id || block.block_index} block={block} />
           ))}
 
-          <button className="btn btn-ghost btn-sm mt-16" onClick={() => navigate('/security')}>
+          <motion.button
+            className="btn btn-ghost btn-sm mt-16"
+            onClick={() => navigate('/security')}
+            {...buttonMotion}
+          >
             <Icon.shield /> View Full Ledger
-          </button>
+          </motion.button>
         </div>
 
         <div className="card">
@@ -167,22 +185,38 @@ export const Dashboard = () => {
             Quick Actions
           </div>
           <div className="grid" style={{ gap: '10px' }}>
-            <button className="btn btn-primary" onClick={() => navigate('/upload')}>
+            <motion.button
+              className="btn btn-primary"
+              onClick={() => navigate('/upload')}
+              {...buttonMotion}
+            >
               <Icon.upload /> Upload &amp; Analyze Document
-            </button>
-            <button className="btn btn-outline" onClick={() => navigate('/contracts')}>
+            </motion.button>
+            <motion.button
+              className="btn btn-outline"
+              onClick={() => navigate('/contracts')}
+              {...buttonMotion}
+            >
               <Icon.pen /> Generate a Contract
-            </button>
-            <button className="btn btn-outline" onClick={() => navigate('/deadlines')}>
+            </motion.button>
+            <motion.button
+              className="btn btn-outline"
+              onClick={() => navigate('/deadlines')}
+              {...buttonMotion}
+            >
               <Icon.calendar /> View Deadlines
-            </button>
-            <button className="btn btn-outline" onClick={() => navigate('/security')}>
+            </motion.button>
+            <motion.button
+              className="btn btn-outline"
+              onClick={() => navigate('/security')}
+              {...buttonMotion}
+            >
               <Icon.shield /> Security Center
-            </button>
+            </motion.button>
           </div>
         </div>
       </div>
-    </div>
+    </PageTransition>
   );
 };
 

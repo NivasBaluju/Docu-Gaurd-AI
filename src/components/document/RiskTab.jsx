@@ -1,10 +1,16 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import { motion, useReducedMotion } from 'motion/react';
 import Api from '../../services/api';
 import { useToast } from '../../context/ToastContext';
+import SkeletonLoader from '../common/SkeletonLoader';
+import { EASE_OUT } from '../../styles/motion';
 
 export const RiskTab = ({ doc }) => {
   const [riskData, setRiskData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [displayScore, setDisplayScore] = useState(0);
+  const hasAnimatedRef = useRef(false);
+  const shouldReduceMotion = useReducedMotion();
   const { toast } = useToast();
 
   const labels = {
@@ -20,7 +26,25 @@ export const RiskTab = ({ doc }) => {
     async function loadRisk() {
       try {
         const res = await Api.get(`/api/ai/documents/${doc.id}/risk`);
-        if (isMounted) setRiskData(res);
+        if (isMounted) {
+          setRiskData(res);
+          const finalScore = res.overall ?? 0;
+          if (shouldReduceMotion || hasAnimatedRef.current) {
+            setDisplayScore(finalScore);
+          } else {
+            hasAnimatedRef.current = true;
+            const duration = 450;
+            const startTime = performance.now();
+            const animateGauge = (now) => {
+              const elapsed = now - startTime;
+              const progress = Math.min(elapsed / duration, 1);
+              const current = Math.round(finalScore * (1 - Math.pow(1 - progress, 3)));
+              if (isMounted) setDisplayScore(current);
+              if (progress < 1) requestAnimationFrame(animateGauge);
+            };
+            requestAnimationFrame(animateGauge);
+          }
+        }
       } catch (err) {
         if (isMounted) toast(err.message || 'Failed to calculate risk score', 'error');
       } finally {
@@ -31,14 +55,10 @@ export const RiskTab = ({ doc }) => {
     return () => {
       isMounted = false;
     };
-  }, [doc.id, toast]);
+  }, [doc.id, toast, shouldReduceMotion]);
 
   if (loading) {
-    return (
-      <div className="spinner-center">
-        <div className="spinner" />
-      </div>
-    );
+    return <SkeletonLoader.Card count={2} height="260px" />;
   }
 
   if (!riskData) return null;
@@ -50,7 +70,7 @@ export const RiskTab = ({ doc }) => {
 
   return (
     <div className="grid grid-2">
-      <div className="card" style={{ textAlign: 'center' }}>
+      <div className="card" style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '260px' }}>
         <div className="card-title" style={{ justifyContent: 'center' }}>
           <span className="dot" />
           Overall Risk Score
@@ -58,15 +78,16 @@ export const RiskTab = ({ doc }) => {
         <div
           style={{
             fontFamily: 'var(--font-head)',
-            fontSize: '72px',
+            fontSize: '76px',
             fontWeight: 700,
             color: riskColor,
-            lineHeight: 1
+            lineHeight: 1,
+            margin: '8px 0'
           }}
         >
-          {overall}
+          {displayScore}
         </div>
-        <p className="text-lo" style={{ margin: '4px 0 16px' }}>
+        <p className="text-lo" style={{ margin: '0 0 16px' }}>
           out of 100
         </p>
         <span className={`badge ${riskBadge}`} style={{ fontSize: '13px' }}>
@@ -77,24 +98,32 @@ export const RiskTab = ({ doc }) => {
       <div className="card">
         <div className="card-title">
           <span className="dot" />
-          Risk Breakdown
+          Risk Breakdown by Category
         </div>
-        {riskData.breakdown &&
-          Object.entries(riskData.breakdown).map(([k, v]) => {
-            const val = Number(v) || 0;
-            const c = val > 50 ? 'var(--red)' : val > 25 ? 'var(--amber)' : 'var(--emerald)';
-            return (
-              <div key={k} className="risk-bar-row">
-                <div className="label">{labels[k] || k}</div>
-                <div className="risk-bar-track">
-                  <div className="risk-bar-fill" style={{ width: `${val}%`, background: c }} />
+        <div style={{ marginTop: '16px' }}>
+          {riskData.breakdown &&
+            Object.entries(riskData.breakdown).map(([k, v], idx) => {
+              const val = Number(v) || 0;
+              const c = val > 50 ? 'var(--red)' : val > 25 ? 'var(--amber)' : 'var(--emerald)';
+              return (
+                <div key={k} className="risk-bar-row">
+                  <div className="label">{labels[k] || k}</div>
+                  <div className="risk-bar-track">
+                    <motion.div
+                      className="risk-bar-fill"
+                      initial={{ width: 0 }}
+                      animate={{ width: `${val}%` }}
+                      transition={{ duration: 0.35, delay: idx * 0.05, ease: EASE_OUT }}
+                      style={{ background: c }}
+                    />
+                  </div>
+                  <div className="val" style={{ color: c }}>
+                    {val}
+                  </div>
                 </div>
-                <div className="val" style={{ color: c }}>
-                  {val}
-                </div>
-              </div>
-            );
-          })}
+              );
+            })}
+        </div>
       </div>
     </div>
   );

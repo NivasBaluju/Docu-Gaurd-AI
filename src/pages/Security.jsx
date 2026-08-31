@@ -1,11 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'motion/react';
 import Api from '../services/api';
 import { useToast } from '../context/ToastContext';
 import Icon from '../components/common/Icon';
 import EmptyState from '../components/common/EmptyState';
 import AuditBlock from '../components/common/AuditBlock';
+import SkeletonLoader from '../components/common/SkeletonLoader';
+import PageTransition from '../components/common/PageTransition';
 import { fmtDate } from '../utils/formatters';
+import { buttonMotion, EASE_OUT } from '../styles/motion';
 
 export const Security = () => {
   const [dash, setDash] = useState(null);
@@ -48,7 +52,7 @@ export const Security = () => {
   const handleRevokeSession = async (sessionId) => {
     try {
       await Api.post(`/api/security/sessions/${sessionId}/revoke`);
-      toast('Session revoked', 'ok');
+      toast('Session revoked successfully', 'ok');
       await fetchSecurityData();
     } catch (err) {
       toast(err.message || 'Failed to revoke session', 'error');
@@ -59,6 +63,7 @@ export const Security = () => {
     try {
       const res = await Api.get('/api/security/signing-key');
       setPublicKey(res.publicKey || '');
+      toast('Public key loaded', 'ok');
     } catch (err) {
       toast(err.message || 'Failed to load public key', 'error');
     }
@@ -69,6 +74,7 @@ export const Security = () => {
     try {
       const res = await Api.get('/api/security/audit/verify');
       setChainVerifyResult(res);
+      toast(res.valid ? 'Blockchain audit chain verified' : 'Tampering detected in chain', res.valid ? 'ok' : 'error');
     } catch (err) {
       toast(err.message || 'Chain verification failed', 'error');
     } finally {
@@ -78,9 +84,15 @@ export const Security = () => {
 
   if (loading || !dash || !zt || !sessions) {
     return (
-      <div className="spinner-center">
-        <div className="spinner" />
-      </div>
+      <PageTransition>
+        <div className="flex-between mb-24">
+          <SkeletonLoader.Text lines={2} width="320px" />
+        </div>
+        <SkeletonLoader.Card count={3} height="120px" />
+        <div style={{ marginTop: '24px' }}>
+          <SkeletonLoader.Card count={2} height="200px" />
+        </div>
+      </PageTransition>
     );
   }
 
@@ -88,7 +100,7 @@ export const Security = () => {
   const ztTone = ztScore >= 70 ? 'metric-icon-green' : ztScore >= 40 ? 'metric-icon-amber' : 'metric-icon-red';
 
   return (
-    <div>
+    <PageTransition>
       <div className="flex-between mb-24">
         <div>
           <h1 className="page-title">Security Center</h1>
@@ -154,12 +166,13 @@ export const Security = () => {
               </span>
               {!zt.mfaEnabled && (
                 <div className="mt-8">
-                  <button
+                  <motion.button
                     className="btn btn-royal btn-sm"
                     onClick={() => navigate('/security/mfa-setup')}
+                    {...buttonMotion}
                   >
                     Enable MFA
-                  </button>
+                  </motion.button>
                 </div>
               )}
             </div>
@@ -193,35 +206,49 @@ export const Security = () => {
           <span className="dot" />
           Active Sessions Manager
         </div>
-        {sessions.sessions?.map((s) => (
-          <div key={s.id} className="session-row">
-            <div>
-              <strong>
-                {s.id === sessions.currentSessionId ? '📍 This device' : 'Remote session'}
-              </strong>
-              {s.mfa_verified && (
-                <span className="badge badge-ok" style={{ marginLeft: '8px' }}>
-                  MFA
-                </span>
-              )}
-              <p className="text-lo small">
-                IP hash {s.ip} · Trust {s.trust_score} · Last seen {fmtDate(s.last_seen)}
-              </p>
-            </div>
-            {s.revoked ? (
-              <span className="badge badge-danger">Revoked</span>
-            ) : s.id === sessions.currentSessionId ? (
-              <span className="badge badge-ok">Current</span>
-            ) : (
-              <button
-                className="btn btn-sm btn-danger"
-                onClick={() => handleRevokeSession(s.id)}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '12px' }}>
+          <AnimatePresence>
+            {sessions.sessions?.map((s) => (
+              <motion.div
+                key={s.id}
+                className="session-row"
+                layout
+                initial={{ opacity: 0, y: 4 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                transition={{ duration: 0.2, ease: EASE_OUT }}
+                style={{ margin: 0 }}
               >
-                Revoke
-              </button>
-            )}
-          </div>
-        ))}
+                <div>
+                  <strong>
+                    {s.id === sessions.currentSessionId ? '📍 This device' : 'Remote session'}
+                  </strong>
+                  {s.mfa_verified && (
+                    <span className="badge badge-ok" style={{ marginLeft: '8px' }}>
+                      MFA
+                    </span>
+                  )}
+                  <p className="text-lo small">
+                    IP hash {s.ip} · Trust {s.trust_score} · Last seen {fmtDate(s.last_seen)}
+                  </p>
+                </div>
+                {s.revoked ? (
+                  <span className="badge badge-danger">Revoked</span>
+                ) : s.id === sessions.currentSessionId ? (
+                  <span className="badge badge-ok">Current</span>
+                ) : (
+                  <motion.button
+                    className="btn btn-sm btn-danger"
+                    onClick={() => handleRevokeSession(s.id)}
+                    {...buttonMotion}
+                  >
+                    Revoke
+                  </motion.button>
+                )}
+              </motion.div>
+            ))}
+          </AnimatePresence>
+        </div>
       </div>
 
       {/* Threats + Sig */}
@@ -262,13 +289,17 @@ export const Security = () => {
             readOnly
             rows={5}
             className="mono small"
-            style={{ resize: 'none' }}
+            style={{ resize: 'none', background: 'var(--off-white)' }}
             value={publicKey}
             placeholder="Click below to load public key..."
           />
-          <button className="btn btn-outline btn-sm mt-8" onClick={handleLoadKey}>
+          <motion.button
+            className="btn btn-outline btn-sm mt-8"
+            onClick={handleLoadKey}
+            {...buttonMotion}
+          >
             <Icon.eye /> Load Public Key
-          </button>
+          </motion.button>
         </div>
       </div>
 
@@ -279,36 +310,45 @@ export const Security = () => {
             <span className="dot dot-emerald" />
             Immutable Blockchain Audit Ledger
           </div>
-          <button
+          <motion.button
             className="btn btn-outline btn-sm"
             onClick={handleVerifyChain}
             disabled={verifyingChain}
+            {...buttonMotion}
           >
             <Icon.eye /> {verifyingChain ? 'Verifying…' : 'Re-verify Chain'}
-          </button>
+          </motion.button>
         </div>
 
-        {chainVerifyResult && (
-          <div id="chainVerifyResult">
-            <p className="mt-8">
-              <span className={`badge ${chainVerifyResult.valid ? 'badge-ok' : 'badge-danger'}`}>
-                {chainVerifyResult.valid ? (
-                  <>
-                    <Icon.check /> Chain integrity confirmed
-                  </>
-                ) : (
-                  <>
-                    <Icon.alert /> TAMPERING DETECTED
-                  </>
-                )}
-              </span>{' '}
-              — {chainVerifyResult.totalBlocks} blocks checked
-              {chainVerifyResult.problems?.length
-                ? ': ' + JSON.stringify(chainVerifyResult.problems)
-                : ''}
-            </p>
-          </div>
-        )}
+        <AnimatePresence>
+          {chainVerifyResult && (
+            <motion.div
+              id="chainVerifyResult"
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+            >
+              <p className="mt-8">
+                <span className={`badge ${chainVerifyResult.valid ? 'badge-ok' : 'badge-danger'}`}>
+                  {chainVerifyResult.valid ? (
+                    <>
+                      <Icon.check /> Chain integrity confirmed
+                    </>
+                  ) : (
+                    <>
+                      <Icon.alert /> TAMPERING DETECTED
+                    </>
+                  )}
+                </span>{' '}
+                — {chainVerifyResult.totalBlocks} blocks checked
+                {chainVerifyResult.problems?.length
+                  ? ': ' + JSON.stringify(chainVerifyResult.problems)
+                  : ''}
+              </p>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         <div className="mt-16">
           {audit?.blocks?.map((block) => (
@@ -316,7 +356,7 @@ export const Security = () => {
           ))}
         </div>
       </div>
-    </div>
+    </PageTransition>
   );
 };
 
