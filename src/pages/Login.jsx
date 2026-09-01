@@ -71,9 +71,9 @@ export const Login = () => {
   return (
     <PageTransition>
       <div className="auth-minimal-wrapper">
-        {/* Landscape Ambient Background Glow */}
-        <div className="auth-landscape-bg" />
-        <div className="auth-landscape-overlay" />
+        {/* Courtroom Hall Ambient Background Artwork (Exclusive to Login) */}
+        <div className="login-courtroom-bg" />
+        <div className="login-courtroom-overlay" />
 
         {/* Compact Centered Minimalist Auth Card */}
         <motion.div
@@ -82,11 +82,11 @@ export const Login = () => {
           animate={{ opacity: 1, scale: 1, y: 0 }}
           transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
         >
-          {/* Landscape Dither Header Banner */}
+          {/* Courtroom Hall Header Banner */}
           <div className="auth-card-landscape-banner">
             <img
-              src="/assets/lady-justice.jpg"
-              alt="Lady Justice Landscape Dither Art"
+              src="/assets/courtroom-hall.jpg"
+              alt="Courtroom Hall Dither Art"
               className="auth-card-banner-img"
             />
             <div className="auth-card-banner-overlay" />
