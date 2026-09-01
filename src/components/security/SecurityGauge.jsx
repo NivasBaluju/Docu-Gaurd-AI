@@ -91,7 +91,7 @@ export const SecurityGauge = ({ score = 100, mfaEnabled = false, auditValid = tr
 
           <div className="gauge-pillar-item">
             <div className="gauge-pillar-icon" style={{ background: 'rgba(59, 130, 246, 0.12)', color: '#3B82F6' }}>
-              <Icon.file />
+              <Icon.document />
             </div>
             <div className="gauge-pillar-text">
               <strong>At-Rest Data Cipher</strong>

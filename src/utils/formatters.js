@@ -2,9 +2,18 @@ export function esc(str) {
   return (str || '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 }
 
-export function fmtDate(iso) {
-  if (!iso) return '—';
-  return new Date(iso.includes('Z') || iso.includes('+') ? iso : iso + 'Z').toLocaleString();
+export function fmtDate(val) {
+  if (!val) return '—';
+  try {
+    if (val instanceof Date) return val.toLocaleString();
+    const str = String(val);
+    const hasTz = str.includes('Z') || str.includes('+') || str.includes('T');
+    const d = new Date(hasTz ? str : str + 'Z');
+    if (isNaN(d.getTime())) return str;
+    return d.toLocaleString();
+  } catch (e) {
+    return String(val);
+  }
 }
 
 export function fmtBytes(n) {

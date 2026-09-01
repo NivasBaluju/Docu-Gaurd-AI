@@ -16,19 +16,21 @@ export const LedgerExplorer = ({
 
   const blocks = auditBlocks || [];
 
-  const getActionCategory = (action = '') => {
-    if (action.includes('LOGIN') || action.includes('LOGOUT') || action.includes('USER')) return 'auth';
-    if (action.includes('DOCUMENT')) return 'doc';
+  const getActionCategory = (action) => {
+    const str = String(action || '');
+    if (str.includes('LOGIN') || str.includes('LOGOUT') || str.includes('USER')) return 'auth';
+    if (str.includes('DOCUMENT')) return 'doc';
     return 'system';
   };
 
-  const getActionBadge = (action = '') => {
-    if (action.includes('LOGIN_SUCCESS')) return { color: '#10B981', bg: 'rgba(16,185,129,0.12)', label: 'AUTH_SUCCESS' };
-    if (action.includes('DOCUMENT_UPLOADED')) return { color: '#F59E0B', bg: 'rgba(245,158,11,0.12)', label: 'DOC_ENCRYPTED' };
-    if (action.includes('DOCUMENT_COMPARED')) return { color: '#8B5CF6', bg: 'rgba(139,92,246,0.12)', label: 'DIFF_AUDIT' };
-    if (action.includes('DOCUMENT_VIEWED')) return { color: '#3B82F6', bg: 'rgba(59,130,246,0.12)', label: 'DOC_ACCESS' };
-    if (action.includes('LOGOUT')) return { color: '#94A3B8', bg: 'rgba(148,163,184,0.12)', label: 'SESSION_END' };
-    return { color: '#60A5FA', bg: 'rgba(96,165,250,0.12)', label: action };
+  const getActionBadge = (action) => {
+    const str = String(action || '');
+    if (str.includes('LOGIN_SUCCESS')) return { color: '#10B981', bg: 'rgba(16,185,129,0.12)', label: 'AUTH_SUCCESS' };
+    if (str.includes('DOCUMENT_UPLOADED')) return { color: '#F59E0B', bg: 'rgba(245,158,11,0.12)', label: 'DOC_ENCRYPTED' };
+    if (str.includes('DOCUMENT_COMPARED')) return { color: '#8B5CF6', bg: 'rgba(139,92,246,0.12)', label: 'DIFF_AUDIT' };
+    if (str.includes('DOCUMENT_VIEWED')) return { color: '#3B82F6', bg: 'rgba(59,130,246,0.12)', label: 'DOC_ACCESS' };
+    if (str.includes('LOGOUT')) return { color: '#94A3B8', bg: 'rgba(148,163,184,0.12)', label: 'SESSION_END' };
+    return { color: '#60A5FA', bg: 'rgba(96,165,250,0.12)', label: str || 'SYSTEM' };
   };
 
   const filteredBlocks = blocks.filter(b => {

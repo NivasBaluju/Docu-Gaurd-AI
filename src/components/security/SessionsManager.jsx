@@ -22,7 +22,10 @@ export const SessionsManager = ({ sessions = [], currentSessionId, onRevokeSessi
 
   const getDeviceDetails = (s, isCurrent) => {
     if (isCurrent) return { name: 'Institutional Legal Workstation (Primary)', icon: '💻', type: 'Primary Enclave' };
-    if (s.ip.includes('127.0.0.1')) return { name: 'Chamber Desktop Client', icon: '🖥️', type: 'Local Loopback' };
+    const ipStr = String(s?.ip || '');
+    if (ipStr.includes('127.0.0.1') || ipStr.includes('::1') || ipStr.includes('localhost')) {
+      return { name: 'Chamber Desktop Client', icon: '🖥️', type: 'Local Loopback' };
+    }
     return { name: 'Authorized Counsel Enclave', icon: '📱', type: 'Secured Remote Endpoint' };
   };
 
