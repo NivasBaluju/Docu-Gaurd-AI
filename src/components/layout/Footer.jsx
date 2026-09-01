@@ -34,15 +34,18 @@ export const Footer = () => {
                 style={{
                   width: '28px',
                   height: '28px',
-                  borderRadius: '7px',
-                  background: '#FFFFFF',
+                  borderRadius: '6px',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  color: '#000000'
+                  overflow: 'hidden'
                 }}
               >
-                <Icon.shield />
+                <img
+                  src="/assets/favicon.png"
+                  alt="Docu-Gaurd AI Logo"
+                  style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+                />
               </div>
               <strong style={{ color: '#FFFFFF', fontSize: '15px', fontWeight: '700' }}>Docu-Gaurd AI</strong>
             </div>

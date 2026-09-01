@@ -43,7 +43,11 @@ export const Topbar = () => {
         }}
       >
         <div className="brand-icon" aria-hidden="true">
-          <Icon.shield stroke="white" strokeWidth="1.6" />
+          <img
+            src="/assets/favicon.png"
+            alt="Docu-Gaurd AI Logo"
+            style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+          />
         </div>
         <span className="brand-text">
           Docu<em>Gaurd</em> AI
