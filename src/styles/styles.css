@@ -750,6 +750,398 @@ input:focus, select:focus, textarea:focus {
 }
 
 /* ============================================================
+   DEADLINE INTELLIGENCE TIMELINE (LEGAL CHRONOLOGY & FOCUS)
+   ============================================================ */
+
+.timeline-page-container {
+  position: relative;
+  min-height: calc(100vh - var(--topbar-h));
+  padding: 16px 16px 48px;
+  background: #000000;
+}
+
+.timeline-ambient-bg {
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  width: 600px;
+  height: 100%;
+  background-image: url('/assets/lady-justice.jpg');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: right bottom;
+  opacity: 0.12;
+  pointer-events: none;
+  z-index: 1;
+  filter: contrast(1.2) brightness(0.85);
+}
+
+.timeline-ambient-overlay {
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(circle at 35% 35%, transparent 0%, #000000 88%);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.timeline-content-wrapper {
+  position: relative;
+  z-index: 2;
+  max-width: 860px;
+  margin: 0 auto;
+}
+
+/* Inline Summary Metrics */
+.timeline-inline-metrics {
+  display: inline-flex;
+  align-items: center;
+  gap: 18px;
+  background: rgba(14, 14, 18, 0.75);
+  backdrop-filter: blur(14px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  padding: 10px 18px;
+  margin-bottom: 20px;
+}
+
+.metric-inline-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.metric-inline-label {
+  font-size: 9.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #71717A;
+  font-weight: 600;
+}
+
+.metric-inline-val {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #FFFFFF;
+  margin-top: 1px;
+  font-family: var(--font-mono);
+}
+
+.metric-inline-divider {
+  width: 1px;
+  height: 22px;
+  background: rgba(255, 255, 255, 0.09);
+}
+
+/* Next Deadline Hero Focus Card */
+.next-deadline-hero {
+  background: linear-gradient(135deg, rgba(22, 22, 28, 0.95) 0%, rgba(13, 13, 16, 0.9) 100%);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  border-radius: 14px;
+  padding: 18px 22px;
+  margin-bottom: 22px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.45);
+}
+
+.next-hero-top-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.next-hero-tag {
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  color: #F59E0B;
+  font-weight: 600;
+}
+
+.next-hero-body {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+
+.next-hero-date-text {
+  font-size: 24px;
+  font-weight: 700;
+  color: #FFFFFF;
+  letter-spacing: -0.02em;
+  margin: 0 0 2px;
+}
+
+.next-hero-event-type {
+  font-size: 11px;
+  color: #F59E0B;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+}
+
+.next-hero-doc-label {
+  font-size: 11px;
+  color: #71717A;
+  display: block;
+  margin-bottom: 2px;
+}
+
+.next-hero-doc-name {
+  font-size: 12.5px;
+  color: #E4E4E7;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.15s ease;
+}
+.next-hero-doc-name:hover {
+  color: #FFFFFF;
+  text-decoration: underline;
+}
+
+/* Horizontal Time Distribution Overview */
+.timeline-horizontal-overview {
+  margin-bottom: 22px;
+}
+
+.month-tabs-track {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+
+.month-tab-btn {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 6px;
+  padding: 5px 10px;
+  color: #A1A1AA;
+  font-size: 11px;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+  font-family: var(--font-mono);
+}
+.month-tab-btn:hover {
+  background: rgba(255, 255, 255, 0.07);
+  color: #FFFFFF;
+}
+.month-tab-btn.active {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.22);
+  color: #FFFFFF;
+}
+
+.month-badge {
+  font-size: 9.5px;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 1px 5px;
+  border-radius: 8px;
+}
+
+/* Vertical Chronological Timeline */
+.timeline-vertical-wrapper {
+  position: relative;
+  padding-left: 6px;
+}
+
+.timeline-vertical-spine {
+  position: absolute;
+  left: 82px;
+  top: 12px;
+  bottom: 12px;
+  width: 1.5px;
+  background: linear-gradient(to bottom, rgba(16, 185, 129, 0.45) 0%, rgba(255, 255, 255, 0.09) 70%, transparent 100%);
+}
+
+.timeline-events-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.timeline-node-item {
+  display: grid;
+  grid-template-columns: 72px 20px 1fr;
+  gap: 12px;
+  align-items: flex-start;
+  position: relative;
+}
+
+.timeline-node-date-col {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  text-align: right;
+  padding-top: 4px;
+}
+
+.timeline-date-day {
+  font-size: 17px;
+  font-weight: 700;
+  color: #FFFFFF;
+  line-height: 1;
+  font-family: var(--font-mono);
+}
+
+.timeline-date-month {
+  font-size: 10.5px;
+  font-weight: 600;
+  color: #A1A1AA;
+  letter-spacing: 0.05em;
+  margin-top: 2px;
+}
+
+.timeline-date-year {
+  font-size: 9.5px;
+  color: #71717A;
+}
+
+.timeline-marker-anchor {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  padding-top: 6px;
+  z-index: 3;
+}
+
+.timeline-marker-circle {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 1.5px solid #10B981;
+  background: #0D0D10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.timeline-marker-core {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+}
+
+.timeline-node-card {
+  background: rgba(14, 14, 18, 0.85);
+  backdrop-filter: blur(14px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  padding: 12px 16px;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.timeline-node-card:hover {
+  border-color: rgba(255, 255, 255, 0.16);
+  background: rgba(20, 20, 26, 0.95);
+  transform: translateY(-1px);
+}
+.timeline-node-item.expanded .timeline-node-card {
+  border-color: rgba(255, 255, 255, 0.2);
+  background: rgba(22, 22, 28, 0.98);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+}
+
+.timeline-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 6px;
+}
+
+.timeline-card-title-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.timeline-event-badge {
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 4px;
+  letter-spacing: 0.04em;
+}
+
+.timeline-doc-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: #E4E4E7;
+}
+
+.timeline-urgency-pill {
+  font-size: 10px;
+  font-weight: 600;
+  font-family: var(--font-mono);
+  padding: 2px 6px;
+}
+
+.timeline-card-excerpt {
+  font-size: 12px;
+  color: #A1A1AA;
+  line-height: 1.45;
+  margin: 0;
+}
+
+/* Progressive Disclosure Drawer */
+.timeline-drawer-divider {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.06);
+  margin: 10px 0;
+}
+
+.timeline-clause-box {
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 6px;
+  padding: 8px 12px;
+  margin-bottom: 10px;
+}
+
+.timeline-clause-text {
+  font-size: 11.5px;
+  color: #D4D4D8;
+  font-style: italic;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.timeline-drawer-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+@media (max-width: 650px) {
+  .timeline-node-item {
+    grid-template-columns: 56px 16px 1fr;
+    gap: 8px;
+  }
+  .timeline-vertical-spine {
+    left: 64px;
+  }
+  .timeline-date-day {
+    font-size: 15px;
+  }
+  .next-hero-date-text {
+    font-size: 20px;
+  }
+  .timeline-inline-metrics {
+    width: 100%;
+    justify-content: space-between;
+  }
+}
+
+/* ============================================================
    COMPACT MINIMALIST AUTH (WITH LANDSCAPE BANNER)
    ============================================================ */
 .auth-minimal-wrapper {
