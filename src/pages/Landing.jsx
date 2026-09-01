@@ -139,21 +139,21 @@ export const Landing = () => {
               transition={{ duration: 0.4, delay: 0.24, ease: EASE_OUT }}
             >
               <img
-                src="/assets/lady-justice.jpg"
-                alt="Lady Justice Landscape Dither Art"
+                src="/assets/courtroom-hall.jpg"
+                alt="Courtroom Hall Landscape Dither Art"
                 style={{
                   width: '100%',
                   maxHeight: '480px',
                   objectFit: 'cover',
                   display: 'block',
-                  filter: 'contrast(1.2) brightness(0.95)'
+                  filter: 'contrast(1.2) brightness(0.9)'
                 }}
               />
               <div
                 style={{
                   position: 'absolute',
                   inset: 0,
-                  background: 'linear-gradient(to top, #000000 0%, transparent 60%), radial-gradient(circle at 75% 50%, transparent 40%, rgba(0,0,0,0.7) 100%)',
+                  background: 'linear-gradient(to right, rgba(0, 0, 0, 0.95) 0%, rgba(0, 0, 0, 0.75) 45%, rgba(0, 0, 0, 0.2) 100%), linear-gradient(to top, #000000 0%, transparent 60%)',
                   pointerEvents: 'none'
                 }}
               />

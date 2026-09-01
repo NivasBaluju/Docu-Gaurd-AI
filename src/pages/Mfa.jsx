@@ -21,29 +21,18 @@ export const Mfa = () => {
 
   const preToken = sessionStorage.getItem('preToken');
 
-  // Auto-request OTP when landing on the page
+  // Check for preToken and retrieve devCode from login dispatch (NO duplicate request)
   useEffect(() => {
     if (!preToken) {
       navigate('/login', { replace: true });
       return;
     }
 
-    let isMounted = true;
-    async function initOtp() {
-      try {
-        const r = await Api.post('/api/auth/mfa/otp/request', { preToken });
-        if (isMounted && r.devMode) {
-          setDevCode(r.devCode);
-        }
-      } catch (err) {
-        console.warn('Initial OTP request note:', err.message);
-      }
+    const savedDevCode = sessionStorage.getItem('devCode');
+    if (savedDevCode) {
+      setDevCode(savedDevCode);
+      sessionStorage.removeItem('devCode');
     }
-    initOtp();
-
-    return () => {
-      isMounted = false;
-    };
   }, [preToken, navigate]);
 
   // Resend cooldown timer

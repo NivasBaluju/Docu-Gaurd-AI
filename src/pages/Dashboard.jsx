@@ -5,7 +5,6 @@ import Api from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import Icon from '../components/common/Icon';
 import MetricCard from '../components/common/MetricCard';
-import AuditBlock from '../components/common/AuditBlock';
 import SkeletonLoader from '../components/common/SkeletonLoader';
 import PageTransition from '../components/common/PageTransition';
 import { useToast } from '../context/ToastContext';
@@ -17,20 +16,20 @@ export const Dashboard = () => {
   const navigate = useNavigate();
 
   const [data, setData] = useState(null);
-  const [audit, setAudit] = useState(null);
+  const [documents, setDocuments] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     let isMounted = true;
     async function fetchDashboard() {
       try {
-        const [dashRes, auditRes] = await Promise.all([
+        const [dashRes, docsRes] = await Promise.all([
           Api.get('/api/security/dashboard'),
-          Api.get('/api/security/audit?limit=5')
+          Api.get('/api/documents')
         ]);
         if (isMounted) {
           setData(dashRes);
-          setAudit(auditRes);
+          setDocuments(docsRes.documents || []);
         }
       } catch (err) {
         if (isMounted) toast(err.message || 'Failed to load dashboard', 'error');
@@ -144,39 +143,76 @@ export const Dashboard = () => {
         />
       </motion.div>
 
-      {/* Row 3: Audit Ledger + Quick Actions */}
+      {/* Row 3: Recent Protected Documents + Quick Actions */}
       <div className="grid grid-2 mt-24">
         <div className="card">
-          <div className="card-title">
-            <span className="dot dot-emerald" />
-            Immutable Audit Ledger
-          </div>
           <div className="flex-between mb-16">
-            <span className="text-lo small">{data.auditLedger?.totalBlocks || 0} blocks</span>
-            <span className={`badge ${data.auditLedger?.valid ? 'badge-ok' : 'badge-danger'}`}>
-              {data.auditLedger?.valid ? (
-                <>
-                  <Icon.check /> Chain Verified
-                </>
-              ) : (
-                <>
-                  <Icon.alert /> Tampered
-                </>
-              )}
-            </span>
+            <div className="card-title" style={{ margin: 0 }}>
+              <span className="dot dot-emerald" />
+              Recent Protected Documents
+            </div>
+            <span className="text-lo small">{documents.length} Total</span>
           </div>
 
-          {audit?.blocks?.slice(0, 4).map((block) => (
-            <AuditBlock key={block.id || block.block_index} block={block} />
-          ))}
+          {documents.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: '32px 16px', color: '#71717A' }}>
+              <div style={{ fontSize: '24px', marginBottom: '8px' }}>📁</div>
+              <p style={{ fontSize: '13px', margin: '0 0 12px' }}>No documents uploaded yet.</p>
+              <button
+                className="btn btn-outline btn-sm"
+                onClick={() => navigate('/upload')}
+              >
+                Upload First Document
+              </button>
+            </div>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              {documents.slice(0, 4).map((doc) => (
+                <div
+                  key={doc.id}
+                  onClick={() => navigate(`/documents/${doc.id}`)}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    padding: '10px 14px',
+                    borderRadius: '8px',
+                    background: 'rgba(255, 255, 255, 0.03)',
+                    border: '1px solid rgba(255, 255, 255, 0.06)',
+                    cursor: 'pointer',
+                    transition: 'all 0.15s ease'
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.15)'}
+                  onMouseLeave={(e) => e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.06)'}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0 }}>
+                    <Icon.document />
+                    <div style={{ minWidth: 0, overflow: 'hidden' }}>
+                      <div style={{ fontSize: '13px', fontWeight: '500', color: '#F4F4F5', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>
+                        {doc.original_name}
+                      </div>
+                      <div className="mono" style={{ fontSize: '10.5px', color: '#71717A' }}>
+                        SHA-256 · {doc.sha256 ? `${doc.sha256.slice(0, 10)}…` : 'VERIFIED'}
+                      </div>
+                    </div>
+                  </div>
+                  <span className={`badge ${doc.risk_score > 50 ? 'badge-danger' : doc.risk_score > 25 ? 'badge-warn' : 'badge-ok'}`} style={{ fontSize: '10.5px' }}>
+                    Risk {doc.risk_score ?? 0}%
+                  </span>
+                </div>
+              ))}
 
-          <motion.button
-            className="btn btn-ghost btn-sm mt-16"
-            onClick={() => navigate('/security')}
-            {...buttonMotion}
-          >
-            <Icon.shield /> View Full Ledger
-          </motion.button>
+              {documents.length > 4 && (
+                <motion.button
+                  className="btn btn-ghost btn-sm mt-8"
+                  onClick={() => navigate('/documents')}
+                  {...buttonMotion}
+                >
+                  View All {documents.length} Documents →
+                </motion.button>
+              )}
+            </div>
+          )}
         </div>
 
         <div className="card">
@@ -211,7 +247,7 @@ export const Dashboard = () => {
               onClick={() => navigate('/security')}
               {...buttonMotion}
             >
-              <Icon.shield /> Security Center
+              <Icon.shield /> Security Observatory
             </motion.button>
           </div>
         </div>

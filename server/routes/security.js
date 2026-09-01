@@ -68,7 +68,7 @@ router.post('/sessions/:id/revoke', requireAuth, async (req, res) => {
 router.get('/audit', requireAuth, async (req, res) => {
   const limit = Math.min(200, Number(req.query.limit) || 50);
   const { rows: blocks } = await db.query(`
-    SELECT * FROM blockchain_audit WHERE user_id = $1 OR user_id IS NULL
+    SELECT * FROM blockchain_audit WHERE user_id = $1
     ORDER BY block_index DESC LIMIT $2
   `, [req.user.id, limit]);
   res.json({ blocks });

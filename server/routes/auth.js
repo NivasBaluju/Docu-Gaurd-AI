@@ -64,7 +64,28 @@ router.post('/login', async (req, res) => {
     if (requireMfa) {
       // Issue a short-lived pre-auth token; MFA verification completes login.
       const preToken = jwt.sign({ preauth: true, userId: user.id }, JWT_SECRET, { expiresIn: '10m' });
-      return res.json({ mfaRequired: true, method: 'email', preToken });
+
+      // Invalidate any older unused login OTPs for this user
+      await db.query("UPDATE otp_codes SET used = true WHERE user_id = $1 AND purpose = 'login'", [user.id]);
+
+      // Generate single OTP and dispatch email
+      const code = String(Math.floor(100000 + Math.random() * 900000));
+      const id = uuidv4();
+      await db.query(
+        `INSERT INTO otp_codes (id, user_id, code, purpose, expires_at)
+         VALUES ($1, $2, $3, $4, NOW() + INTERVAL '15 minutes')`,
+        [id, user.id, code, 'login']
+      );
+
+      const emailRes = await sendOtpEmail(user.email, code);
+
+      return res.json({
+        mfaRequired: true,
+        method: 'email',
+        preToken,
+        devMode: emailRes.devMode,
+        devCode: emailRes.devMode ? code : undefined
+      });
     }
 
     const sessionId = uuidv4();

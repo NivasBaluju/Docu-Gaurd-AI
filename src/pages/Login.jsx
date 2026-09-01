@@ -47,6 +47,7 @@ export const Login = () => {
       const result = await Api.post('/api/auth/login', { email, password });
       if (result.mfaRequired) {
         sessionStorage.setItem('preToken', result.preToken);
+        if (result.devCode) sessionStorage.setItem('devCode', result.devCode);
         navigate('/mfa');
         return;
       }
