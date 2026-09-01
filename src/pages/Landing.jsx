@@ -41,63 +41,57 @@ export const Landing = () => {
               transition={{ duration: 0.25, ease: EASE_OUT }}
             >
               <span
+                className="mono"
                 style={{
                   display: 'inline-flex',
                   alignItems: 'center',
                   gap: '8px',
-                  padding: '5px 16px',
-                  borderRadius: '980px',
-                  background: 'rgba(255, 255, 255, 0.08)',
-                  border: '1px solid rgba(255, 255, 255, 0.14)',
-                  color: '#FFFFFF',
-                  fontSize: '12.5px',
-                  fontWeight: '600',
+                  padding: '4px 14px',
+                  borderRadius: '6px',
+                  background: 'rgba(255, 255, 255, 0.04)',
+                  border: '1px solid rgba(255, 255, 255, 0.08)',
+                  color: '#A1A1AA',
+                  fontSize: '11px',
+                  fontWeight: '500',
                   letterSpacing: '0.04em',
-                  textTransform: 'uppercase',
-                  marginBottom: '24px',
-                  backdropFilter: 'blur(8px)'
+                  marginBottom: '28px'
                 }}
               >
-                [DOCU-GAURD_AI_2.0] · CRYPTOGRAPHIC LEGAL INTELLIGENCE
+                [DOCU-GUARD_AI_2.0] · CRYPTOGRAPHIC LEGAL INTELLIGENCE
               </span>
             </motion.div>
 
             <motion.h1
               style={{
-                fontSize: 'clamp(42px, 6.8vw, 82px)',
-                fontWeight: 800,
-                letterSpacing: '-0.04em',
-                lineHeight: 1.05,
-                margin: '12px auto 22px',
-                maxWidth: '1000px',
+                fontFamily: 'var(--font-sans)',
+                fontSize: 'clamp(38px, 6.2vw, 72px)',
+                fontWeight: 650,
+                letterSpacing: '-0.03em',
+                lineHeight: 1.08,
+                margin: '0 auto 20px',
+                maxWidth: '960px',
                 color: '#FFFFFF'
               }}
-              initial={{ opacity: 0, y: 12 }}
+              initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.32, delay: 0.06, ease: EASE_OUT }}
             >
               Legal intelligence.<br />
-              <span
-                style={{
-                  background: 'linear-gradient(180deg, #FFFFFF 0%, #71717A 100%)',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent'
-                }}
-              >
-                Cryptographically verified.
-              </span>
+              Cryptographically verified.
             </motion.h1>
 
             <motion.p
               style={{
-                fontSize: 'clamp(17px, 2.2vw, 21px)',
-                lineHeight: 1.55,
-                color: '#D4D4D8',
-                maxWidth: '680px',
+                fontFamily: 'var(--font-sans)',
+                fontSize: 'clamp(15px, 1.8vw, 18px)',
+                lineHeight: 1.6,
+                color: '#A1A1AA',
+                maxWidth: '620px',
                 margin: '0 auto 36px',
-                letterSpacing: '-0.016em'
+                letterSpacing: '-0.01em',
+                fontWeight: 400
               }}
-              initial={{ opacity: 0, y: 10 }}
+              initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3, delay: 0.12, ease: EASE_OUT }}
             >
@@ -108,11 +102,11 @@ export const Landing = () => {
             <motion.div
               style={{
                 display: 'flex',
-                gap: '14px',
+                gap: '12px',
                 justifyContent: 'center',
                 alignItems: 'center',
                 flexWrap: 'wrap',
-                marginBottom: '56px'
+                marginBottom: '64px'
               }}
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
