@@ -78,10 +78,10 @@
   --radius-pill:         980px;
 
   /* ── Typography Stack ── */
-  --font-sans:           -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Plus Jakarta Sans', 'Inter', 'Helvetica Neue', sans-serif;
-  --font-display:        -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Plus Jakarta Sans', 'Helvetica Neue', sans-serif;
-  --font-legal:          -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Plus Jakarta Sans', sans-serif;
-  --font-mono:           'JetBrains Mono', 'SF Mono', Menlo, Monaco, Consolas, monospace;
+  --font-sans:           'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Inter', 'SF Pro Text', sans-serif;
+  --font-display:        'Space Mono', 'Courier Prime', -apple-system, BlinkMacSystemFont, monospace;
+  --font-legal:          'Courier Prime', 'Courier New', Courier, monospace;
+  --font-mono:           'Space Mono', 'Courier Prime', 'JetBrains Mono', 'SF Mono', monospace;
 
   /* ── Shadows ── */
   --shadow-sm:           0 1px 3px rgba(0, 0, 0, 0.5);
