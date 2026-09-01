@@ -1,27 +1,24 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import Api from '../services/api';
 import { useToast } from '../context/ToastContext';
 import PageTransition from '../components/common/PageTransition';
 
-import SecurityGauge from '../components/security/SecurityGauge';
-import ActivityChart from '../components/security/ActivityChart';
-import SessionsManager from '../components/security/SessionsManager';
-import ThreatBreakdown from '../components/security/ThreatBreakdown';
-import SignatureInspector from '../components/security/SignatureInspector';
-import LedgerExplorer from '../components/security/LedgerExplorer';
+import ObservatoryRadial from '../components/security/ObservatoryRadial';
+import ObservatoryDetailPanel from '../components/security/ObservatoryDetailPanel';
+import SecuritySignalsStrip from '../components/security/SecuritySignalsStrip';
 
 export const Security = () => {
-  const [dash, setDash] = useState({ auditLedger: { valid: true, totalBlocks: 124 } });
+  const [dash, setDash] = useState({ auditLedger: { valid: true, totalBlocks: 124 }, documentsUploaded: 0 });
   const [sessions, setSessions] = useState({ sessions: [], currentSessionId: '' });
   const [audit, setAudit] = useState({ blocks: [] });
   const [threats, setThreats] = useState({ threats: [] });
-  const [zt, setZt] = useState({ score: 100, mfaEnabled: false, reasons: ['Hardware-grade zero-trust active'] });
+  const [zt, setZt] = useState({ score: 100, mfaEnabled: false, reasons: ['All zero-trust safeguards active'] });
   const [publicKey, setPublicKey] = useState('');
   const [chainVerifyResult, setChainVerifyResult] = useState(null);
   const [verifyingChain, setVerifyingChain] = useState(false);
+  const [selectedNode, setSelectedNode] = useState(null);
+
   const { toast } = useToast();
-  const navigate = useNavigate();
 
   const fetchSecurityData = async () => {
     try {
@@ -81,64 +78,60 @@ export const Security = () => {
 
   const ztScore = zt?.score ?? 100;
   const isAuditValid = dash?.auditLedger?.valid !== false;
+  const activeSessionsCount = (sessions?.sessions || []).filter(s => !s.revoked).length || 1;
+  const threatsCount = (threats?.threats || []).filter(t => t.severity === 'high').length;
+  const auditBlocksCount = dash?.auditLedger?.totalBlocks || (audit?.blocks || []).length || 124;
 
   return (
     <PageTransition>
-      {/* Header Banner */}
-      <div className="flex-between mb-24">
+      {/* Header */}
+      <div className="security-page-header mb-16">
         <div>
-          <span className="mono text-lo small" style={{ letterSpacing: '0.08em' }}>[ZERO-TRUST_SOC_V2]</span>
-          <h1 className="page-title" style={{ marginTop: '2px' }}>Security & Audit Operations Center</h1>
-          <p className="page-sub">
-            Real-time cryptographic telemetry, zero-trust enclave authorization, and immutable ledger integrity.
+          <span className="mono text-lo small" style={{ letterSpacing: '0.08em' }}>[ZERO-TRUST_OBSERVATORY]</span>
+          <h1 className="page-title" style={{ marginTop: '2px', marginBottom: '4px' }}>Security Center</h1>
+          <p className="page-sub" style={{ margin: 0 }}>
+            Real-time zero-trust posture and cryptographic integrity.
           </p>
         </div>
-        <div style={{ display: 'flex', gap: '8px' }}>
-          <span
-            className={`badge ${isAuditValid ? 'badge-ok' : 'badge-danger'}`}
-            style={{ fontSize: '13px', padding: '6px 12px' }}
-          >
-            {isAuditValid ? '✓ SHA-256 Merkle Valid' : '⚠ Ledger Breach'}
-          </span>
-        </div>
       </div>
 
-      {/* Row 1: Zero-Trust Posture Gauge & Activity Velocity Chart */}
-      <div className="grid grid-2">
-        <SecurityGauge
+      {/* Primary Visual Instrument: Radial Observatory */}
+      <div className="security-observatory-wrapper">
+        <ObservatoryRadial
           score={ztScore}
           mfaEnabled={zt?.mfaEnabled}
-          auditValid={isAuditValid}
-          reasons={zt?.reasons || []}
-        />
-        <ActivityChart
-          auditBlocks={audit?.blocks || []}
-          sessions={sessions?.sessions || []}
+          isAuditValid={isAuditValid}
+          activeSessionsCount={activeSessionsCount}
+          threatsCount={threatsCount}
+          auditBlocksCount={auditBlocksCount}
+          docsEncryptedCount={dash?.documentsUploaded || 0}
+          selectedNode={selectedNode}
+          onSelectNode={setSelectedNode}
         />
       </div>
 
-      {/* Row 2: Active Session Enclaves Hub */}
-      <SessionsManager
-        sessions={sessions?.sessions || []}
-        currentSessionId={sessions?.currentSessionId}
+      {/* Contextual Progressive Disclosure Detail Panel */}
+      <ObservatoryDetailPanel
+        selectedNode={selectedNode}
+        onClose={() => setSelectedNode(null)}
+        dash={dash}
+        sessions={sessions}
+        audit={audit}
+        threats={threats}
+        zt={zt}
+        publicKey={publicKey}
+        onLoadKey={handleLoadKey}
         onRevokeSession={handleRevokeSession}
-      />
-
-      {/* Row 3: Threat Analytics & Digital Signature Verification */}
-      <div className="grid grid-2 mt-24">
-        <ThreatBreakdown threats={threats?.threats || []} />
-        <SignatureInspector
-          publicKey={publicKey}
-          onLoadKey={handleLoadKey}
-        />
-      </div>
-
-      {/* Row 4: Immutable Blockchain Audit Ledger Explorer */}
-      <LedgerExplorer
-        auditBlocks={audit?.blocks || []}
         onVerifyChain={handleVerifyChain}
         verifyingChain={verifyingChain}
         chainVerifyResult={chainVerifyResult}
+      />
+
+      {/* Security Signals Strip */}
+      <SecuritySignalsStrip
+        zt={zt}
+        isAuditValid={isAuditValid}
+        activeSessionsCount={activeSessionsCount}
       />
     </PageTransition>
   );
