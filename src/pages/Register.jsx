@@ -34,6 +34,7 @@ export const Register = () => {
       <div className="auth-minimal-wrapper">
         {/* Landscape Ambient Background Glow */}
         <div className="auth-landscape-bg" />
+        <div className="auth-landscape-overlay" />
 
         {/* Compact Centered Minimalist Auth Card */}
         <motion.div
@@ -45,8 +46,8 @@ export const Register = () => {
           {/* Landscape Dither Header Banner */}
           <div className="auth-card-landscape-banner">
             <img
-              src="/assets/courthouse-hero.jpg"
-              alt="Supreme Court Facade Landscape Art"
+              src="/assets/lady-justice.jpg"
+              alt="Lady Justice Landscape Dither Art"
               className="auth-card-banner-img"
             />
             <div className="auth-card-banner-overlay" />

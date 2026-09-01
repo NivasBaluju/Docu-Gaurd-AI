@@ -18,187 +18,228 @@ export const Landing = () => {
     <PageTransition>
       <div className="landing-container" style={{ background: '#000000', color: '#FFFFFF', paddingBottom: '72px' }}>
         {/* =========================================================
-            SECTION 1: DARK MINIMALIST LEGAL HERO
+            SECTION 1: DARK MINIMALIST LEGAL HERO WITH LADY JUSTICE DITHER BACKDROP
             ========================================================= */}
-        <section
-          className="hero-section"
-          style={{
-            padding: '72px 24px 48px',
-            maxWidth: '1180px',
-            margin: '0 auto',
-            textAlign: 'center',
-            position: 'relative'
-          }}
-        >
-          <motion.div
-            initial={{ opacity: 0, y: 6 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.25, ease: EASE_OUT }}
-          >
-            <span
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '8px',
-                padding: '5px 16px',
-                borderRadius: '980px',
-                background: 'rgba(255, 255, 255, 0.08)',
-                border: '1px solid rgba(255, 255, 255, 0.14)',
-                color: '#FFFFFF',
-                fontSize: '12.5px',
-                fontWeight: '600',
-                letterSpacing: '0.04em',
-                textTransform: 'uppercase',
-                marginBottom: '24px'
-              }}
-            >
-              [DOCU-GAURD_AI_2.0] · CRYPTOGRAPHIC LEGAL INTELLIGENCE
-            </span>
-          </motion.div>
+        <div className="landing-hero-backdrop-wrapper">
+          <div className="landing-hero-bg-art" />
+          <div className="landing-hero-bg-overlay" />
 
-          <motion.h1
+          <section
+            className="hero-section"
             style={{
-              fontSize: 'clamp(42px, 6.8vw, 82px)',
-              fontWeight: 800,
-              letterSpacing: '-0.04em',
-              lineHeight: 1.05,
-              margin: '12px auto 22px',
-              maxWidth: '1000px',
-              color: '#FFFFFF'
-            }}
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.32, delay: 0.06, ease: EASE_OUT }}
-          >
-            Legal intelligence.<br />
-            <span
-              style={{
-                background: 'linear-gradient(180deg, #FFFFFF 0%, #71717A 100%)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent'
-              }}
-            >
-              Cryptographically verified.
-            </span>
-          </motion.h1>
-
-          <motion.p
-            style={{
-              fontSize: 'clamp(17px, 2.2vw, 21px)',
-              lineHeight: 1.55,
-              color: '#A1A1AA',
-              maxWidth: '680px',
-              margin: '0 auto 36px',
-              letterSpacing: '-0.016em'
-            }}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3, delay: 0.12, ease: EASE_OUT }}
-          >
-            Understand, dissect, and cryptographically verify complex contracts in seconds. Built for counsel who demand institutional precision.
-          </motion.p>
-
-          {/* Minimalist Action Buttons */}
-          <motion.div
-            style={{
-              display: 'flex',
-              gap: '14px',
-              justifyContent: 'center',
-              alignItems: 'center',
-              flexWrap: 'wrap',
-              marginBottom: '56px'
-            }}
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.28, delay: 0.18, ease: EASE_OUT }}
-          >
-            <motion.button className="btn-hero" onClick={handleCta} {...buttonMotion}>
-              {user ? 'Enter Chamber' : 'Start Firm Access'}
-            </motion.button>
-            <motion.button
-              className="btn-hero-ghost"
-              onClick={() => navigate('/login')}
-              {...buttonMotion}
-            >
-              Chamber Sign In →
-            </motion.button>
-          </motion.div>
-
-          {/* Classical Dithered Courthouse Facade Frame */}
-          <motion.div
-            style={{
+              padding: '80px 24px 64px',
+              maxWidth: '1180px',
+              margin: '0 auto',
+              textAlign: 'center',
               position: 'relative',
-              borderRadius: '24px',
-              overflow: 'hidden',
-              border: '1px solid rgba(255, 255, 255, 0.12)',
-              boxShadow: '0 30px 80px rgba(0, 0, 0, 0.9)'
+              zIndex: 2
             }}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, delay: 0.24, ease: EASE_OUT }}
           >
-            <img
-              src="/assets/courthouse-hero.jpg"
-              alt="Supreme Court Facade Dither Art"
-              style={{
-                width: '100%',
-                maxHeight: '480px',
-                objectFit: 'cover',
-                display: 'block',
-                filter: 'contrast(1.15) brightness(0.95)'
-              }}
-            />
-            <div
-              style={{
-                position: 'absolute',
-                inset: 0,
-                background: 'linear-gradient(to top, #000000 0%, transparent 60%), radial-gradient(circle at 50% 50%, transparent 50%, #000000 100%)',
-                pointerEvents: 'none'
-              }}
-            />
-            <div
-              style={{
-                position: 'absolute',
-                bottom: '24px',
-                left: '28px',
-                right: '28px',
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                zIndex: 2
-              }}
+            <motion.div
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.25, ease: EASE_OUT }}
             >
-              <span className="mono" style={{ fontSize: '12px', color: '#A1A1AA', letterSpacing: '0.05em' }}>
-                [INSTITUTIONAL_LEGAL_AI_STANDARDS]
+              <span
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  padding: '5px 16px',
+                  borderRadius: '980px',
+                  background: 'rgba(255, 255, 255, 0.08)',
+                  border: '1px solid rgba(255, 255, 255, 0.14)',
+                  color: '#FFFFFF',
+                  fontSize: '12.5px',
+                  fontWeight: '600',
+                  letterSpacing: '0.04em',
+                  textTransform: 'uppercase',
+                  marginBottom: '24px',
+                  backdropFilter: 'blur(8px)'
+                }}
+              >
+                [DOCU-GAURD_AI_2.0] · CRYPTOGRAPHIC LEGAL INTELLIGENCE
               </span>
-              <div style={{ display: 'flex', gap: '8px' }}>
-                <span className="badge badge-neutral">EQUAL JUSTICE UNDER LAW</span>
+            </motion.div>
+
+            <motion.h1
+              style={{
+                fontSize: 'clamp(42px, 6.8vw, 82px)',
+                fontWeight: 800,
+                letterSpacing: '-0.04em',
+                lineHeight: 1.05,
+                margin: '12px auto 22px',
+                maxWidth: '1000px',
+                color: '#FFFFFF'
+              }}
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.32, delay: 0.06, ease: EASE_OUT }}
+            >
+              Legal intelligence.<br />
+              <span
+                style={{
+                  background: 'linear-gradient(180deg, #FFFFFF 0%, #71717A 100%)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent'
+                }}
+              >
+                Cryptographically verified.
+              </span>
+            </motion.h1>
+
+            <motion.p
+              style={{
+                fontSize: 'clamp(17px, 2.2vw, 21px)',
+                lineHeight: 1.55,
+                color: '#D4D4D8',
+                maxWidth: '680px',
+                margin: '0 auto 36px',
+                letterSpacing: '-0.016em'
+              }}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3, delay: 0.12, ease: EASE_OUT }}
+            >
+              Understand, dissect, and cryptographically verify complex contracts in seconds. Built for counsel who demand institutional precision.
+            </motion.p>
+
+            {/* Minimalist Action Buttons */}
+            <motion.div
+              style={{
+                display: 'flex',
+                gap: '14px',
+                justifyContent: 'center',
+                alignItems: 'center',
+                flexWrap: 'wrap',
+                marginBottom: '56px'
+              }}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.28, delay: 0.18, ease: EASE_OUT }}
+            >
+              <motion.button className="btn-hero" onClick={handleCta} {...buttonMotion}>
+                {user ? 'Enter Chamber' : 'Start Firm Access'}
+              </motion.button>
+              <motion.button
+                className="btn-hero-ghost"
+                onClick={() => navigate('/login')}
+                {...buttonMotion}
+              >
+                Chamber Sign In →
+              </motion.button>
+            </motion.div>
+
+            {/* Landscape Lady Justice Dither Visual Frame */}
+            <motion.div
+              style={{
+                position: 'relative',
+                borderRadius: '24px',
+                overflow: 'hidden',
+                border: '1px solid rgba(255, 255, 255, 0.14)',
+                boxShadow: '0 30px 80px rgba(0, 0, 0, 0.95)',
+                background: '#000000'
+              }}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, delay: 0.24, ease: EASE_OUT }}
+            >
+              <img
+                src="/assets/lady-justice.jpg"
+                alt="Lady Justice Landscape Dither Art"
+                style={{
+                  width: '100%',
+                  maxHeight: '480px',
+                  objectFit: 'cover',
+                  display: 'block',
+                  filter: 'contrast(1.2) brightness(0.95)'
+                }}
+              />
+              <div
+                style={{
+                  position: 'absolute',
+                  inset: 0,
+                  background: 'linear-gradient(to top, #000000 0%, transparent 60%), radial-gradient(circle at 75% 50%, transparent 40%, rgba(0,0,0,0.7) 100%)',
+                  pointerEvents: 'none'
+                }}
+              />
+              {/* Quote in black empty space */}
+              <div
+                style={{
+                  position: 'absolute',
+                  top: '45%',
+                  left: '40px',
+                  transform: 'translateY(-50%)',
+                  maxWidth: '480px',
+                  zIndex: 2,
+                  textAlign: 'left'
+                }}
+              >
+                <p
+                  style={{
+                    margin: 0,
+                    fontSize: '22px',
+                    fontWeight: '600',
+                    lineHeight: '1.4',
+                    color: '#F4F4F5',
+                    letterSpacing: '-0.02em',
+                    fontStyle: 'italic'
+                  }}
+                >
+                  “Justice begins with the truth. Security protects it.”
+                </p>
               </div>
-            </div>
-          </motion.div>
-        </section>
+              <div
+                style={{
+                  position: 'absolute',
+                  bottom: '24px',
+                  left: '28px',
+                  right: '28px',
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  zIndex: 2
+                }}
+              >
+                <span className="mono" style={{ fontSize: '12px', color: '#A1A1AA', letterSpacing: '0.05em' }}>
+                  [JUSTITIA_ALGORITHM · UNBIASED_PRECISION]
+                </span>
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  <span className="badge badge-neutral" style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', color: '#D4D4D8' }}>
+                    EQUAL JUSTICE UNDER LAW
+                  </span>
+                </div>
+              </div>
+            </motion.div>
+          </section>
+        </div>
 
         {/* =========================================================
-            SECTION 2: BLACK MINIMALIST BENTO GRID
+            SECTION 2: BLACK MINIMALIST BENTO GRID WITH COURTROOM BACKDROP
             ========================================================= */}
         <section
           style={{
             maxWidth: '1180px',
-            margin: '64px auto 0',
+            margin: '72px auto 0',
             padding: '0 24px'
           }}
         >
-          <div style={{ textAlign: 'center', marginBottom: '44px' }}>
-            <span className="eyebrow-bullet">CORE INNOVATIONS</span>
-            <h2 style={{ fontSize: '36px', letterSpacing: '-0.03em', marginTop: '8px', color: '#FFFFFF' }}>
-              Engineered with courtroom rigor.
-            </h2>
-            <p style={{ maxWidth: '580px', margin: '8px auto 0', color: '#A1A1AA', fontSize: '16px' }}>
-              Four pillars of intelligence and cryptographic trust powering top corporate law teams.
-            </p>
-          </div>
+          <div className="courtroom-backdrop-section">
+            <div className="courtroom-bg-art" />
+            <div className="courtroom-bg-overlay" />
 
-          <div className="grid grid-2" style={{ gap: '22px' }}>
+            <div style={{ position: 'relative', zIndex: 2 }}>
+              <div style={{ textAlign: 'center', marginBottom: '44px' }}>
+                <span className="eyebrow-bullet">CORE INNOVATIONS</span>
+                <h2 style={{ fontSize: '36px', letterSpacing: '-0.03em', marginTop: '8px', color: '#FFFFFF' }}>
+                  Engineered with courtroom rigor.
+                </h2>
+                <p style={{ maxWidth: '580px', margin: '8px auto 0', color: '#D4D4D8', fontSize: '16px' }}>
+                  Four pillars of intelligence and cryptographic trust powering top corporate law teams.
+                </p>
+              </div>
+
+              <div className="grid grid-2" style={{ gap: '22px' }}>
             {/* Bento Card 1: Neural Reasoner */}
             <motion.div
               className="card"
@@ -339,7 +380,9 @@ export const Landing = () => {
               </p>
             </motion.div>
           </div>
-        </section>
+        </div>
+      </div>
+    </section>
 
         {/* =========================================================
             SECTION 3: KEYNOTE FEATURE SPOTLIGHT

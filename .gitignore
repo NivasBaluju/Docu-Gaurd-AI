@@ -7,3 +7,4 @@ data/db/*.pem
 data/uploads/*
 !data/uploads/.gitkeep
 !data/db/.gitkeep
+scratch/
