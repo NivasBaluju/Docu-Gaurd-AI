@@ -84,6 +84,11 @@ export const Topbar = () => {
             <span className="text-mid small bold" style={{ fontSize: '13px' }}>
               {user.name}
             </span>
+            {(user.role === 'admin' || (user.email || '').toLowerCase() === 'balujunivas@gmail.com') && (
+              <span className="badge badge-gold" style={{ fontSize: '10px', padding: '2px 6px' }}>
+                ADMIN
+              </span>
+            )}
             <motion.button
               className="btn btn-ghost btn-sm"
               onClick={logout}

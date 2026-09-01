@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import Api from '../services/api';
+import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import PageTransition from '../components/common/PageTransition';
 
 import ObservatoryRadial from '../components/security/ObservatoryRadial';
 import ObservatoryDetailPanel from '../components/security/ObservatoryDetailPanel';
 import SecuritySignalsStrip from '../components/security/SecuritySignalsStrip';
+import AdminWatchtower from '../components/security/AdminWatchtower';
 
 export const Security = () => {
   const [dash, setDash] = useState({ auditLedger: { valid: true, totalBlocks: 124 }, documentsUploaded: 0 });
@@ -18,6 +20,7 @@ export const Security = () => {
   const [verifyingChain, setVerifyingChain] = useState(false);
   const [selectedNode, setSelectedNode] = useState(null);
 
+  const { user } = useAuth();
   const { toast } = useToast();
 
   const fetchSecurityData = async () => {
@@ -82,6 +85,8 @@ export const Security = () => {
   const threatsCount = (threats?.threats || []).filter(t => t.severity === 'high').length;
   const auditBlocksCount = dash?.auditLedger?.totalBlocks || (audit?.blocks || []).length || 124;
 
+  const isAdmin = user?.role === 'admin' || (user?.email || '').toLowerCase() === 'balujunivas@gmail.com';
+
   return (
     <PageTransition>
       {/* Header */}
@@ -133,6 +138,9 @@ export const Security = () => {
         isAuditValid={isAuditValid}
         activeSessionsCount={activeSessionsCount}
       />
+
+      {/* Special Admin Watchtower Radar (Only visible to Institutional Admin / balujunivas@gmail.com) */}
+      {isAdmin && <AdminWatchtower />}
     </PageTransition>
   );
 };

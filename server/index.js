@@ -13,6 +13,7 @@ const aiRoutes = require('./routes/ai');
 const contractRoutes = require('./routes/contracts');
 const securityRoutes = require('./routes/security');
 const shareRoutes = require('./routes/share');
+const adminRoutes = require('./routes/admin');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -55,6 +56,7 @@ app.use('/api/ai', aiRoutes);
 app.use('/api/contracts', contractRoutes);
 app.use('/api/security', securityRoutes);
 app.use('/api/share', shareRoutes);
+app.use('/api/admin', adminRoutes);
 
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', service: 'Docu-Gaurd AI', time: new Date().toISOString() });
