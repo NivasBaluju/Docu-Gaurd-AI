@@ -189,23 +189,6 @@ export const Login = () => {
                 Create one
               </Link>
             </div>
-
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '8px',
-                marginTop: '16px',
-                paddingTop: '16px',
-                borderTop: '1px solid rgba(255, 255, 255, 0.06)',
-                fontSize: '11px',
-                color: '#71717A'
-              }}
-            >
-              <span className="dot dot-emerald" />
-              <span>Zero-Trust 256-Bit Hardware Enclave Active</span>
-            </div>
           </div>
         </motion.div>
       </div>
