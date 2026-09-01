@@ -824,12 +824,54 @@ input:focus, select:focus, textarea:focus {
   color: #FFFFFF;
   font-family: var(--font-sans);
   font-size: 13.5px;
-  transition: border-color 0.15s ease;
+  transition: border-color 0.15s ease, background 0.15s ease;
 }
 .auth-input-field:focus {
   outline: none;
   border-color: #FFFFFF;
   background: #1B1B1F;
+}
+.auth-input-field.input-error {
+  border-color: #EF4444 !important;
+  background: rgba(239, 68, 68, 0.05) !important;
+}
+
+.auth-password-wrapper {
+  position: relative;
+  width: 100%;
+}
+.auth-password-wrapper .auth-input-field {
+  padding-right: 40px;
+}
+.auth-password-toggle {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: #71717A;
+  cursor: pointer;
+  padding: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: color 0.15s ease, background 0.15s ease;
+}
+.auth-password-toggle:hover {
+  color: #FFFFFF;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.auth-field-error {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11.5px;
+  color: #EF4444;
+  margin-top: 5px;
+  font-weight: 500;
 }
 
 .auth-btn-action {

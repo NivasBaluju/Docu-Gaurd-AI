@@ -1,74 +1,102 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion } from 'motion/react';
 import Api from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
-import Icon from '../components/common/Icon';
 import PageTransition from '../components/common/PageTransition';
-import { buttonMotion, EASE_OUT } from '../styles/motion';
+import { buttonMotion } from '../styles/motion';
 
 export const Mfa = () => {
-  const [totpCode, setTotpCode] = useState('');
   const [otpCode, setOtpCode] = useState('');
-  const [otpSent, setOtpSent] = useState(false);
-  const [devModeInfo, setDevModeInfo] = useState(null);
+  const [otpError, setOtpError] = useState('');
+  const [devCode, setDevCode] = useState(null);
+  const [requesting, setRequesting] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [resendCooldown, setResendCooldown] = useState(0);
+
   const { login } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
 
   const preToken = sessionStorage.getItem('preToken');
 
+  // Auto-request OTP when landing on the page
   useEffect(() => {
     if (!preToken) {
       navigate('/login', { replace: true });
+      return;
     }
+
+    let isMounted = true;
+    async function initOtp() {
+      try {
+        const r = await Api.post('/api/auth/mfa/otp/request', { preToken });
+        if (isMounted && r.devMode) {
+          setDevCode(r.devCode);
+        }
+      } catch (err) {
+        console.warn('Initial OTP request note:', err.message);
+      }
+    }
+    initOtp();
+
+    return () => {
+      isMounted = false;
+    };
   }, [preToken, navigate]);
 
-  const handleTotpSubmit = async (e) => {
-    e.preventDefault();
-    if (!preToken) return;
-    setSubmitting(true);
-    try {
-      const result = await Api.post('/api/auth/mfa/totp/verify', { preToken, code: totpCode });
-      sessionStorage.removeItem('preToken');
-      await login(result.token, result.user);
-      toast('MFA verified — signed in', 'ok');
-      navigate('/dashboard');
-    } catch (err) {
-      toast(err.message || 'Verification failed', 'error');
-    } finally {
-      setSubmitting(false);
-    }
+  // Resend cooldown timer
+  useEffect(() => {
+    if (resendCooldown <= 0) return;
+    const timer = setInterval(() => {
+      setResendCooldown((prev) => prev - 1);
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [resendCooldown]);
+
+  const handleCodeChange = (e) => {
+    setOtpCode(e.target.value);
+    if (otpError) setOtpError('');
   };
 
   const handleRequestOtp = async () => {
-    if (!preToken) return;
+    if (!preToken || resendCooldown > 0) return;
+    setRequesting(true);
+    setOtpError('');
     try {
       const r = await Api.post('/api/auth/mfa/otp/request', { preToken });
-      setOtpSent(true);
       if (r.devMode) {
-        setDevModeInfo(r.devCode);
+        setDevCode(r.devCode);
       }
-      toast(r.devMode ? 'Dev mode: OTP shown on screen' : 'OTP sent to your email', 'info');
+      setResendCooldown(30);
+      toast(r.devMode ? 'Dev mode: New code generated' : 'Verification code sent to your email', 'info');
     } catch (err) {
-      toast(err.message || 'Failed to request OTP', 'error');
+      setOtpError(err.message || 'Failed to request new code');
+    } finally {
+      setRequesting(false);
     }
   };
 
-  const handleOtpSubmit = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!preToken) return;
+
+    if (!otpCode.trim() || otpCode.trim().length < 6) {
+      setOtpError('Please enter the 6-digit verification code');
+      return;
+    }
+
     setSubmitting(true);
+    setOtpError('');
     try {
-      const result = await Api.post('/api/auth/mfa/otp/verify', { preToken, code: otpCode });
+      const result = await Api.post('/api/auth/mfa/otp/verify', { preToken, code: otpCode.trim() });
       sessionStorage.removeItem('preToken');
       await login(result.token, result.user);
-      toast('MFA verified — signed in', 'ok');
+      toast('Identity verified — signed in', 'ok');
       navigate('/dashboard');
     } catch (err) {
-      toast(err.message || 'OTP verification failed', 'error');
+      setOtpError('Incorrect or expired verification code. Please check your email or request a new code.');
     } finally {
       setSubmitting(false);
     }
@@ -103,34 +131,52 @@ export const Mfa = () => {
           <div style={{ padding: '24px 28px 28px' }}>
             <div style={{ textAlign: 'center', marginBottom: '22px' }}>
               <span className="mono" style={{ fontSize: '11px', color: '#71717A', letterSpacing: '0.06em' }}>
-                [ZERO-TRUST_SECURITY]
+                [EMAIL_VERIFICATION]
               </span>
               <h1 style={{ fontSize: '22px', fontWeight: '700', letterSpacing: '-0.03em', color: '#FFFFFF', margin: '4px 0 2px' }}>
-                Two-Factor Auth
+                Security Verification
               </h1>
               <p style={{ fontSize: '13px', color: '#A1A1AA', margin: 0 }}>
-                Enter the 6-digit code from your authenticator
+                Enter the 6-digit code sent to your registered email
               </p>
+              {devCode && (
+                <div style={{ marginTop: '8px' }}>
+                  <span className="badge badge-warn" style={{ fontSize: '11px' }}>
+                    DEV CODE: {devCode}
+                  </span>
+                </div>
+              )}
             </div>
 
-            <form id="totpForm" onSubmit={handleTotpSubmit}>
+            <form id="otpForm" onSubmit={handleSubmit} noValidate>
               <div style={{ marginBottom: '18px' }}>
-                <label style={{ display: 'block', fontSize: '12px', fontWeight: '500', color: '#A1A1AA', marginBottom: '5px' }}>
-                  Authenticator Passcode
+                <label style={{ display: 'block', fontSize: '12px', fontWeight: '500', color: '#A1A1AA', marginBottom: '6px' }}>
+                  Verification Code
                 </label>
                 <input
-                  id="mfa-code"
+                  id="mfa-otp-code"
                   name="code"
                   maxLength={6}
                   inputMode="numeric"
-                  required
                   autoFocus
-                  placeholder="000000"
-                  className="auth-input-field"
-                  style={{ textAlign: 'center', letterSpacing: '6px', fontSize: '18px', fontWeight: '700' }}
-                  value={totpCode}
-                  onChange={(e) => setTotpCode(e.target.value)}
+                  required
+                  className={`auth-input-field ${otpError ? 'input-error' : ''}`}
+                  style={{
+                    textAlign: 'center',
+                    letterSpacing: '8px',
+                    fontSize: '20px',
+                    fontWeight: '700',
+                    fontFamily: 'var(--font-mono)'
+                  }}
+                  value={otpCode}
+                  onChange={handleCodeChange}
                 />
+                {otpError && (
+                  <div className="auth-field-error" style={{ justifyContent: 'center', textAlign: 'center' }}>
+                    <span>⚠</span>
+                    <span>{otpError}</span>
+                  </div>
+                )}
               </div>
 
               <motion.button
@@ -139,60 +185,43 @@ export const Mfa = () => {
                 disabled={submitting}
                 {...buttonMotion}
               >
-                {submitting ? 'Verifying…' : 'Verify & Authorize'}
+                {submitting ? 'Verifying Code…' : 'Verify & Sign In'}
               </motion.button>
             </form>
 
-            <motion.button
-              className="btn btn-outline btn-block mt-12"
-              id="reqOtpBtn"
-              style={{ borderRadius: '8px', padding: '9px', fontSize: '13px', marginTop: '10px' }}
-              onClick={handleRequestOtp}
-              type="button"
-              {...buttonMotion}
-            >
-              <Icon.chat /> Send Email OTP instead
-            </motion.button>
+            {/* Resend Code Action */}
+            <div style={{ textAlign: 'center', marginTop: '16px' }}>
+              <button
+                type="button"
+                className="btn btn-ghost btn-sm"
+                onClick={handleRequestOtp}
+                disabled={requesting || resendCooldown > 0}
+                style={{ fontSize: '12px', color: resendCooldown > 0 ? '#71717A' : '#A1A1AA' }}
+              >
+                {requesting
+                  ? 'Sending code…'
+                  : resendCooldown > 0
+                  ? `Resend code in ${resendCooldown}s`
+                  : 'Didn’t receive code? Resend email'}
+              </button>
+            </div>
 
-            <AnimatePresence>
-              {otpSent && (
-                <motion.div
-                  id="otpArea"
-                  initial={{ opacity: 0, y: 8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.22, ease: EASE_OUT }}
-                >
-                  <form id="otpForm" className="mt-16" onSubmit={handleOtpSubmit}>
-                    <div style={{ marginBottom: '12px' }}>
-                      <label style={{ display: 'block', fontSize: '12px', fontWeight: '500', color: '#A1A1AA', marginBottom: '5px' }}>
-                        Email OTP Code{' '}
-                        {devModeInfo && <span className="badge badge-warn">DEV: {devModeInfo}</span>}
-                      </label>
-                      <input
-                        name="code"
-                        maxLength={6}
-                        inputMode="numeric"
-                        required
-                        placeholder="000000"
-                        className="auth-input-field"
-                        style={{ textAlign: 'center', letterSpacing: '6px', fontSize: '18px', fontWeight: '700' }}
-                        value={otpCode}
-                        onChange={(e) => setOtpCode(e.target.value)}
-                      />
-                    </div>
-                    <motion.button
-                      className="auth-btn-action"
-                      type="submit"
-                      disabled={submitting}
-                      {...buttonMotion}
-                    >
-                      {submitting ? 'Verifying OTP…' : 'Verify OTP'}
-                    </motion.button>
-                  </form>
-                </motion.div>
-              )}
-            </AnimatePresence>
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '8px',
+                marginTop: '16px',
+                paddingTop: '16px',
+                borderTop: '1px solid rgba(255, 255, 255, 0.06)',
+                fontSize: '11px',
+                color: '#71717A'
+              }}
+            >
+              <span className="dot dot-emerald" />
+              <span>Zero-Trust One-Time Password Enforcement</span>
+            </div>
           </div>
         </motion.div>
       </div>

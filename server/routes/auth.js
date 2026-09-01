@@ -52,19 +52,19 @@ router.post('/login', async (req, res) => {
     const user = rows[0];
     if (!user) {
       await logThreat(null, req.ip, 'medium', 'auth', `Failed login attempt for unknown email ${email}`);
-      return res.status(401).json({ error: 'Invalid email or password' });
+      return res.status(401).json({ error: 'No account found with this email address', field: 'email' });
     }
     const ok = await bcrypt.compare(password || '', user.password_hash);
     if (!ok) {
       await logThreat(user.id, req.ip, 'medium', 'auth', 'Failed login attempt: wrong password');
-      return res.status(401).json({ error: 'Invalid email or password' });
+      return res.status(401).json({ error: 'Incorrect password. Please try again.', field: 'password' });
     }
 
     const requireMfa = !!user.mfa_enabled || process.env.REQUIRE_MFA !== 'false';
     if (requireMfa) {
       // Issue a short-lived pre-auth token; MFA verification completes login.
       const preToken = jwt.sign({ preauth: true, userId: user.id }, JWT_SECRET, { expiresIn: '10m' });
-      return res.json({ mfaRequired: true, method: 'totp', preToken });
+      return res.json({ mfaRequired: true, method: 'email', preToken });
     }
 
     const sessionId = uuidv4();
@@ -279,7 +279,7 @@ router.post('/mfa/otp/verify', async (req, res) => {
 
     if (!valid) {
       await logThreat(user.id, req.ip, 'high', 'mfa', 'Failed OTP verification attempt');
-      return res.status(401).json({ error: 'Invalid or expired code' });
+      return res.status(401).json({ error: 'Incorrect or expired verification code. Please try again.', field: 'otp' });
     }
 
     const sessionId = uuidv4();

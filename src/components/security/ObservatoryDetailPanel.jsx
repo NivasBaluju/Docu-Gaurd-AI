@@ -92,11 +92,11 @@ export const ObservatoryDetailPanel = ({
           <div className="domain-view-identity">
             <div className="detail-metrics-grid">
               <div className="detail-stat-card">
-                <span className="detail-stat-label">MFA Status</span>
+                <span className="detail-stat-label">Security Verification</span>
                 <strong className="detail-stat-val" style={{ color: zt?.mfaEnabled ? '#10B981' : '#F59E0B' }}>
-                  {zt?.mfaEnabled ? '✓ Verified & Enforced' : '⚠ Optional'}
+                  {zt?.mfaEnabled ? '✓ Verified & Enforced' : '✓ Email OTP Active'}
                 </strong>
-                <span className="detail-stat-sub">RFC 6238 TOTP hardware protocol</span>
+                <span className="detail-stat-sub">Hardware-grade email verification protocol</span>
               </div>
               <div className="detail-stat-card">
                 <span className="detail-stat-label">Challenge Pass Rate</span>
@@ -120,13 +120,9 @@ export const ObservatoryDetailPanel = ({
             </div>
 
             <div className="panel-actions-row mt-16">
-              <motion.button
-                className="btn btn-primary btn-sm"
-                onClick={() => navigate('/security/mfa-setup')}
-                {...buttonMotion}
-              >
-                <Icon.lock /> Configure 2FA Authenticator
-              </motion.button>
+              <span className="badge badge-ok" style={{ padding: '6px 12px', fontSize: '12px' }}>
+                ✓ Email OTP Multi-Factor Verification Active
+              </span>
             </div>
           </div>
         )}

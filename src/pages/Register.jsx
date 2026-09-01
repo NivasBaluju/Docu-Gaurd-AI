@@ -11,19 +11,62 @@ export const Register = () => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState({ name: '', email: '', password: '' });
   const [submitting, setSubmitting] = useState(false);
+
   const { toast } = useToast();
   const navigate = useNavigate();
 
+  const handleNameChange = (e) => {
+    setName(e.target.value);
+    if (fieldErrors.name) setFieldErrors(prev => ({ ...prev, name: '' }));
+  };
+
+  const handleEmailChange = (e) => {
+    setEmail(e.target.value);
+    if (fieldErrors.email) setFieldErrors(prev => ({ ...prev, email: '' }));
+  };
+
+  const handlePasswordChange = (e) => {
+    setPassword(e.target.value);
+    if (fieldErrors.password) setFieldErrors(prev => ({ ...prev, password: '' }));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setFieldErrors({ name: '', email: '', password: '' });
+
+    let hasErr = false;
+    if (!name.trim()) {
+      setFieldErrors(prev => ({ ...prev, name: 'Please enter your full name' }));
+      hasErr = true;
+    }
+    if (!email.trim()) {
+      setFieldErrors(prev => ({ ...prev, email: 'Please enter your work email' }));
+      hasErr = true;
+    }
+    if (!password || password.length < 8) {
+      setFieldErrors(prev => ({ ...prev, password: 'Password must be at least 8 characters' }));
+      hasErr = true;
+    }
+    if (hasErr) return;
+
     setSubmitting(true);
     try {
       await Api.post('/api/auth/register', { name, email, password });
       toast('Account created — please sign in', 'ok');
       navigate('/login');
     } catch (err) {
-      toast(err.message || 'Registration failed', 'error');
+      const errMsg = err.message || 'Registration failed';
+      const lower = errMsg.toLowerCase();
+      if (lower.includes('email already exists') || lower.includes('email')) {
+        setFieldErrors(prev => ({ ...prev, email: errMsg }));
+      } else if (lower.includes('password')) {
+        setFieldErrors(prev => ({ ...prev, password: errMsg }));
+      } else {
+        setFieldErrors(prev => ({ ...prev, email: errMsg }));
+      }
     } finally {
       setSubmitting(false);
     }
@@ -66,56 +109,95 @@ export const Register = () => {
               </p>
             </div>
 
-            <form id="regForm" onSubmit={handleSubmit}>
+            <form id="regForm" onSubmit={handleSubmit} noValidate>
+              {/* Full Name */}
               <div style={{ marginBottom: '14px' }}>
                 <label style={{ display: 'block', fontSize: '12px', fontWeight: '500', color: '#A1A1AA', marginBottom: '5px' }}>
                   Full name
                 </label>
                 <input
                   id="reg-name"
-                  className="auth-input-field"
+                  className={`auth-input-field ${fieldErrors.name ? 'input-error' : ''}`}
                   name="name"
                   value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  placeholder="Jane Smith, Esq."
+                  onChange={handleNameChange}
                   autoComplete="name"
                   required
                 />
+                {fieldErrors.name && (
+                  <div className="auth-field-error">
+                    <span>⚠</span>
+                    <span>{fieldErrors.name}</span>
+                  </div>
+                )}
               </div>
 
+              {/* Work Email */}
               <div style={{ marginBottom: '14px' }}>
                 <label style={{ display: 'block', fontSize: '12px', fontWeight: '500', color: '#A1A1AA', marginBottom: '5px' }}>
                   Work email
                 </label>
                 <input
                   id="reg-email"
-                  className="auth-input-field"
+                  className={`auth-input-field ${fieldErrors.email ? 'input-error' : ''}`}
                   type="email"
                   name="email"
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="jane@lawfirm.com"
+                  onChange={handleEmailChange}
                   autoComplete="email"
                   required
                 />
+                {fieldErrors.email && (
+                  <div className="auth-field-error">
+                    <span>⚠</span>
+                    <span>{fieldErrors.email}</span>
+                  </div>
+                )}
               </div>
 
+              {/* Password with Show/Hide Toggle */}
               <div style={{ marginBottom: '20px' }}>
                 <label style={{ display: 'block', fontSize: '12px', fontWeight: '500', color: '#A1A1AA', marginBottom: '5px' }}>
                   Password
                 </label>
-                <input
-                  id="reg-pw"
-                  className="auth-input-field"
-                  type="password"
-                  name="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Min. 8 characters"
-                  minLength={8}
-                  autoComplete="new-password"
-                  required
-                />
+                <div className="auth-password-wrapper">
+                  <input
+                    id="reg-pw"
+                    className={`auth-input-field ${fieldErrors.password ? 'input-error' : ''}`}
+                    type={showPassword ? 'text' : 'password'}
+                    name="password"
+                    value={password}
+                    onChange={handlePasswordChange}
+                    minLength={8}
+                    autoComplete="new-password"
+                    required
+                  />
+                  <button
+                    type="button"
+                    className="auth-password-toggle"
+                    onClick={() => setShowPassword(!showPassword)}
+                    aria-label={showPassword ? 'Hide password' : 'Show password'}
+                    title={showPassword ? 'Hide password' : 'Show password'}
+                  >
+                    {showPassword ? (
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
+                        <line x1="1" y1="1" x2="23" y2="23" />
+                      </svg>
+                    ) : (
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                        <circle cx="12" cy="12" r="3" />
+                      </svg>
+                    )}
+                  </button>
+                </div>
+                {fieldErrors.password && (
+                  <div className="auth-field-error">
+                    <span>⚠</span>
+                    <span>{fieldErrors.password}</span>
+                  </div>
+                )}
               </div>
 
               <motion.button
@@ -138,18 +220,18 @@ export const Register = () => {
             <div
               style={{
                 display: 'flex',
+                alignItems: 'center',
                 justifyContent: 'center',
-                gap: '10px',
-                marginTop: '20px',
+                gap: '8px',
+                marginTop: '16px',
                 paddingTop: '16px',
-                borderTop: '1px solid rgba(255, 255, 255, 0.08)'
+                borderTop: '1px solid rgba(255, 255, 255, 0.06)',
+                fontSize: '11px',
+                color: '#71717A'
               }}
             >
-              <span className="mono" style={{ fontSize: '10.5px', color: '#52525B' }}>Hardware MFA</span>
-              <span className="mono" style={{ fontSize: '10.5px', color: '#52525B' }}>·</span>
-              <span className="mono" style={{ fontSize: '10.5px', color: '#52525B' }}>AES-256-GCM</span>
-              <span className="mono" style={{ fontSize: '10.5px', color: '#52525B' }}>·</span>
-              <span className="mono" style={{ fontSize: '10.5px', color: '#52525B' }}>GDPR</span>
+              <span className="dot dot-emerald" />
+              <span>Zero-Trust 256-Bit Hardware Enclave Active</span>
             </div>
           </div>
         </motion.div>
