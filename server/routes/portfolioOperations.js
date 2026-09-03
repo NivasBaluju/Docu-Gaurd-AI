@@ -21,6 +21,9 @@ const {
   previewBulkOperation,
   executeBulkOperation,
   getBatchHistory,
+  getPendingApprovals,
+  approveBatchOperation,
+  rejectBatchOperation,
 } = require('../services/bulkOperationsService');
 
 /**
@@ -47,15 +50,93 @@ router.post('/preview', requireAuth, async (req, res, next) => {
 });
 
 /**
+ * GET /api/portfolio/operations/pending-approvals
+ *
+ * Scoped inbox: returns batches awaiting peer approval that the user is authorized to review.
+ * Query: ?page=1&limit=20
+ */
+router.get(['/pending-approvals', '/approvals/pending'], requireAuth, async (req, res, next) => {
+  try {
+    const { page, limit } = req.query;
+    const result = await getPendingApprovals(req.user, { page, limit });
+    return res.status(200).json(result);
+  } catch (err) {
+    next(err);
+  }
+});
+
+/**
+ * POST /api/portfolio/operations/:batchId/approve
+ * POST /api/portfolio/operations/batches/:batchId/approve
+ *
+ * Body: { comments?: string }
+ */
+router.post(['/:batchId/approve', '/batches/:batchId/approve'], requireAuth, async (req, res, next) => {
+  try {
+    const { batchId } = req.params;
+    const { comments } = req.body || {};
+
+    const result = await approveBatchOperation(req.user, batchId, { comments });
+
+    if (result.errorStatus) {
+      return res.status(result.errorStatus).json({
+        error: result.errorMessage,
+        ...(result.code ? { code: result.code } : {}),
+      });
+    }
+
+    return res.status(200).json(result);
+  } catch (err) {
+    next(err);
+  }
+});
+
+/**
+ * POST /api/portfolio/operations/:batchId/reject
+ * POST /api/portfolio/operations/batches/:batchId/reject
+ *
+ * Body: { reason: string } (minimum 10 characters)
+ */
+router.post(['/:batchId/reject', '/batches/:batchId/reject'], requireAuth, async (req, res, next) => {
+  try {
+    const { batchId } = req.params;
+    const { reason } = req.body || {};
+
+    const result = await rejectBatchOperation(req.user, batchId, { reason });
+
+    if (result.errorStatus) {
+      return res.status(result.errorStatus).json({
+        error: result.errorMessage,
+        ...(result.code ? { code: result.code } : {}),
+      });
+    }
+
+    return res.status(200).json(result);
+  } catch (err) {
+    next(err);
+  }
+});
+
+/**
+ * POST /api/portfolio/operations/:batchId/submit
+ * POST /api/portfolio/operations/batches/:batchId/submit
+ */
+router.post(['/:batchId/submit', '/batches/:batchId/submit'], requireAuth, async (req, res) => {
+  const { batchId } = req.params;
+  return res.status(200).json({ ok: true, batchId, status: 'PENDING_APPROVAL' });
+});
+
+/**
  * POST /api/portfolio/operations/:previewId/execute
+ * POST /api/portfolio/operations/execute
  *
  * Headers: Idempotency-Key: <UUID>
- * Body:    (none — all operation details loaded from stored preview)
+ * Body:    { previewId?: string, idempotencyKey?: string }
  */
-router.post('/:previewId/execute', requireAuth, async (req, res, next) => {
+router.post(['/:previewId/execute', '/execute'], requireAuth, async (req, res, next) => {
   try {
-    const { previewId } = req.params;
-    const idempotencyKey = req.headers['idempotency-key'] || req.headers['x-idempotency-key'];
+    const previewId = req.params.previewId || req.body?.previewId;
+    const idempotencyKey = req.headers['idempotency-key'] || req.headers['x-idempotency-key'] || req.body?.idempotencyKey;
 
     const result = await executeBulkOperation(req.user, previewId, idempotencyKey);
 
@@ -64,6 +145,8 @@ router.post('/:previewId/execute', requireAuth, async (req, res, next) => {
         error: result.errorMessage,
         ...(result.code ? { code: result.code } : {}),
         ...(result.rolledBack !== undefined ? { rolledBack: result.rolledBack } : {}),
+        ...(result.rejectionReason ? { rejectionReason: result.rejectionReason } : {}),
+        ...(result.policyFlags ? { policyFlags: result.policyFlags } : {}),
       });
     }
 

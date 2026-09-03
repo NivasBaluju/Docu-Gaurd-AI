@@ -1,0 +1,43 @@
+[
+  {
+    "slug": "merger-guidelines-practical-analysis",
+    "title": "What the latest merger guidelines actually change",
+    "dek": "A practical read of the update — and what it means for deal timelines this year.",
+    "category": "Regulatory Clearance",
+    "author": "Eleanor Cross, Principal Counsel",
+    "date": "September 2025",
+    "readTime": "4 min read",
+    "content": [
+      "Every update to merger guidance arrives with a wave of commentary predicting the end of deal-making as we know it. Most of that commentary is wrong, or at least early. The practical question for a general counsel isn't what the guidelines say in the abstract — it's what changes in the review timeline and the evidence regulators will now expect to see at filing.",
+      "Three changes are worth planning around now. First, expect earlier and more detailed information requests, particularly on market definition — build that analysis before filing, not after the first request arrives. Second, the guidance narrows the space for efficiencies arguments to save a deal that's otherwise contested; if efficiencies are central to your case, that argument needs to be built with real data from day one, not asserted late. Third, and most practically: timelines are lengthening for any deal that touches more than one regulator, so build the extra weeks into deal certainty language now rather than renegotiating it under pressure later.",
+      "None of this means fewer deals close. It means the deals that close are the ones prepared for this version of the review, not the last one."
+    ]
+  },
+  {
+    "slug": "deadlock-provisions-joint-ventures",
+    "title": "The clause everyone skips in a joint venture agreement",
+    "dek": "Deadlock provisions rarely get real attention until the moment they're the only clause that matters.",
+    "category": "Contract Diligence",
+    "author": "Marcus Ihejirika, Dispute Strategy Lead",
+    "date": "August 2025",
+    "readTime": "3 min read",
+    "content": [
+      "Joint venture agreements get the most negotiating attention on governance and economics, and the least on what happens when the partners simply disagree and can't move forward. That's backwards. A well-drafted deadlock provision is the clause that actually determines whether a JV survives its first real disagreement — and most disagreements are ordinary, not dramatic: a budget dispute, a disagreement on a hire, a difference on strategy in year three.",
+      "The provisions worth negotiating hard are the ones nobody wants to imagine using: a genuine buy-sell mechanism with a price-setting method both sides would accept even if they're the one being bought out, and an escalation path with real deadlines, not indefinite 'good faith discussion' language. Draft the deadlock clause as if you already know you'll need it — because on a long enough timeline, most JVs eventually do."
+    ]
+  },
+  {
+    "slug": "cryptographic-non-repudiation-contracts",
+    "title": "Cryptographic non-repudiation in enterprise contract governance",
+    "dek": "Why audit logs are failing in cross-border disputes — and how append-only SHA-256 ledgers change evidential weight.",
+    "category": "Security & Governance",
+    "author": "Priya Naidu, Systems & IP Counsel",
+    "date": "July 2025",
+    "readTime": "5 min read",
+    "content": [
+      "In commercial litigation, standard database audit trails are increasingly challenged for mutability. An administrative user with root access can modify an approval timestamp or delete a compliance note without leaving an external trace. When multi-million dollar liability hinges on whether a notice was reviewed before 17:00 UTC, internal database logs rarely survive aggressive discovery.",
+      "Cryptographic append-only ledgers solve this evidential problem. By hashing every contract state change, approval lineage, and policy flag into an unbroken SHA-256 Merkle chain, DocuGuard creates an unforgeable evidentiary record. The resulting evidence package is mathematically self-verifying: altering a single character in a contract clause breaks the canonical digest across the entire chain.",
+      "In enterprise governance, mathematical certainty will always outperform institutional trust."
+    ]
+  }
+]

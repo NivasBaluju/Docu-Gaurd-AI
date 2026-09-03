@@ -26,9 +26,10 @@ UPLOADS_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'
 def get_documents():
     """
     GET /api/documents
-    Returns list of documents from PostgreSQL database
+    Internal service endpoint. Requires user_id parameter when called internally.
     """
-    docs = DocumentModel.get_all()
+    user_id = request.args.get('user_id')
+    docs = DocumentModel.get_all(user_id=user_id)
     return jsonify(docs), 200
 
 # -------------------------------------------------------------

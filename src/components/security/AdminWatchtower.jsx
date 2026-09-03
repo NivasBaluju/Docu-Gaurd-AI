@@ -82,7 +82,7 @@ export const AdminWatchtower = () => {
               Risky Users & Threat Radar
             </h2>
             <p className="text-lo small" style={{ margin: 0 }}>
-              Live cross-tenant anomaly radar and emergency session quarantine authority for <strong>balujunivas@gmail.com</strong>.
+              Live cross-tenant anomaly radar and emergency session quarantine authority for institutional administrators.
             </p>
           </div>
 
@@ -185,7 +185,7 @@ export const AdminWatchtower = () => {
                 </tr>
               ) : (
                 filteredUsers.map((u) => {
-                  const isBaluju = (u.email || '').toLowerCase() === 'balujunivas@gmail.com';
+                  const isAdmin = u.role === 'admin';
                   const trustColor = u.minTrust >= 85 ? '#10B981' : u.minTrust >= 60 ? '#F59E0B' : '#EF4444';
                   const riskBadge =
                     u.riskLevel === 'CRITICAL_RISK'
@@ -201,7 +201,7 @@ export const AdminWatchtower = () => {
                           <strong>{u.name || 'Anonymous User'}</strong>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '2px' }}>
                             <span className="mono text-lo small">{u.email}</span>
-                            {isBaluju && <span className="badge badge-gold" style={{ fontSize: '9px' }}>SUPERADMIN</span>}
+                            {isAdmin && <span className="badge badge-gold" style={{ fontSize: '9px' }}>ADMIN</span>}
                           </div>
                         </div>
                       </td>
@@ -251,7 +251,7 @@ export const AdminWatchtower = () => {
                       </td>
 
                       <td>
-                        {isBaluju ? (
+                        {isAdmin ? (
                           <span className="badge badge-neutral" style={{ fontSize: '10px' }}>PROTECTED</span>
                         ) : (
                           <motion.button

@@ -1,37 +1,52 @@
 import React, { lazy, Suspense } from 'react';
-import { HashRouter, Routes, Route, useLocation } from 'react-router-dom';
+import { HashRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { ToastProvider } from './context/ToastContext';
 import { AuthProvider, useAuth } from './context/AuthContext';
 
 import Topbar from './components/layout/Topbar';
 import Footer from './components/layout/Footer';
 import ProtectedRoute from './components/layout/ProtectedRoute';
-import SkeletonLoader from './components/common/SkeletonLoader';
+import ThinkingLoader from './components/common/ThinkingLoader';
+import LenisProvider from './components/motion/LenisProvider';
 
-// Lazy-loaded route components for production code splitting
+// Lazy-loaded Public Pages
 const Landing = lazy(() => import('./pages/Landing'));
+const Capabilities = lazy(() => import('./pages/Capabilities'));
+const CapabilityDetail = lazy(() => import('./pages/CapabilityDetail'));
+const Insights = lazy(() => import('./pages/Insights'));
+const InsightDetail = lazy(() => import('./pages/InsightDetail'));
+const Trust = lazy(() => import('./pages/Trust'));
+const Contact = lazy(() => import('./pages/Contact'));
+const Privacy = lazy(() => import('./pages/Privacy'));
+const Terms = lazy(() => import('./pages/Terms'));
+const Accessibility = lazy(() => import('./pages/Accessibility'));
+const NotFound = lazy(() => import('./pages/NotFound'));
+
+// Lazy-loaded Auth Pages
 const Register = lazy(() => import('./pages/Register'));
 const Login = lazy(() => import('./pages/Login'));
 const Mfa = lazy(() => import('./pages/Mfa'));
+
+// Lazy-loaded Protected Enterprise Pages
 const Dashboard = lazy(() => import('./pages/Dashboard'));
 const Upload = lazy(() => import('./pages/Upload'));
 const Documents = lazy(() => import('./pages/Documents'));
 const DocumentDetail = lazy(() => import('./pages/DocumentDetail'));
 const Contracts = lazy(() => import('./pages/Contracts'));
-const Deadlines = lazy(() => import('./pages/Deadlines'));
 const Security = lazy(() => import('./pages/Security'));
 const Portfolio = lazy(() => import('./pages/Portfolio'));
 const MfaSetup = lazy(() => import('./pages/MfaSetup'));
-const NotFound = lazy(() => import('./pages/NotFound'));
 
 import './styles/styles.css';
 
 const RouteLoadingFallback = () => (
-  <div style={{ padding: '32px', maxWidth: '1200px', margin: '0 auto' }}>
-    <SkeletonLoader.Text lines={2} width="280px" />
-    <div style={{ marginTop: '20px' }}>
-      <SkeletonLoader.Card count={2} height="220px" />
-    </div>
+  <div className="w-full bg-paper min-h-[70vh] flex items-center justify-center py-24">
+    <ThinkingLoader
+      state="working"
+      size={56}
+      caption="Loading DocuGuard chamber..."
+      subcaption="Establishing isolated session and preparing secure workspace"
+    />
   </div>
 );
 
@@ -51,16 +66,28 @@ const AppContent = () => {
   return (
     <>
       <Topbar />
-      <main id="app" role="main">
+      <main id="app" role="main" className="flex-1">
         <Suspense fallback={<RouteLoadingFallback />}>
           <Routes>
-            {/* Public Routes */}
+            {/* Public Marketing & Intelligence Routes */}
             <Route path="/" element={<Landing />} />
+            <Route path="/capabilities" element={<Capabilities />} />
+            <Route path="/capabilities/:slug" element={<CapabilityDetail />} />
+            <Route path="/intelligence" element={<Insights />} />
+            <Route path="/intelligence/:slug" element={<InsightDetail />} />
+            <Route path="/trust" element={<Trust />} />
+            <Route path="/about" element={<Trust />} />
+            <Route path="/contact" element={<Contact />} />
+            <Route path="/privacy" element={<Privacy />} />
+            <Route path="/terms" element={<Terms />} />
+            <Route path="/accessibility" element={<Accessibility />} />
+
+            {/* Authentication Routes */}
             <Route path="/register" element={<Register />} />
             <Route path="/login" element={<Login />} />
             <Route path="/mfa" element={<Mfa />} />
 
-            {/* Protected Routes */}
+            {/* Protected Enterprise Portal Routes (Preserved 100%) */}
             <Route
               path="/dashboard"
               element={
@@ -119,11 +146,7 @@ const AppContent = () => {
             />
             <Route
               path="/deadlines"
-              element={
-                <ProtectedRoute>
-                  <Deadlines />
-                </ProtectedRoute>
-              }
+              element={<Navigate to="/portfolio?tab=deadlines" replace />}
             />
             <Route
               path="/security"
@@ -157,7 +180,9 @@ export function App() {
     <ToastProvider>
       <AuthProvider>
         <HashRouter>
-          <AppContent />
+          <LenisProvider>
+            <AppContent />
+          </LenisProvider>
         </HashRouter>
       </AuthProvider>
     </ToastProvider>

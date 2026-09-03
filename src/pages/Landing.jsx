@@ -1,489 +1,171 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import { motion } from 'motion/react';
-import { useAuth } from '../context/AuthContext';
-import Icon from '../components/common/Icon';
-import PageTransition from '../components/common/PageTransition';
-import { buttonMotion, EASE_OUT, cardHoverMotion } from '../styles/motion';
+import { Link } from 'react-router-dom';
+import HeroEntrance from '../components/motion/HeroEntrance';
+import RedactionReveal from '../components/motion/RedactionReveal';
+import Button from '../components/ui/Button';
+import ContentCard from '../components/ui/ContentCard';
+import PullQuote from '../components/ui/PullQuote';
+import TextLinkButton from '../components/ui/TextLinkButton';
+import capabilitiesData from '../content/capabilities.json';
+import insightsData from '../content/insights.json';
 
-export const Landing = () => {
-  const { user } = useAuth();
-  const navigate = useNavigate();
-
-  const handleCta = () => {
-    navigate(user ? '/dashboard' : '/register');
-  };
-
+export function Landing() {
   return (
-    <PageTransition>
-      <div className="landing-container" style={{ background: '#000000', color: '#FFFFFF', paddingBottom: '72px' }}>
-        {/* =========================================================
-            SECTION 1: DARK MINIMALIST LEGAL HERO WITH LADY JUSTICE DITHER BACKDROP
-            ========================================================= */}
-        <div className="landing-hero-backdrop-wrapper">
-          <div className="landing-hero-bg-art" />
-          <div className="landing-hero-bg-overlay" />
-
-          <section
-            className="hero-section"
-            style={{
-              padding: '80px 24px 64px',
-              maxWidth: '1180px',
-              margin: '0 auto',
-              textAlign: 'center',
-              position: 'relative',
-              zIndex: 2
-            }}
+    <div className="w-full">
+      {/* SECTION 1: Full-Bleed Hero (Ink Section) */}
+      <section
+        className="section-ink relative flex items-center min-h-[90vh] py-24 sm:py-32"
+        style={{
+          backgroundColor: '#0A0A0A',
+          color: '#FAF9F6'
+        }}
+      >
+        <div className="container-wide w-full">
+          <HeroEntrance
+            headline="Judgment, applied with precision."
+            subheadline="DocuGuard AI evaluates the contracts that define an enterprise's future — diligence, risk mitigation, autonomous negotiation, and governance."
           >
-            <motion.div
-              initial={{ opacity: 0, y: 6 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.25, ease: EASE_OUT }}
-            >
-              <span
-                className="mono"
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                  padding: '4px 14px',
-                  borderRadius: '6px',
-                  background: 'rgba(255, 255, 255, 0.04)',
-                  border: '1px solid rgba(255, 255, 255, 0.08)',
-                  color: '#A1A1AA',
-                  fontSize: '11px',
-                  fontWeight: '500',
-                  letterSpacing: '0.04em',
-                  marginBottom: '28px'
-                }}
-              >
-                [DOCU-GUARD_AI_2.0] · CRYPTOGRAPHIC LEGAL INTELLIGENCE
-              </span>
-            </motion.div>
-
-            <motion.h1
-              style={{
-                fontFamily: 'var(--font-sans)',
-                fontSize: 'clamp(38px, 6.2vw, 72px)',
-                fontWeight: 650,
-                letterSpacing: '-0.03em',
-                lineHeight: 1.08,
-                margin: '0 auto 20px',
-                maxWidth: '960px',
-                color: '#FFFFFF'
-              }}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.32, delay: 0.06, ease: EASE_OUT }}
-            >
-              Legal intelligence.<br />
-              Cryptographically verified.
-            </motion.h1>
-
-            <motion.p
-              style={{
-                fontFamily: 'var(--font-sans)',
-                fontSize: 'clamp(15px, 1.8vw, 18px)',
-                lineHeight: 1.6,
-                color: '#A1A1AA',
-                maxWidth: '620px',
-                margin: '0 auto 36px',
-                letterSpacing: '-0.01em',
-                fontWeight: 400
-              }}
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3, delay: 0.12, ease: EASE_OUT }}
-            >
-              Understand, dissect, and cryptographically verify complex contracts in seconds. Built for counsel who demand institutional precision.
-            </motion.p>
-
-            {/* Minimalist Action Buttons */}
-            <motion.div
-              style={{
-                display: 'flex',
-                gap: '12px',
-                justifyContent: 'center',
-                alignItems: 'center',
-                flexWrap: 'wrap',
-                marginBottom: '64px'
-              }}
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.28, delay: 0.18, ease: EASE_OUT }}
-            >
-              <motion.button className="btn-hero" onClick={handleCta} {...buttonMotion}>
-                {user ? 'Enter Chamber' : 'Start Firm Access'}
-              </motion.button>
-              <motion.button
-                className="btn-hero-ghost"
-                onClick={() => navigate('/login')}
-                {...buttonMotion}
-              >
-                Chamber Sign In →
-              </motion.button>
-            </motion.div>
-
-            {/* Landscape Lady Justice Dither Visual Frame */}
-            <motion.div
-              style={{
-                position: 'relative',
-                borderRadius: '24px',
-                overflow: 'hidden',
-                border: '1px solid rgba(255, 255, 255, 0.14)',
-                boxShadow: '0 30px 80px rgba(0, 0, 0, 0.95)',
-                background: '#000000'
-              }}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4, delay: 0.24, ease: EASE_OUT }}
-            >
-              <img
-                src="/assets/courtroom-hall.jpg"
-                alt="Courtroom Hall Landscape Dither Art"
-                style={{
-                  width: '100%',
-                  maxHeight: '480px',
-                  objectFit: 'cover',
-                  display: 'block',
-                  filter: 'contrast(1.2) brightness(0.9)'
-                }}
-              />
-              <div
-                style={{
-                  position: 'absolute',
-                  inset: 0,
-                  background: 'linear-gradient(to right, rgba(0, 0, 0, 0.95) 0%, rgba(0, 0, 0, 0.75) 45%, rgba(0, 0, 0, 0.2) 100%), linear-gradient(to top, #000000 0%, transparent 60%)',
-                  pointerEvents: 'none'
-                }}
-              />
-              {/* Quote in black empty space */}
-              <div
-                style={{
-                  position: 'absolute',
-                  top: '45%',
-                  left: '40px',
-                  transform: 'translateY(-50%)',
-                  maxWidth: '480px',
-                  zIndex: 2,
-                  textAlign: 'left'
-                }}
-              >
-                <p
-                  style={{
-                    margin: 0,
-                    fontSize: '22px',
-                    fontWeight: '600',
-                    lineHeight: '1.4',
-                    color: '#F4F4F5',
-                    letterSpacing: '-0.02em',
-                    fontStyle: 'italic'
-                  }}
-                >
-                  “Justice begins with the truth. Security protects it.”
-                </p>
-              </div>
-              <div
-                style={{
-                  position: 'absolute',
-                  bottom: '24px',
-                  left: '28px',
-                  right: '28px',
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  zIndex: 2
-                }}
-              >
-                <span className="mono" style={{ fontSize: '12px', color: '#A1A1AA', letterSpacing: '0.05em' }}>
-                  [JUSTITIA_ALGORITHM · UNBIASED_PRECISION]
-                </span>
-                <div style={{ display: 'flex', gap: '8px' }}>
-                  <span className="badge badge-neutral" style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', color: '#D4D4D8' }}>
-                    EQUAL JUSTICE UNDER LAW
-                  </span>
-                </div>
-              </div>
-            </motion.div>
-          </section>
+            <Button href="/contact" variant="primary">
+              Speak with us
+            </Button>
+            <Button href="/capabilities" variant="ghost-light">
+              View capabilities
+            </Button>
+          </HeroEntrance>
         </div>
+      </section>
 
-        {/* =========================================================
-            SECTION 2: BLACK MINIMALIST BENTO GRID WITH COURTROOM BACKDROP
-            ========================================================= */}
-        <section
-          style={{
-            maxWidth: '1180px',
-            margin: '72px auto 0',
-            padding: '0 24px'
-          }}
-        >
-          <div className="courtroom-backdrop-section">
-            <div className="courtroom-bg-art" />
-            <div className="courtroom-bg-overlay" />
+      {/* SECTION 2: Capabilities Overview (Paper) */}
+      <section className="bg-paper py-24 sm:py-32 border-b border-rule">
+        <div className="container-wide">
+          <div className="max-w-2xl mb-16">
+            <span className="font-body text-label text-ink-soft mb-2 block">
+              Core Intelligence Engines
+            </span>
+            <h2 className="display-03 text-ink tracking-tight">
+              Six capabilities. One enterprise standard.
+            </h2>
+          </div>
 
-            <div style={{ position: 'relative', zIndex: 2 }}>
-              <div style={{ textAlign: 'center', marginBottom: '44px' }}>
-                <span className="eyebrow-bullet">CORE INNOVATIONS</span>
-                <h2 style={{ fontSize: '36px', letterSpacing: '-0.03em', marginTop: '8px', color: '#FFFFFF' }}>
-                  Engineered with courtroom rigor.
-                </h2>
-                <p style={{ maxWidth: '580px', margin: '8px auto 0', color: '#D4D4D8', fontSize: '16px' }}>
-                  Four pillars of intelligence and cryptographic trust powering top corporate law teams.
-                </p>
-              </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-10 gap-y-16">
+            {capabilitiesData.map((cap) => (
+              <ContentCard
+                key={cap.slug}
+                href={`/capabilities/${cap.slug}`}
+                title={cap.name}
+                subtitle={cap.indexLine}
+              />
+            ))}
+          </div>
 
-              <div className="grid grid-2" style={{ gap: '22px' }}>
-            {/* Bento Card 1: Neural Reasoner */}
-            <motion.div
-              className="card"
-              style={{
-                background: '#0D0D10',
-                borderRadius: '24px',
-                padding: '36px',
-                border: '1px solid rgba(255, 255, 255, 0.08)'
-              }}
-              {...cardHoverMotion}
-            >
-              <div
-                style={{
-                  width: '46px',
-                  height: '46px',
-                  borderRadius: '12px',
-                  background: 'rgba(255, 255, 255, 0.08)',
-                  color: '#FFFFFF',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  marginBottom: '20px',
-                  border: '1px solid rgba(255, 255, 255, 0.12)'
-                }}
-              >
-                <Icon.chat />
-              </div>
-              <h3 style={{ fontSize: '22px', marginBottom: '8px', letterSpacing: '-0.024em', color: '#FFFFFF' }}>
-                Multi-Pass Neural Reasoner
-              </h3>
-              <p style={{ fontSize: '15px', lineHeight: '1.6', color: '#A1A1AA' }}>
-                Leveraging Gemini Pro LLMs to automatically isolate liabilities, indemnification traps, and payment obligations with citation-backed precision.
-              </p>
-            </motion.div>
-
-            {/* Bento Card 2: Cryptographic Security */}
-            <motion.div
-              className="card"
-              style={{
-                background: '#0D0D10',
-                borderRadius: '24px',
-                padding: '36px',
-                border: '1px solid rgba(255, 255, 255, 0.08)'
-              }}
-              {...cardHoverMotion}
-            >
-              <div
-                style={{
-                  width: '46px',
-                  height: '46px',
-                  borderRadius: '12px',
-                  background: 'rgba(255, 255, 255, 0.08)',
-                  color: '#FFFFFF',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  marginBottom: '20px',
-                  border: '1px solid rgba(255, 255, 255, 0.12)'
-                }}
-              >
-                <Icon.lock />
-              </div>
-              <h3 style={{ fontSize: '22px', marginBottom: '8px', letterSpacing: '-0.024em', color: '#FFFFFF' }}>
-                AES-256-GCM Envelope Security
-              </h3>
-              <p style={{ fontSize: '15px', lineHeight: '1.6', color: '#A1A1AA' }}>
-                Every brief, contract, and addendum is symmetrically encrypted at rest with hardware-backed keys and evidentiary SHA-256 checksums.
-              </p>
-            </motion.div>
-
-            {/* Bento Card 3: Instant Redlining */}
-            <motion.div
-              className="card"
-              style={{
-                background: '#0D0D10',
-                borderRadius: '24px',
-                padding: '36px',
-                border: '1px solid rgba(255, 255, 255, 0.08)'
-              }}
-              {...cardHoverMotion}
-            >
-              <div
-                style={{
-                  width: '46px',
-                  height: '46px',
-                  borderRadius: '12px',
-                  background: 'rgba(255, 255, 255, 0.08)',
-                  color: '#FFFFFF',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  marginBottom: '20px',
-                  border: '1px solid rgba(255, 255, 255, 0.12)'
-                }}
-              >
-                <Icon.pen />
-              </div>
-              <h3 style={{ fontSize: '22px', marginBottom: '8px', letterSpacing: '-0.024em', color: '#FFFFFF' }}>
-                Negotiation Assistant &amp; Redlines
-              </h3>
-              <p style={{ fontSize: '15px', lineHeight: '1.6', color: '#A1A1AA' }}>
-                Detect one-sided termination language and receive market-standard counter-proposals ready to insert directly into agreement drafts.
-              </p>
-            </motion.div>
-
-            {/* Bento Card 4: Blockchain Audit Ledger */}
-            <motion.div
-              className="card"
-              style={{
-                background: '#0D0D10',
-                borderRadius: '24px',
-                padding: '36px',
-                border: '1px solid rgba(255, 255, 255, 0.08)'
-              }}
-              {...cardHoverMotion}
-            >
-              <div
-                style={{
-                  width: '46px',
-                  height: '46px',
-                  borderRadius: '12px',
-                  background: 'rgba(255, 255, 255, 0.08)',
-                  color: '#FFFFFF',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  marginBottom: '20px',
-                  border: '1px solid rgba(255, 255, 255, 0.12)'
-                }}
-              >
-                <Icon.shield />
-              </div>
-              <h3 style={{ fontSize: '22px', marginBottom: '8px', letterSpacing: '-0.024em', color: '#FFFFFF' }}>
-                Immutable Audit Ledger
-              </h3>
-              <p style={{ fontSize: '15px', lineHeight: '1.6', color: '#A1A1AA' }}>
-                Every document view, export, redaction, and revision is cryptographically appended to an immutable chain to ensure courtroom non-repudiation.
-              </p>
-            </motion.div>
+          <div className="mt-16 pt-8 border-t border-rule">
+            <TextLinkButton href="/capabilities">
+              View all capabilities
+            </TextLinkButton>
           </div>
         </div>
-      </div>
-    </section>
+      </section>
 
-        {/* =========================================================
-            SECTION 3: KEYNOTE FEATURE SPOTLIGHT
-            ========================================================= */}
-        <section
-          style={{
-            maxWidth: '1180px',
-            margin: '72px auto 0',
-            padding: '0 24px'
-          }}
-        >
-          <div className="intelligence-spotlight">
-            <div className="split" style={{ alignItems: 'center' }}>
-              <div>
-                <span
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '6px',
-                    padding: '4px 12px',
-                    borderRadius: '980px',
-                    background: 'rgba(255, 255, 255, 0.12)',
-                    fontSize: '12.5px',
-                    color: '#FFFFFF',
-                    marginBottom: '18px'
-                  }}
-                >
-                  <Icon.shield /> Zero-Trust Security Sentinel
+      {/* SECTION 3: Statement with Signature Redaction-Reveal (Ink Section) */}
+      <section
+        className="section-ink py-28 sm:py-40 border-b border-neutral-800"
+        style={{
+          backgroundColor: '#0A0A0A',
+          color: '#FAF9F6'
+        }}
+      >
+        <div className="container-wide">
+          <div className="max-w-4xl">
+            <span className="font-body text-label text-neutral-400 mb-4 block">
+              Statutory Surveillance
+            </span>
+            <div className="mb-6">
+              <RedactionReveal barColor="#0A0A0A">
+                <span className="display-01 text-paper font-medium block">
+                  40+
                 </span>
-                <h2 style={{ fontSize: '32px', marginBottom: '14px', letterSpacing: '-0.03em' }}>
-                  Continuous Behavioral Telemetry
-                </h2>
-                <p style={{ fontSize: '16px', lineHeight: '1.65', color: '#A1A1AA', marginBottom: '24px' }}>
-                  Docu-Gaurd calculates a real-time Zero-Trust confidence score for every active user session, monitoring IP risk, device authentication, and hardware MFA.
-                </p>
-                <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-                  <span className="badge badge-neutral" style={{ color: '#FFFFFF', borderColor: 'rgba(255,255,255,0.15)' }}>
-                    ✓ TOTP &amp; Email MFA
-                  </span>
-                  <span className="badge badge-neutral" style={{ color: '#FFFFFF', borderColor: 'rgba(255,255,255,0.15)' }}>
-                    ✓ 1-Click Session Revocation
-                  </span>
-                  <span className="badge badge-neutral" style={{ color: '#FFFFFF', borderColor: 'rgba(255,255,255,0.15)' }}>
-                    ✓ RSA-2048 PKCS#1v15
-                  </span>
-                </div>
-              </div>
-
-              <div
-                style={{
-                  background: 'rgba(255, 255, 255, 0.04)',
-                  border: '1px solid rgba(255, 255, 255, 0.12)',
-                  borderRadius: '20px',
-                  padding: '28px',
-                  textAlign: 'left'
-                }}
-              >
-                <div className="mono small" style={{ color: '#71717A', borderBottom: '1px solid rgba(255, 255, 255, 0.08)', paddingBottom: '10px', marginBottom: '16px' }}>
-                  SECURITY_ASSURANCE_SUMMARY
-                </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span style={{ color: '#D4D4D8', fontSize: '14px' }}>Zero-Trust Confidence:</span>
-                    <span className="badge badge-ok">100% Score</span>
-                  </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span style={{ color: '#D4D4D8', fontSize: '14px' }}>Data Encryption:</span>
-                    <span className="badge badge-info">AES-256-GCM</span>
-                  </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span style={{ color: '#D4D4D8', fontSize: '14px' }}>Audit Ledger Blocks:</span>
-                    <span className="badge badge-ok">Chain Verified</span>
-                  </div>
-                </div>
-              </div>
+              </RedactionReveal>
             </div>
+            <h3 className="font-display text-3xl sm:text-4xl text-paper font-medium leading-snug">
+              compliance frameworks and statutory regimes monitored continuously across your portfolio.
+            </h3>
+            <p className="font-body text-body text-neutral-400 mt-6 max-w-2xl">
+              From Delaware corporate precedent and UCC obligations to European Union GDPR Article 28 mandates, DocuGuard continuously validates contract terms against changing statutory baselines.
+            </p>
           </div>
-        </section>
+        </div>
+      </section>
 
-        {/* =========================================================
-            SECTION 4: FINAL CALL TO ACTION
-            ========================================================= */}
-        <section
-          style={{
-            maxWidth: '880px',
-            margin: '72px auto 0',
-            padding: '52px 36px',
-            background: '#0D0D10',
-            border: '1px solid rgba(255, 255, 255, 0.1)',
-            borderRadius: '32px',
-            textAlign: 'center',
-            boxShadow: '0 20px 48px rgba(0, 0, 0, 0.8)'
-          }}
-        >
-          <h2 style={{ fontSize: '38px', letterSpacing: '-0.035em', margin: '0 0 12px', color: '#FFFFFF' }}>
-            Elevate your firm's legal intelligence.
+      {/* SECTION 4: Featured Diligence Matter (Paper) */}
+      <section className="bg-paper py-24 sm:py-32 border-b border-rule">
+        <div className="container-wide">
+          <div className="max-w-4xl">
+            <span className="font-body text-label text-ink-soft mb-4 block">
+              Representative Matter
+            </span>
+            <PullQuote
+              quote="Advised an enterprise manufacturer through an unannounced multi-jurisdiction contract audit, identifying 14 uncapped liability clauses before counterparty discovery."
+              attribution="Cross-Border Commercial Diligence"
+              subattribution="Mergers & Acquisitions • 2025"
+            />
+          </div>
+        </div>
+      </section>
+
+      {/* SECTION 5: Recent Intelligence & Research (Paper-Dim) */}
+      <section className="bg-paper-dim py-24 sm:py-32 border-b border-rule">
+        <div className="container-wide">
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-16 gap-6">
+            <div>
+              <span className="font-body text-label text-ink-soft mb-2 block">
+                Legal Engineering
+              </span>
+              <h2 className="display-03 text-ink tracking-tight">
+                Recent thinking
+              </h2>
+            </div>
+            <TextLinkButton href="/intelligence">
+              All publications
+            </TextLinkButton>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
+            {insightsData.slice(0, 3).map((item) => (
+              <ContentCard
+                key={item.slug}
+                href={`/intelligence/${item.slug}`}
+                badge={item.category}
+                title={item.title}
+                subtitle={item.dek}
+                meta={`${item.author} • ${item.date}`}
+              />
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* SECTION 6: Closing Executive CTA (Ink Section) */}
+      <section
+        className="section-ink py-28 sm:py-36 text-center flex flex-col items-center justify-center"
+        style={{
+          backgroundColor: '#0A0A0A',
+          color: '#FAF9F6'
+        }}
+      >
+        <div className="container-text">
+          <h2 className="display-02 text-paper tracking-tight mb-6">
+            Let’s talk about what’s next.
           </h2>
-          <p style={{ fontSize: '16.5px', color: '#A1A1AA', maxWidth: '540px', margin: '0 auto 30px', letterSpacing: '-0.016em' }}>
-            Start analyzing contracts with automated risk detection and cryptographic verification in under 30 seconds.
+          <p className="font-body text-body-lg text-neutral-400 mb-10 max-w-xl mx-auto">
+            Schedule an executive briefing with our legal engineering group to examine how DocuGuard audits and governs complex contract portfolios.
           </p>
-          <motion.button className="btn-hero" onClick={handleCta} {...buttonMotion}>
-            {user ? 'Enter Your Workspace' : 'Get Started Free'}
-          </motion.button>
-        </section>
-      </div>
-    </PageTransition>
+          <Button href="/contact" variant="primary">
+            Speak with us
+          </Button>
+        </div>
+      </section>
+    </div>
   );
-};
+}
 
 export default Landing;

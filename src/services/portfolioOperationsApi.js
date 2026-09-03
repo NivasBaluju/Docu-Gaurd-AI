@@ -79,6 +79,33 @@ export const PortfolioOperationsApi = {
     const qs = new URLSearchParams({ page, limit }).toString();
     return Api.get(`/api/portfolio/operations/history?${qs}`);
   },
+
+  /**
+   * GET /api/portfolio/operations/pending-approvals
+   * @param {object} params - { page, limit }
+   */
+  async getPendingApprovals({ page = 1, limit = 20 } = {}) {
+    const qs = new URLSearchParams({ page, limit }).toString();
+    return Api.get(`/api/portfolio/operations/pending-approvals?${qs}`);
+  },
+
+  /**
+   * POST /api/portfolio/operations/:batchId/approve
+   * @param {string} batchId
+   * @param {string} comments
+   */
+  async approveBatch(batchId, comments = '') {
+    return Api.post(`/api/portfolio/operations/${encodeURIComponent(batchId)}/approve`, { comments });
+  },
+
+  /**
+   * POST /api/portfolio/operations/:batchId/reject
+   * @param {string} batchId
+   * @param {string} reason
+   */
+  async rejectBatch(batchId, reason) {
+    return Api.post(`/api/portfolio/operations/${encodeURIComponent(batchId)}/reject`, { reason });
+  },
 };
 
 export default PortfolioOperationsApi;

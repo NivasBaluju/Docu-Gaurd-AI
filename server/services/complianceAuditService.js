@@ -21,6 +21,36 @@ function getPriorityBand(score) {
 }
 
 /**
+ * Standardizes a portfolio_operation_batches row into canonical evidence format.
+ */
+function formatGovernedBatch(b) {
+  return {
+    batchId: b.id,
+    operationType: b.operation_type,
+    mode: b.mode,
+    status: b.status,
+    requestedCount: Number(b.requested_count) || 0,
+    eligibleCount: Number(b.eligible_count) || 0,
+    executedCount: Number(b.executed_count) || 0,
+    blockedCount: Number(b.blocked_count) || 0,
+    previewHash: b.preview_hash || null,
+    requestHash: b.request_hash || null,
+    policyVersion: b.policy_version || '1.0',
+    policyFlags: Array.isArray(b.policy_flags) ? b.policy_flags : (typeof b.policy_flags === 'string' ? JSON.parse(b.policy_flags) : []),
+    policyDetails: (b.policy_details && typeof b.policy_details === 'object') ? b.policy_details : (typeof b.policy_details === 'string' ? JSON.parse(b.policy_details) : {}),
+    requesterId: b.requester_id,
+    approvedBy: b.approved_by || null,
+    approvedAt: b.approved_at ? new Date(b.approved_at).toISOString() : null,
+    approvalComments: b.approval_comments || null,
+    rejectedBy: b.rejected_by || null,
+    rejectedAt: b.rejected_at ? new Date(b.rejected_at).toISOString() : null,
+    rejectionReason: b.rejection_reason || null,
+    createdAt: b.created_at ? new Date(b.created_at).toISOString() : null,
+    completedAt: b.completed_at ? new Date(b.completed_at).toISOString() : null
+  };
+}
+
+/**
  * Collects and canonicalizes complete compliance evidence for a single document.
  * Read-only: executes zero database mutations.
  */
@@ -31,7 +61,7 @@ async function getContractEvidence(documentId, user) {
     throw err;
   }
 
-  // 1. Authorize document ownership
+  // 1. Authorize document ownership (owner or admin)
   const { rows: docRows } = await db.query(
     `SELECT id, filename, original_name, mime_type, size, created_at, user_id
      FROM documents
@@ -46,7 +76,7 @@ async function getContractEvidence(documentId, user) {
   }
 
   const doc = docRows[0];
-  if (doc.user_id !== user.id) {
+  if (doc.user_id !== user.id && user.role !== 'admin') {
     const err = new Error('Unauthorized access to contract evidence');
     err.status = 403;
     throw err;
@@ -103,6 +133,24 @@ async function getContractEvidence(documentId, user) {
      JOIN contract_actions a ON c.action_id = a.id
      WHERE a.document_id = $1 AND c.deleted_at IS NULL
      ORDER BY c.created_at ASC, c.id ASC`,
+    [documentId]
+  );
+
+  // 6.5 Fetch governed operation batches affecting actions in this contract (deterministic sort: created_at ASC, id ASC)
+  const { rows: batchRows } = await db.query(
+    `SELECT DISTINCT b.id, b.user_id AS requester_id, b.operation_type, b.mode, b.status,
+            b.requested_count, b.eligible_count, b.executed_count, b.blocked_count,
+            b.preview_hash, b.request_hash, b.policy_version, b.policy_flags, b.policy_details,
+            b.approved_by, b.approved_at, b.approval_comments,
+            b.rejected_by, b.rejected_at, b.rejection_reason,
+            b.created_at, b.completed_at
+     FROM portfolio_operation_batches b
+     WHERE EXISTS (
+       SELECT 1 FROM contract_action_activity act
+       JOIN contract_actions a ON act.action_id = a.id
+       WHERE a.document_id = $1 AND (act.metadata->>'batchId')::text = b.id::text
+     )
+     ORDER BY b.created_at ASC, b.id ASC`,
     [documentId]
   );
 
@@ -225,6 +273,7 @@ async function getContractEvidence(documentId, user) {
       createdAt: act.created_at ? new Date(act.created_at).toISOString() : null
     })),
     collaborationHistory: topLevelComments,
+    governedOperationsHistory: batchRows.map(formatGovernedBatch),
     operationalHealthAtExport: {
       healthScore: liveHealth.healthScore,
       healthGrade: liveHealth.healthGrade,
@@ -288,6 +337,20 @@ async function getPortfolioEvidence(user) {
     portfolioService.getPortfolioDeadlineAnalytics(user),
     portfolioService.getPortfolioEscalationAnalytics(user)
   ]);
+
+  // Fetch governed operation batches created by or approved by this user
+  const { rows: portfolioBatchRows } = await db.query(
+    `SELECT b.id, b.user_id AS requester_id, b.operation_type, b.mode, b.status,
+            b.requested_count, b.eligible_count, b.executed_count, b.blocked_count,
+            b.preview_hash, b.request_hash, b.policy_version, b.policy_flags, b.policy_details,
+            b.approved_by, b.approved_at, b.approval_comments,
+            b.rejected_by, b.rejected_at, b.rejection_reason,
+            b.created_at, b.completed_at
+     FROM portfolio_operation_batches b
+     WHERE ${user.role === 'admin' ? '1=1' : '(b.user_id = $1 OR b.approved_by = $1)'}
+     ORDER BY b.created_at ASC, b.id ASC`,
+    user.role === 'admin' ? [] : [user.id]
+  );
 
   const portfolioEvidenceContent = {
     portfolioOwnerId: user.id,
@@ -366,7 +429,8 @@ async function getPortfolioEvidence(user) {
         resolvedActions: m.resolvedActions
       })),
       unassignedBacklog: workload.unassigned || {}
-    }
+    },
+    governedBatches: portfolioBatchRows.map(formatGovernedBatch)
   };
 
   const canonicalHash = generateEvidenceHash(portfolioEvidenceContent);

@@ -14,6 +14,29 @@ const { getDocumentActions, syncDocumentActions } = require('./contractActions')
 const router = express.Router();
 const uploadsDir = path.join(__dirname, '..', '..', 'data', 'uploads');
 
+const INTERNAL_SERVICE_KEY = process.env.INTERNAL_SERVICE_KEY || 'docuguard-internal-service-secret-key-default';
+
+function getInternalHeaders(extraHeaders = {}) {
+  return {
+    'x-internal-service-key': INTERNAL_SERVICE_KEY,
+    ...extraHeaders
+  };
+}
+
+async function authorizeDocument(id, user) {
+  const { rows } = await db.query(
+    'SELECT id, user_id, original_name, filename, created_at FROM documents WHERE id = $1',
+    [id]
+  );
+  if (rows.length === 0) {
+    return { errorStatus: 404, errorMessage: 'Document not found' };
+  }
+  if (rows[0].user_id !== user.id && user.role !== 'admin') {
+    return { errorStatus: 403, errorMessage: 'Unauthorized access to document' };
+  }
+  return { document: rows[0] };
+}
+
 const upload = multer({
   storage: multer.memoryStorage(),
   limits: { fileSize: 25 * 1024 * 1024 }
@@ -64,6 +87,7 @@ router.post('/upload', requireAuth, upload.single('file'), async (req, res) => {
 
       const flaskRes = await fetch('http://127.0.0.1:5001/api/documents/upload', {
         method: 'POST',
+        headers: getInternalHeaders(),
         body: form,
         signal: AbortSignal.timeout(6000)
       });
@@ -128,21 +152,15 @@ router.post('/upload', requireAuth, upload.single('file'), async (req, res) => {
 // --- List / get / delete -------------------------------------------------
 router.get('/', requireAuth, async (req, res) => {
   try {
-    // Query directly from Flask PostgreSQL backend
-    try {
-      const flaskRes = await fetch('http://127.0.0.1:5001/api/documents');
-      if (flaskRes.ok) {
-        const flaskDocs = await flaskRes.json();
-        return res.json(flaskDocs);
-      }
-    } catch (flaskErr) {
-      // Fallback to direct DB query if Flask is restarting
-    }
+    const isAdmin = req.user.role === 'admin';
+    const query = isAdmin
+      ? `SELECT id, original_name AS filename, original_name, mime_type, size, sha256, ocr_confidence, risk_score, version_group, version_number, created_at
+         FROM documents ORDER BY created_at DESC`
+      : `SELECT id, original_name AS filename, original_name, mime_type, size, sha256, ocr_confidence, risk_score, version_group, version_number, created_at
+         FROM documents WHERE user_id = $1 ORDER BY created_at DESC`;
+    const params = isAdmin ? [] : [req.user.id];
 
-    const { rows: docs } = await db.query(`
-      SELECT id, original_name AS filename, original_name, mime_type, size, sha256, ocr_confidence, risk_score, version_group, version_number, created_at
-      FROM documents WHERE user_id = $1 ORDER BY created_at DESC
-    `, [req.user.id]);
+    const { rows: docs } = await db.query(query, params);
     res.json(docs);
   } catch (err) {
     console.error('List documents error:', err);
@@ -214,7 +232,13 @@ router.get('/:id/verify', requireAuth, async (req, res) => {
 // --- AI Analysis Endpoints (Proxied to Flask AI Engine) -------------------
 router.get('/:id/analysis', requireAuth, async (req, res) => {
   try {
-    const response = await fetch(`http://127.0.0.1:5001/api/documents/${req.params.id}/analysis`);
+    const authCheck = await authorizeDocument(req.params.id, req.user);
+    if (authCheck.errorStatus) {
+      return res.status(authCheck.errorStatus).json({ error: authCheck.errorMessage });
+    }
+    const response = await fetch(`http://127.0.0.1:5001/api/documents/${req.params.id}/analysis`, {
+      headers: getInternalHeaders()
+    });
     const data = await response.json();
     res.status(response.status).json(data);
   } catch (err) {
@@ -225,7 +249,13 @@ router.get('/:id/analysis', requireAuth, async (req, res) => {
 
 router.get('/:id/clauses', requireAuth, async (req, res) => {
   try {
-    const response = await fetch(`http://127.0.0.1:5001/api/documents/${req.params.id}/clauses`);
+    const authCheck = await authorizeDocument(req.params.id, req.user);
+    if (authCheck.errorStatus) {
+      return res.status(authCheck.errorStatus).json({ error: authCheck.errorMessage });
+    }
+    const response = await fetch(`http://127.0.0.1:5001/api/documents/${req.params.id}/clauses`, {
+      headers: getInternalHeaders()
+    });
     const data = await response.json();
     res.status(response.status).json(data);
   } catch (err) {
@@ -236,7 +266,13 @@ router.get('/:id/clauses', requireAuth, async (req, res) => {
 
 router.get('/:id/deadlines', requireAuth, async (req, res) => {
   try {
-    const response = await fetch(`http://127.0.0.1:5001/api/documents/${req.params.id}/deadlines`);
+    const authCheck = await authorizeDocument(req.params.id, req.user);
+    if (authCheck.errorStatus) {
+      return res.status(authCheck.errorStatus).json({ error: authCheck.errorMessage });
+    }
+    const response = await fetch(`http://127.0.0.1:5001/api/documents/${req.params.id}/deadlines`, {
+      headers: getInternalHeaders()
+    });
     const data = await response.json();
     res.status(response.status).json(data);
   } catch (err) {
@@ -247,7 +283,13 @@ router.get('/:id/deadlines', requireAuth, async (req, res) => {
 
 router.get('/:id/risks', requireAuth, async (req, res) => {
   try {
-    const response = await fetch(`http://127.0.0.1:5001/api/documents/${req.params.id}/risks`);
+    const authCheck = await authorizeDocument(req.params.id, req.user);
+    if (authCheck.errorStatus) {
+      return res.status(authCheck.errorStatus).json({ error: authCheck.errorMessage });
+    }
+    const response = await fetch(`http://127.0.0.1:5001/api/documents/${req.params.id}/risks`, {
+      headers: getInternalHeaders()
+    });
     const data = await response.json();
     res.status(response.status).json(data);
   } catch (err) {
@@ -258,8 +300,13 @@ router.get('/:id/risks', requireAuth, async (req, res) => {
 
 router.post('/:id/analyze', requireAuth, async (req, res) => {
   try {
+    const authCheck = await authorizeDocument(req.params.id, req.user);
+    if (authCheck.errorStatus) {
+      return res.status(authCheck.errorStatus).json({ error: authCheck.errorMessage });
+    }
     const response = await fetch(`http://127.0.0.1:5001/api/documents/${req.params.id}/analyze`, {
-      method: 'POST'
+      method: 'POST',
+      headers: getInternalHeaders()
     });
     const data = await response.json();
     res.status(response.status).json(data);
@@ -273,30 +320,22 @@ router.post('/:id/analyze', requireAuth, async (req, res) => {
 router.post('/:id/chat', requireAuth, async (req, res) => {
   try {
     const { id } = req.params;
-    const { question } = req.body;
 
+    // Layer 1: Gateway Authorization & Ownership verification FIRST
+    const authCheck = await authorizeDocument(id, req.user);
+    if (authCheck.errorStatus) {
+      return res.status(authCheck.errorStatus).json({ error: authCheck.errorMessage });
+    }
+
+    const question = req.body.question || req.body.message;
     if (!question || !String(question).trim()) {
       return res.status(400).json({ error: 'Question is required and cannot be empty' });
-    }
-
-    // Layer 1: Gateway Authorization & Ownership verification
-    const { rows: docRows } = await db.query(
-      'SELECT id, user_id FROM documents WHERE id = $1',
-      [id]
-    );
-
-    if (docRows.length === 0) {
-      return res.status(404).json({ error: 'Document not found' });
-    }
-
-    if (docRows[0].user_id !== req.user.id && req.user.role !== 'admin') {
-      return res.status(403).json({ error: 'Unauthorized access to document' });
     }
 
     // Forward request to Flask RAG Engine
     const flaskRes = await fetch(`http://127.0.0.1:5001/api/documents/${id}/chat`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: getInternalHeaders({ 'Content-Type': 'application/json' }),
       body: JSON.stringify({ question: String(question).trim() })
     });
 
@@ -341,17 +380,9 @@ router.get('/:id/chat', requireAuth, async (req, res) => {
     const { id } = req.params;
 
     // Layer 1: Gateway Authorization & Ownership verification
-    const { rows: docRows } = await db.query(
-      'SELECT id, user_id FROM documents WHERE id = $1',
-      [id]
-    );
-
-    if (docRows.length === 0) {
-      return res.status(404).json({ error: 'Document not found' });
-    }
-
-    if (docRows[0].user_id !== req.user.id && req.user.role !== 'admin') {
-      return res.status(403).json({ error: 'Unauthorized access to document' });
+    const authCheck = await authorizeDocument(id, req.user);
+    if (authCheck.errorStatus) {
+      return res.status(authCheck.errorStatus).json({ error: authCheck.errorMessage });
     }
 
     const { rows: messages } = await db.query(
@@ -378,6 +409,13 @@ router.get('/:id/chat', requireAuth, async (req, res) => {
 router.post('/:id/negotiate', requireAuth, async (req, res) => {
   try {
     const { id } = req.params;
+
+    // Layer 1: Gateway Authorization & Ownership verification FIRST
+    const authCheck = await authorizeDocument(id, req.user);
+    if (authCheck.errorStatus) {
+      return res.status(authCheck.errorStatus).json({ error: authCheck.errorMessage });
+    }
+
     const { clauseId, clauseType, mode = 'balanced' } = req.body;
 
     const validModes = ['balanced', 'protective', 'aggressive', 'collaborative'];
@@ -387,24 +425,10 @@ router.post('/:id/negotiate', requireAuth, async (req, res) => {
       });
     }
 
-    // Layer 1: Gateway Authorization & Ownership verification
-    const { rows: docRows } = await db.query(
-      'SELECT id, user_id FROM documents WHERE id = $1',
-      [id]
-    );
-
-    if (docRows.length === 0) {
-      return res.status(404).json({ error: 'Document not found' });
-    }
-
-    if (docRows[0].user_id !== req.user.id && req.user.role !== 'admin') {
-      return res.status(403).json({ error: 'Unauthorized access to document' });
-    }
-
     // Forward to Flask Negotiation AI Engine
     const flaskRes = await fetch(`http://127.0.0.1:5001/api/documents/${id}/negotiate`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: getInternalHeaders({ 'Content-Type': 'application/json' }),
       body: JSON.stringify({ clauseId, clauseType, mode })
     });
 
@@ -421,20 +445,14 @@ router.get('/:id/negotiation-suggestions', requireAuth, async (req, res) => {
     const { id } = req.params;
 
     // Layer 1: Gateway Authorization & Ownership verification
-    const { rows: docRows } = await db.query(
-      'SELECT id, user_id FROM documents WHERE id = $1',
-      [id]
-    );
-
-    if (docRows.length === 0) {
-      return res.status(404).json({ error: 'Document not found' });
+    const authCheck = await authorizeDocument(id, req.user);
+    if (authCheck.errorStatus) {
+      return res.status(authCheck.errorStatus).json({ error: authCheck.errorMessage });
     }
 
-    if (docRows[0].user_id !== req.user.id && req.user.role !== 'admin') {
-      return res.status(403).json({ error: 'Unauthorized access to document' });
-    }
-
-    const flaskRes = await fetch(`http://127.0.0.1:5001/api/documents/${id}/negotiation-suggestions`);
+    const flaskRes = await fetch(`http://127.0.0.1:5001/api/documents/${id}/negotiation-suggestions`, {
+      headers: getInternalHeaders()
+    });
     const oppData = await flaskRes.json();
     res.status(flaskRes.status).json(oppData);
   } catch (err) {
@@ -447,30 +465,22 @@ router.get('/:id/negotiation-suggestions', requireAuth, async (req, res) => {
 router.post('/:id/simulate', requireAuth, async (req, res) => {
   try {
     const { id } = req.params;
-    const { scenario } = req.body;
 
+    // Layer 1: Gateway Authorization & Ownership verification FIRST
+    const authCheck = await authorizeDocument(id, req.user);
+    if (authCheck.errorStatus) {
+      return res.status(authCheck.errorStatus).json({ error: authCheck.errorMessage });
+    }
+
+    const { scenario } = req.body;
     if (!scenario || typeof scenario !== 'string' || !scenario.trim()) {
       return res.status(400).json({ error: 'Scenario text is required for risk simulation' });
-    }
-
-    // Layer 1: Gateway Authorization & Ownership verification
-    const { rows: docRows } = await db.query(
-      'SELECT id, user_id FROM documents WHERE id = $1',
-      [id]
-    );
-
-    if (docRows.length === 0) {
-      return res.status(404).json({ error: 'Document not found' });
-    }
-
-    if (docRows[0].user_id !== req.user.id && req.user.role !== 'admin') {
-      return res.status(403).json({ error: 'Unauthorized access to document' });
     }
 
     // Forward to Flask Simulation Engine
     const flaskRes = await fetch(`http://127.0.0.1:5001/api/documents/${id}/simulate`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: getInternalHeaders({ 'Content-Type': 'application/json' }),
       body: JSON.stringify({ scenario: scenario.trim() })
     });
 
@@ -513,17 +523,9 @@ router.get('/:id/simulations', requireAuth, async (req, res) => {
     const { id } = req.params;
 
     // Layer 1: Gateway Authorization & Ownership verification
-    const { rows: docRows } = await db.query(
-      'SELECT id, user_id FROM documents WHERE id = $1',
-      [id]
-    );
-
-    if (docRows.length === 0) {
-      return res.status(404).json({ error: 'Document not found' });
-    }
-
-    if (docRows[0].user_id !== req.user.id && req.user.role !== 'admin') {
-      return res.status(403).json({ error: 'Unauthorized access to document' });
+    const authCheck = await authorizeDocument(id, req.user);
+    if (authCheck.errorStatus) {
+      return res.status(authCheck.errorStatus).json({ error: authCheck.errorMessage });
     }
 
     const { rows: simulations } = await db.query(
@@ -555,21 +557,15 @@ router.get('/:id/intelligence', requireAuth, async (req, res) => {
     const { id } = req.params;
 
     // Layer 1: Gateway Authentication & Authorization Check
-    const { rows: docRows } = await db.query(
-      'SELECT id, user_id FROM documents WHERE id = $1',
-      [id]
-    );
-
-    if (docRows.length === 0) {
-      return res.status(404).json({ error: 'Document not found' });
-    }
-
-    if (docRows[0].user_id !== req.user.id && req.user.role !== 'admin') {
-      return res.status(403).json({ error: 'Unauthorized access to document' });
+    const authCheck = await authorizeDocument(id, req.user);
+    if (authCheck.errorStatus) {
+      return res.status(authCheck.errorStatus).json({ error: authCheck.errorMessage });
     }
 
     // Call Flask Intelligence Engine (pure computation boundary)
-    const flaskRes = await fetch(`http://127.0.0.1:5001/api/documents/${id}/intelligence`);
+    const flaskRes = await fetch(`http://127.0.0.1:5001/api/documents/${id}/intelligence`, {
+      headers: getInternalHeaders()
+    });
     const intelData = await flaskRes.json();
 
     if (!flaskRes.ok) {
@@ -616,22 +612,15 @@ router.post('/:id/intelligence/refresh', requireAuth, async (req, res) => {
     const { id } = req.params;
 
     // Layer 1: Gateway Authentication & Authorization Check
-    const { rows: docRows } = await db.query(
-      'SELECT id, user_id FROM documents WHERE id = $1',
-      [id]
-    );
-
-    if (docRows.length === 0) {
-      return res.status(404).json({ error: 'Document not found' });
-    }
-
-    if (docRows[0].user_id !== req.user.id && req.user.role !== 'admin') {
-      return res.status(403).json({ error: 'Unauthorized access to document' });
+    const authCheck = await authorizeDocument(id, req.user);
+    if (authCheck.errorStatus) {
+      return res.status(authCheck.errorStatus).json({ error: authCheck.errorMessage });
     }
 
     // Call Flask Intelligence Engine refresh endpoint
     const flaskRes = await fetch(`http://127.0.0.1:5001/api/documents/${id}/intelligence/refresh`, {
-      method: 'POST'
+      method: 'POST',
+      headers: getInternalHeaders()
     });
     const intelData = await flaskRes.json();
 

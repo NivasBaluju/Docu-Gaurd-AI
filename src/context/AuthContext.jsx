@@ -52,6 +52,9 @@ export const AuthProvider = ({ children }) => {
       // Ignore network errors during logout
     }
     Api.clearToken();
+    localStorage.removeItem('token');
+    localStorage.removeItem('docugaurd_token');
+    sessionStorage.clear();
     setUser(null);
     setTrust(null);
     toast('Signed out securely', 'ok');

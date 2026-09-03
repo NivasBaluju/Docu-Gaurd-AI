@@ -1,0 +1,80 @@
+[
+  {
+    "slug": "contract-diligence",
+    "name": "Contract Diligence & Examination",
+    "indexLine": "Deep structural clause extraction, statutory reference verification, and deviation scoring.",
+    "overview": "DocuGuard AI parses master agreements, indentures, and commercial covenants with structural precision. Rather than summarizing text superficially, it constructs a complete dependency graph of mutual obligations, carve-outs, and statutory liabilities against Delaware Chancery, Uniform Commercial Code, and English Common Law baselines.",
+    "services": [
+      "Automated clause segmentation & classification",
+      "Statutory precedent & jurisdictional cross-referencing",
+      "Corporate playbook deviation scoring",
+      "Obligation & covenant dependency mapping",
+      "High-throughput cross-portfolio diligence"
+    ]
+  },
+  {
+    "slug": "risk-radar",
+    "name": "Autonomous Risk Radar",
+    "indexLine": "Real-time exposure modeling against corporate policy baselines with declassification reveals.",
+    "overview": "Uncapped indemnities, unilateral termination rights, and asymmetric liability clauses expose enterprises to catastrophic balance sheet risk. DocuGuard's Risk Radar continuously scans contract language for non-standard commitments, declassifying hidden exposures with mathematical severity scoring before execution.",
+    "services": [
+      "Uncapped liability & consequential damage detection",
+      "Unilateral termination & notice window auditing",
+      "IP assignment & broad license grant detection",
+      "Regulatory breach probability estimation",
+      "Mathematical risk severity ranking"
+    ]
+  },
+  {
+    "slug": "autonomous-negotiation",
+    "name": "Bilateral Negotiation Workbench",
+    "indexLine": "Asymmetric redline generation with counterparty BATNA simulation and concession modeling.",
+    "overview": "Negotiation is an instrument of commercial judgment, not a chatbot conversation. The Bilateral Workbench renders counterparty terms alongside proposed enterprise redlines, calculating concession probabilities, fallback positions, and strategic BATNA tolerance matrices to maximize leverage at every exchange.",
+    "services": [
+      "Side-by-side bilateral clause comparison",
+      "Fallback position & BATNA sensitivity modeling",
+      "Concession impact on portfolio liability variance",
+      "Standard redline generation with audit trail",
+      "Counterparty dispute history cross-checking"
+    ]
+  },
+  {
+    "slug": "portfolio-governance",
+    "name": "Portfolio Health & Governance",
+    "indexLine": "Continuous multi-contract surveillance with deterministic policy rollback and batch execution.",
+    "overview": "Enterprise risk lives across thousands of distributed agreements. DocuGuard computes an explainable 88.4 Portfolio Health Index, continuously monitoring SLA deadlines, renewal windows, and governing bulk operations through a deterministic policy engine with atomic zero-mutation rollback.",
+    "services": [
+      "Explainable portfolio health scoring",
+      "Deterministic bulk operation governance (Phase 8.1)",
+      "Separation-of-duties dual signatory enforcement",
+      "Chronological obligation & deadline ledger",
+      "Stale preview invalidation & anti-tampering guards"
+    ]
+  },
+  {
+    "slug": "compliance-audit",
+    "name": "Cryptographic Audit Ledger",
+    "indexLine": "Hardware-grade non-repudiation with SHA-256 block verification and RFC-4180 export.",
+    "overview": "Every contract mutation, AI suggestion, and administrative approval is permanently anchored in a tamper-evident cryptographic ledger. DocuGuard enables stateless third-party verification of evidence manifests, providing unalterable mathematical proof of compliance for regulators and courts.",
+    "services": [
+      "Append-only SHA-256 block ledger",
+      "Stateless evidence verification endpoint",
+      "RFC-4180 CSV and binary PDF evidence streams",
+      "Governed operations history & signatory lineage",
+      "Zero-Trust role-based access verification"
+    ]
+  },
+  {
+    "slug": "regulatory-crosscheck",
+    "name": "Jurisdictional Regulatory Cross-Check",
+    "indexLine": "Statutory compliance cross-checks across GDPR, SOC 2, and cross-border antitrust guidelines.",
+    "overview": "Global commerce crosses conflicting regulatory regimes. DocuGuard continuously cross-references contract provisions against active European Union GDPR Article 28 data processing mandates, FTC/DOJ merger guidelines, and statutory cure periods to eliminate compliance exposure before signing.",
+    "services": [
+      "EU GDPR Article 28 data processing auditing",
+      "US FTC/DOJ merger guidelines compliance",
+      "Statutory notice & cure period verification",
+      "Foreign investment & national security review checks",
+      "Automated compliance package generation"
+    ]
+  }
+]

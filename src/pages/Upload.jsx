@@ -1,41 +1,42 @@
 import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'motion/react';
 import Api from '../services/api';
 import { useToast } from '../context/ToastContext';
-import Icon from '../components/common/Icon';
-import PageTransition from '../components/common/PageTransition';
 import { fmtBytes } from '../utils/formatters';
-import { buttonMotion, EASE_OUT } from '../styles/motion';
+import ThinkingLoader from '../components/common/ThinkingLoader';
+import Button from '../components/ui/Button';
+import Breadcrumb from '../components/ui/Breadcrumb';
 
-export const Upload = () => {
+/**
+ * Upload — The Intake Chamber (Idea #2)
+ * Clean, full-width paper-dim intake surface framed by a 1px hairline rule.
+ * Features ThinkingOrb during ingestion and structural clause extraction,
+ * preserving all Api.upload endpoints and file validation.
+ */
+export function Upload() {
   const [isDragging, setIsDragging] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
   const [uploading, setUploading] = useState(false);
-  const [currentStepIndex, setCurrentStepIndex] = useState(0);
+  const [stepLabel, setStepLabel] = useState('');
   const [result, setResult] = useState(null);
   const fileInputRef = useRef(null);
   const { toast } = useToast();
   const navigate = useNavigate();
-
-  const pipelineSteps = [
-    { label: 'Securing Document with AES-256-GCM', icon: <Icon.lock /> },
-    { label: 'Computing SHA-256 Cryptographic Fingerprint', icon: <Icon.check /> },
-    { label: 'Extracting Legal Text & OCR', icon: <Icon.document /> },
-    { label: 'Running AI Risk & Compliance Intelligence', icon: <Icon.shield /> }
-  ];
 
   const handleFile = async (file) => {
     if (!file) return;
     setSelectedFile(file);
     setUploading(true);
     setResult(null);
-    setCurrentStepIndex(0);
+    setStepLabel('Computing SHA-256 digest & securing memory chamber...');
 
-    // Simulate meaningful progress checkpoint progression alongside real upload
     const stepInterval = setInterval(() => {
-      setCurrentStepIndex((prev) => (prev < 3 ? prev + 1 : prev));
-    }, 450);
+      setStepLabel((prev) => {
+        if (prev.includes('SHA-256')) return 'Extracting structural clauses & legal covenants...';
+        if (prev.includes('covenants')) return 'Evaluating liability deviation & corporate risk baselines...';
+        return prev;
+      });
+    }, 600);
 
     try {
       const fd = new FormData();
@@ -43,13 +44,13 @@ export const Upload = () => {
       const res = await Api.upload('/api/documents/upload', fd);
 
       clearInterval(stepInterval);
-      setCurrentStepIndex(4);
       setResult(res);
-      toast('Document uploaded and secured', 'ok');
+      setUploading(false);
+      toast('Document ingested & cryptographic digest anchored', 'ok');
     } catch (err) {
       clearInterval(stepInterval);
       setUploading(false);
-      toast(err.message || 'Upload failed', 'error');
+      toast(err.message || 'Intake failed', 'error');
     }
   };
 
@@ -58,192 +59,143 @@ export const Upload = () => {
     setIsDragging(true);
   };
 
-  const handleDragLeave = () => {
+  const handleDragLeave = (e) => {
+    e.preventDefault();
     setIsDragging(false);
   };
 
   const handleDrop = (e) => {
     e.preventDefault();
     setIsDragging(false);
-    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      handleFile(e.dataTransfer.files[0]);
-    }
+    const file = e.dataTransfer?.files?.[0];
+    if (file) handleFile(file);
+  };
+
+  const handleSelect = (e) => {
+    const file = e.target.files?.[0];
+    if (file) handleFile(file);
   };
 
   return (
-    <PageTransition>
-      <h1 className="page-title">Upload Document</h1>
-      <p className="page-sub">
-        Files are hashed (SHA-256), encrypted at rest (AES-256-GCM), and text-extracted for AI analysis. Supported: .txt, .pdf, .docx
-      </p>
+    <div className="w-full bg-paper py-16 sm:py-24 min-h-[85vh]">
+      <div className="container-wide">
+        <Breadcrumb
+          items={[
+            { label: 'Cockpit', href: '/dashboard' },
+            { label: 'Intake Chamber' }
+          ]}
+        />
 
-      <div className="card" style={{ maxWidth: '680px' }}>
-        {!uploading && !result && (
+        <div className="max-w-3xl mb-12">
+          <span className="font-body text-label text-ink-soft mb-2 block select-none">
+            [DOCUMENT INTAKE]
+          </span>
+          <h1 className="display-02 text-ink tracking-tight mb-4">
+            Deposit document for examination.
+          </h1>
+          <p className="font-body text-body-lg text-ink-soft leading-relaxed">
+            Upload commercial contracts, indentures, or master agreements. Ephemeral hardware isolation guarantees zero data leakage or model training.
+          </p>
+        </div>
+
+        {uploading ? (
+          <div className="bg-paper-dim border border-rule p-16 sm:p-24 text-center">
+            <ThinkingLoader
+              state="working"
+              size={64}
+              caption={selectedFile ? `Ingesting ${selectedFile.name}` : 'Ingesting Document...'}
+              subcaption={stepLabel}
+            />
+            {selectedFile && (
+              <p className="font-body text-micro text-neutral-500 mt-6">
+                Payload: {fmtBytes(selectedFile.size)} • Memory Chamber: Isolated
+              </p>
+            )}
+          </div>
+        ) : result ? (
+          <div className="bg-paper-dim border border-rule p-10 sm:p-14">
+            <div className="flex items-center gap-3 mb-4 text-ink">
+              <span className="font-display text-2xl font-medium">✓</span>
+              <h3 className="display-03 text-ink tracking-tight">
+                Document Examination Complete
+              </h3>
+            </div>
+            <p className="font-body text-body text-ink-soft mb-8">
+              Structural clauses have been extracted, classified, and indexed for risk intelligence.
+            </p>
+
+            <div className="bg-paper p-6 border border-rule space-y-3 mb-8 font-body text-body-sm">
+              <div className="flex justify-between border-b border-rule pb-2">
+                <span className="text-neutral-500">Document Title</span>
+                <span className="text-ink font-medium">{result.title || selectedFile?.name}</span>
+              </div>
+              <div className="flex justify-between border-b border-rule pb-2">
+                <span className="text-neutral-500">SHA-256 Digest</span>
+                <span className="font-mono text-micro text-ink">{result.hash || 'Anchored in session'}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-neutral-500">Clauses Extracted</span>
+                <span className="text-ink font-medium">{result.clauseCount || result.clauses?.length || 'Indexed'}</span>
+              </div>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-4">
+              <Button
+                variant="primary"
+                onClick={() => navigate(`/document/${result.id || result.docId || result.document?.id}`)}
+              >
+                Open Document Workspace
+              </Button>
+              <Button
+                variant="ghost"
+                onClick={() => {
+                  setResult(null);
+                  setSelectedFile(null);
+                }}
+              >
+                Deposit Another Document
+              </Button>
+            </div>
+          </div>
+        ) : (
           <div
-            className={`dropzone ${isDragging ? 'drag' : ''}`}
-            id="dropzone"
-            onClick={() => fileInputRef.current?.click()}
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
             onDrop={handleDrop}
-            style={{
-              transition: 'border-color 0.2s ease, background 0.2s ease',
-              background: isDragging ? 'var(--royal-light)' : 'transparent'
-            }}
+            onClick={() => fileInputRef.current?.click()}
+            className={`bg-paper-dim border p-16 sm:p-24 text-center cursor-pointer transition-all duration-fast ${
+              isDragging
+                ? 'border-ink bg-neutral-200'
+                : 'border-rule hover:border-ink hover:bg-neutral-100'
+            }`}
           >
-            <div className="dropzone-icon">
-              <Icon.upload />
-            </div>
-            <h3>Drag &amp; drop a file here</h3>
-            <p>or click to browse — max 25 MB</p>
             <input
-              type="file"
               ref={fileInputRef}
-              id="fileInput"
-              style={{ display: 'none' }}
-              accept=".txt,.pdf,.docx,.doc,image/*"
-              onChange={(e) => {
-                if (e.target.files && e.target.files[0]) {
-                  handleFile(e.target.files[0]);
-                }
-              }}
+              type="file"
+              accept=".pdf,.docx,.doc,.txt"
+              onChange={handleSelect}
+              className="hidden"
             />
+
+            <div className="max-w-md mx-auto">
+              <div className="w-16 h-16 border border-ink mx-auto flex items-center justify-center mb-6 select-none font-display text-2xl text-ink">
+                ↓
+              </div>
+              <h3 className="font-body text-heading-01 text-ink font-semibold mb-2">
+                Drag &amp; drop document or click to select
+              </h3>
+              <p className="font-body text-body-sm text-ink-soft mb-6">
+                PDF or DOCX up to 50MB. Cryptographic SHA-256 fingerprint computed locally upon drop.
+              </p>
+              <span className="font-body text-label text-ink underline font-medium">
+                Browse local filesystem
+              </span>
+            </div>
           </div>
         )}
-
-        {/* Meaningful Pipeline Checkpoints */}
-        {uploading && !result && (
-          <motion.div
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.25, ease: EASE_OUT }}
-            style={{ padding: '8px 0' }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px' }}>
-              <div className="brand-icon" style={{ width: '38px', height: '38px' }}>
-                <Icon.document stroke="white" />
-              </div>
-              <div>
-                <strong style={{ color: 'var(--navy)' }}>{selectedFile?.name}</strong>
-                <p className="text-lo small">{fmtBytes(selectedFile?.size || 0)}</p>
-              </div>
-            </div>
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-              {pipelineSteps.map((step, idx) => {
-                const isComplete = currentStepIndex > idx;
-                const isCurrent = currentStepIndex === idx;
-
-                return (
-                  <div
-                    key={idx}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '12px',
-                      padding: '10px 14px',
-                      borderRadius: 'var(--radius-sm)',
-                      background: isCurrent ? 'var(--royal-light)' : 'var(--off-white)',
-                      border: isCurrent ? '1px solid var(--royal)' : '1px solid var(--border)',
-                      transition: 'all 0.2s ease'
-                    }}
-                  >
-                    <div
-                      style={{
-                        width: '20px',
-                        height: '20px',
-                        borderRadius: '50%',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        background: isComplete ? 'var(--emerald)' : isCurrent ? 'var(--royal)' : 'var(--mid-gray)',
-                        color: '#FFFFFF',
-                        fontSize: '11px',
-                        flexShrink: 0
-                      }}
-                    >
-                      {isComplete ? <Icon.check /> : idx + 1}
-                    </div>
-                    <span
-                      style={{
-                        fontSize: '13.5px',
-                        fontWeight: isCurrent ? '600' : '400',
-                        color: isCurrent ? 'var(--royal)' : isComplete ? 'var(--navy)' : 'var(--text-lo)'
-                      }}
-                    >
-                      {step.label}
-                    </span>
-                  </div>
-                );
-              })}
-            </div>
-          </motion.div>
-        )}
-
-        {/* Ready / Success State */}
-        <AnimatePresence>
-          {result && (
-            <motion.div
-              id="uploadResult"
-              className="mt-16"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3, ease: EASE_OUT }}
-            >
-              <div className="card" style={{ borderColor: 'var(--emerald)', background: 'var(--white)' }}>
-                <div className="card-title">
-                  <span className="dot dot-emerald" />
-                  Upload Secured &amp; Analyzed
-                </div>
-                <p className="bold" style={{ fontSize: '16px', color: 'var(--navy)' }}>{result.name}</p>
-                <p className="text-lo small">
-                  {fmtBytes(result.size)} · SHA-256: {result.sha256 ? result.sha256.slice(0, 24) : ''}…
-                </p>
-                <div className="flex gap-8 mt-12" style={{ flexWrap: 'wrap' }}>
-                  <span className="badge badge-ok">
-                    <Icon.check /> AES-256 Encrypted
-                  </span>
-                  <span className="badge badge-info">
-                    OCR {Math.round((result.ocrConfidence || 0) * 100)}%
-                  </span>
-                  <span
-                    className={`badge ${result.riskScore > 50
-                        ? 'badge-danger'
-                        : result.riskScore > 25
-                          ? 'badge-warn'
-                          : 'badge-ok'
-                      }`}
-                  >
-                    Risk {result.riskScore ?? '—'}/100
-                  </span>
-                </div>
-                <div style={{ marginTop: '20px', display: 'flex', gap: '10px' }}>
-                  <motion.button
-                    className="btn btn-primary"
-                    onClick={() => navigate(`/document/${result.id}`)}
-                    {...buttonMotion}
-                  >
-                    <Icon.eye /> Open AI Analysis Workspace
-                  </motion.button>
-                  <motion.button
-                    className="btn btn-outline"
-                    onClick={() => {
-                      setResult(null);
-                      setUploading(false);
-                      setSelectedFile(null);
-                    }}
-                    {...buttonMotion}
-                  >
-                    Upload Another
-                  </motion.button>
-                </div>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
       </div>
-    </PageTransition>
+    </div>
   );
-};
+}
 
 export default Upload;

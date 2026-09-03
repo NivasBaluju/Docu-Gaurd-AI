@@ -410,7 +410,46 @@ export const BulkOperationModal = ({
           ))}
         </div>
 
-        {!isExecutable && (
+        {preview.requiresApproval ? (
+          <div style={{
+            padding: '14px 18px', borderRadius: '10px',
+            background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.3)',
+            display: 'flex', flexDirection: 'column', gap: '8px',
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span style={{ fontSize: '18px' }}>🛡️</span>
+              <strong style={{ color: '#F59E0B', fontSize: '14px' }}>
+                Governance Policy v{preview.policyVersion || '1.0'} — Peer Approval Required
+              </strong>
+            </div>
+            <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.75)', lineHeight: '1.5' }}>
+              This operation involves high-consequence portfolio changes. Under the four-eyes separation of duties principle, it must be independently reviewed and approved by an administrative peer before execution.
+            </div>
+            {preview.policyFlags?.length > 0 && (
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginTop: '4px' }}>
+                {preview.policyFlags.map(f => (
+                  <span key={f} style={{
+                    fontSize: '11px', padding: '2px 8px', borderRadius: '4px',
+                    background: 'rgba(245,158,11,0.2)', color: '#FCD34D', fontWeight: 600,
+                  }}>
+                    ⚠ {f}
+                  </span>
+                ))}
+              </div>
+            )}
+          </div>
+        ) : (
+          <div style={{
+            padding: '10px 14px', borderRadius: '8px',
+            background: 'rgba(16,185,129,0.06)', border: '1px solid rgba(16,185,129,0.2)',
+            display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', color: '#6EE7B7',
+          }}>
+            <span>✓</span>
+            <span><strong>Approval-Exempt:</strong> Operation meets standard safety policy and can be executed directly without peer sign-off.</span>
+          </div>
+        )}
+
+        {!isExecutable && !preview.requiresApproval && (
           <div style={{
             padding: '12px 16px', borderRadius: '8px',
             background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.25)',
@@ -639,7 +678,18 @@ export const BulkOperationModal = ({
           {step === STEPS.PREVIEW && (
             <>
               <button style={styles.btnGhost} onClick={() => setStep(STEPS.CONFIGURE)}>← Back</button>
-              {preview?.executable && preview?.previewId ? (
+              {preview?.requiresApproval ? (
+                <button
+                  style={styles.btnPrimary}
+                  onClick={() => {
+                    toast('Batch registered in status PENDING_APPROVAL. An administrative peer can now review it in Governed Approvals.', 'info');
+                    if (onComplete) onComplete();
+                    onClose();
+                  }}
+                >
+                  ✓ Registered for Peer Approval (Done)
+                </button>
+              ) : preview?.executable && preview?.previewId ? (
                 <button style={styles.btnPrimary} onClick={() => setStep(STEPS.CONFIRM)}>
                   Confirm ({preview.eligibleCount} eligible) →
                 </button>

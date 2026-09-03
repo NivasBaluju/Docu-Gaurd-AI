@@ -1,13 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion } from 'motion/react';
 import Api from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
-import PageTransition from '../components/common/PageTransition';
-import { buttonMotion } from '../styles/motion';
+import Button from '../components/ui/Button';
+import AuthThresholdModal from '../components/common/AuthThresholdModal';
 
-export const Mfa = () => {
+/**
+ * Mfa — The Threshold Crossing Entry
+ * Incorporates the Paper & Ink editorial design system and the
+ * AuthThresholdModal transition upon successful OTP verification.
+ */
+export function Mfa() {
   const [otpCode, setOtpCode] = useState('');
   const [otpError, setOtpError] = useState('');
   const [devCode, setDevCode] = useState(null);
@@ -15,13 +19,17 @@ export const Mfa = () => {
   const [submitting, setSubmitting] = useState(false);
   const [resendCooldown, setResendCooldown] = useState(0);
 
+  // Threshold modal states
+  const [thresholdOpen, setThresholdOpen] = useState(false);
+  const [thresholdStatus, setThresholdStatus] = useState('validating');
+  const [authPayload, setAuthPayload] = useState(null);
+
   const { login } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
 
   const preToken = sessionStorage.getItem('preToken');
 
-  // Check for preToken and retrieve devCode from login dispatch (NO duplicate request)
   useEffect(() => {
     if (!preToken) {
       navigate('/login', { replace: true });
@@ -35,7 +43,6 @@ export const Mfa = () => {
     }
   }, [preToken, navigate]);
 
-  // Resend cooldown timer
   useEffect(() => {
     if (resendCooldown <= 0) return;
     const timer = setInterval(() => {
@@ -45,7 +52,8 @@ export const Mfa = () => {
   }, [resendCooldown]);
 
   const handleCodeChange = (e) => {
-    setOtpCode(e.target.value);
+    const val = e.target.value.replace(/\D/g, '').slice(0, 6);
+    setOtpCode(val);
     if (otpError) setOtpError('');
   };
 
@@ -59,7 +67,7 @@ export const Mfa = () => {
         setDevCode(r.devCode);
       }
       setResendCooldown(30);
-      toast(r.devMode ? 'Dev mode: New code generated' : 'Verification code sent to your email', 'info');
+      toast(r.devMode ? 'Dev code generated' : 'Verification code dispatched to your email', 'info');
     } catch (err) {
       setOtpError(err.message || 'Failed to request new code');
     } finally {
@@ -72,150 +80,117 @@ export const Mfa = () => {
     if (!preToken) return;
 
     if (!otpCode.trim() || otpCode.trim().length < 6) {
-      setOtpError('Please enter the 6-digit verification code');
+      setOtpError('Please enter the complete 6-digit verification pass');
       return;
     }
 
     setSubmitting(true);
     setOtpError('');
+
     try {
       const result = await Api.post('/api/auth/mfa/otp/verify', { preToken, code: otpCode.trim() });
-      sessionStorage.removeItem('preToken');
-      await login(result.token, result.user);
-      toast('Identity verified — signed in', 'ok');
-      navigate('/dashboard');
+      setAuthPayload(result);
+      setThresholdOpen(true);
+      setThresholdStatus('confirmed');
     } catch (err) {
       setOtpError('Incorrect or expired verification code. Please check your email or request a new code.');
-    } finally {
       setSubmitting(false);
     }
+  };
+
+  const handleThresholdComplete = async () => {
+    if (!authPayload) return;
+    sessionStorage.removeItem('preToken');
+    await login(authPayload.token, authPayload.user);
+    toast('Identity confirmed — workspace initialized', 'ok');
+    navigate('/dashboard');
   };
 
   if (!preToken) return null;
 
   return (
-    <PageTransition>
-      <div className="auth-minimal-wrapper">
-        {/* Landscape Ambient Background Glow */}
-        <div className="auth-landscape-bg" />
-        <div className="auth-landscape-overlay" />
-
-        {/* Compact Centered Minimalist Auth Card */}
-        <motion.div
-          className="auth-compact-card"
-          initial={{ opacity: 0, scale: 0.98, y: 8 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
-        >
-          {/* Landscape Dither Header Banner */}
-          <div className="auth-card-landscape-banner">
-            <img
-              src="/assets/lady-justice.jpg"
-              alt="Lady Justice Landscape Dither Art"
-              className="auth-card-banner-img"
-            />
-            <div className="auth-card-banner-overlay" />
-          </div>
-
-          <div style={{ padding: '24px 28px 28px' }}>
-            <div style={{ textAlign: 'center', marginBottom: '22px' }}>
-              <span className="mono" style={{ fontSize: '11px', color: '#71717A', letterSpacing: '0.06em' }}>
-                [EMAIL_VERIFICATION]
+    <div className="w-full min-h-[85vh] bg-paper flex items-center justify-center py-20 px-6">
+      <div className="max-w-md w-full bg-paper-dim border border-rule p-8 sm:p-12">
+        <div className="text-center mb-10 pb-6 border-b border-rule">
+          <span className="font-body text-micro text-neutral-500 block mb-2 select-none">
+            [ZERO-TRUST VERIFICATION]
+          </span>
+          <h1 className="display-03 text-ink tracking-tight mb-2">
+            Security Pass
+          </h1>
+          <p className="font-body text-body-sm text-ink-soft">
+            Enter the 6-digit one-time code dispatched to your email address.
+          </p>
+          {devCode && (
+            <div className="mt-4 p-2 bg-paper border border-ink text-center">
+              <span className="font-body text-micro text-ink font-semibold">
+                DEV PASS: {devCode}
               </span>
-              <h1 style={{ fontSize: '22px', fontWeight: '700', letterSpacing: '-0.03em', color: '#FFFFFF', margin: '4px 0 2px' }}>
-                Security Verification
-              </h1>
-              <p style={{ fontSize: '13px', color: '#A1A1AA', margin: 0 }}>
-                Enter the 6-digit code sent to your registered email
+            </div>
+          )}
+        </div>
+
+        <form onSubmit={handleSubmit} noValidate>
+          <div className="mb-8">
+            <label htmlFor="otpCode" className="block font-body text-label text-ink-soft mb-2 text-center">
+              One-Time Passcode
+            </label>
+            <input
+              id="otpCode"
+              type="text"
+              inputMode="numeric"
+              pattern="[0-9]*"
+              maxLength={6}
+              autoComplete="one-time-code"
+              autoFocus
+              value={otpCode}
+              onChange={handleCodeChange}
+              placeholder="000000"
+              className="w-full bg-paper border-0 border-b-2 border-rule focus:border-ink px-4 py-4 text-center font-display text-3xl tracking-widest text-ink outline-none transition-colors duration-instant"
+            />
+            {otpError && (
+              <p role="alert" className="mt-3 font-body text-body-sm text-ink text-center font-medium">
+                {otpError}
               </p>
-              {devCode && (
-                <div style={{ marginTop: '8px' }}>
-                  <span className="badge badge-warn" style={{ fontSize: '11px' }}>
-                    DEV CODE: {devCode}
-                  </span>
-                </div>
-              )}
-            </div>
-
-            <form id="otpForm" onSubmit={handleSubmit} noValidate>
-              <div style={{ marginBottom: '18px' }}>
-                <label style={{ display: 'block', fontSize: '12px', fontWeight: '500', color: '#A1A1AA', marginBottom: '6px' }}>
-                  Verification Code
-                </label>
-                <input
-                  id="mfa-otp-code"
-                  name="code"
-                  maxLength={6}
-                  inputMode="numeric"
-                  autoFocus
-                  required
-                  className={`auth-input-field ${otpError ? 'input-error' : ''}`}
-                  style={{
-                    textAlign: 'center',
-                    letterSpacing: '8px',
-                    fontSize: '20px',
-                    fontWeight: '700',
-                    fontFamily: 'var(--font-mono)'
-                  }}
-                  value={otpCode}
-                  onChange={handleCodeChange}
-                />
-                {otpError && (
-                  <div className="auth-field-error" style={{ justifyContent: 'center', textAlign: 'center' }}>
-                    <span>⚠</span>
-                    <span>{otpError}</span>
-                  </div>
-                )}
-              </div>
-
-              <motion.button
-                className="auth-btn-action"
-                type="submit"
-                disabled={submitting}
-                {...buttonMotion}
-              >
-                {submitting ? 'Verifying Code…' : 'Verify & Sign In'}
-              </motion.button>
-            </form>
-
-            {/* Resend Code Action */}
-            <div style={{ textAlign: 'center', marginTop: '16px' }}>
-              <button
-                type="button"
-                className="btn btn-ghost btn-sm"
-                onClick={handleRequestOtp}
-                disabled={requesting || resendCooldown > 0}
-                style={{ fontSize: '12px', color: resendCooldown > 0 ? '#71717A' : '#A1A1AA' }}
-              >
-                {requesting
-                  ? 'Sending code…'
-                  : resendCooldown > 0
-                  ? `Resend code in ${resendCooldown}s`
-                  : 'Didn’t receive code? Resend email'}
-              </button>
-            </div>
-
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '8px',
-                marginTop: '16px',
-                paddingTop: '16px',
-                borderTop: '1px solid rgba(255, 255, 255, 0.06)',
-                fontSize: '11px',
-                color: '#71717A'
-              }}
-            >
-              <span className="dot dot-emerald" />
-              <span>Zero-Trust One-Time Password Enforcement</span>
-            </div>
+            )}
           </div>
-        </motion.div>
+
+          <Button
+            type="submit"
+            variant="primary"
+            loading={submitting}
+            disabled={otpCode.length < 6 || submitting}
+            className="w-full mb-6"
+          >
+            Verify &amp; Enter Cockpit
+          </Button>
+
+          <div className="text-center pt-4 border-t border-rule">
+            <button
+              type="button"
+              onClick={handleRequestOtp}
+              disabled={requesting || resendCooldown > 0}
+              className="font-body text-body-sm text-ink-soft hover:text-ink transition-colors disabled:opacity-40"
+            >
+              {requesting
+                ? 'Dispatching code...'
+                : resendCooldown > 0
+                ? `Request new code in ${resendCooldown}s`
+                : 'Resend verification code'}
+            </button>
+          </div>
+        </form>
       </div>
-    </PageTransition>
+
+      {/* The Threshold Transition Modal */}
+      <AuthThresholdModal
+        isOpen={thresholdOpen}
+        status={thresholdStatus}
+        email={authPayload?.user?.email}
+        onComplete={handleThresholdComplete}
+      />
+    </div>
   );
-};
+}
 
 export default Mfa;

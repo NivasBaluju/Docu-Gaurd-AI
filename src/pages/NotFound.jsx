@@ -1,32 +1,39 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import { motion } from 'motion/react';
-import Icon from '../components/common/Icon';
-import EmptyState from '../components/common/EmptyState';
-import PageTransition from '../components/common/PageTransition';
-import { buttonMotion } from '../styles/motion';
+import Button from '../components/ui/Button';
 
-export const NotFound = () => {
-  const navigate = useNavigate();
-
+/**
+ * NotFound (404) — Part 10.11
+ * Centered, .container-text, ink section.
+ * "This page has been redacted."
+ */
+export function NotFound() {
   return (
-    <PageTransition>
-      <div style={{ maxWidth: '480px', margin: '80px auto', textAlign: 'center', padding: '0 20px' }}>
-        <EmptyState
-          icon={<Icon.alert />}
-          title="Page not found"
-          sub="The page you're looking for doesn't exist or has moved."
-        />
-        <motion.button
-          className="btn btn-primary mt-16"
-          onClick={() => navigate('/')}
-          {...buttonMotion}
-        >
-          Go Home
-        </motion.button>
+    <div
+      className="min-h-[85vh] flex items-center justify-center section-ink py-24 text-center px-6"
+      style={{
+        backgroundColor: '#0A0A0A',
+        color: '#FAF9F6'
+      }}
+    >
+      <div className="container-text flex flex-col items-center">
+        <span className="font-body text-micro text-neutral-400 mb-4 select-none">
+          [CLASSIFICATION: RESTRICTED]
+        </span>
+
+        <h1 className="display-02 text-paper tracking-tight mb-6">
+          This page has been redacted.
+        </h1>
+
+        <p className="font-body text-body-lg text-neutral-400 mb-10 max-w-md mx-auto">
+          The document, specification, or route you are looking for does not exist, or has been archived by administrative policy.
+        </p>
+
+        <Button href="/" variant="primary">
+          Return home
+        </Button>
       </div>
-    </PageTransition>
+    </div>
   );
-};
+}
 
 export default NotFound;

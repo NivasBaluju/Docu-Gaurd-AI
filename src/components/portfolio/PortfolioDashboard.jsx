@@ -7,6 +7,7 @@ import PortfolioRiskDistribution from './PortfolioRiskDistribution';
 import PortfolioDeadlinesAndEscalations from './PortfolioDeadlinesAndEscalations';
 import PortfolioCompliancePanel from '../compliance/PortfolioCompliancePanel';
 import BulkOperationHistoryPanel from './BulkOperationHistoryPanel';
+import PendingApprovalsQueue from './PendingApprovalsQueue';
 import SkeletonLoader from '../common/SkeletonLoader';
 import { PortfolioAnalyticsApi } from '../../services/portfolioAnalyticsApi';
 import { useToast } from '../../context/ToastContext';
@@ -14,7 +15,7 @@ import { useToast } from '../../context/ToastContext';
 export const PortfolioDashboard = () => {
   const [summary, setSummary] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState('OVERVIEW'); // 'OVERVIEW' | 'ATTENTION' | 'CONTRACTS' | 'WORKLOAD' | 'AUDIT' | 'BULK_OPS'
+  const [activeTab, setActiveTab] = useState('OVERVIEW'); // 'OVERVIEW' | 'ATTENTION' | 'CONTRACTS' | 'WORKLOAD' | 'AUDIT' | 'BULK_OPS' | 'APPROVALS'
   const { toast } = useToast();
 
   const fetchSummary = async () => {
@@ -62,7 +63,8 @@ export const PortfolioDashboard = () => {
           background: 'rgba(15, 23, 42, 0.6)',
           border: '1px solid rgba(255, 255, 255, 0.08)',
           borderRadius: '10px',
-          width: 'fit-content'
+          width: 'fit-content',
+          flexWrap: 'wrap',
         }}
       >
         <button
@@ -120,6 +122,13 @@ export const PortfolioDashboard = () => {
           style={{ fontSize: '12.5px', padding: '6px 14px' }}
         >
           ⚡ Bulk Operations
+        </button>
+        <button
+          className={`btn btn-sm ${activeTab === 'APPROVALS' ? 'btn-primary' : 'btn-ghost'}`}
+          onClick={() => setActiveTab('APPROVALS')}
+          style={{ fontSize: '12.5px', padding: '6px 14px' }}
+        >
+          🛡️ Governed Approvals
         </button>
       </div>
 
@@ -189,6 +198,12 @@ export const PortfolioDashboard = () => {
             </button>
           </div>
           <BulkOperationHistoryPanel />
+        </div>
+      )}
+
+      {activeTab === 'APPROVALS' && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+          <PendingApprovalsQueue onDecided={fetchSummary} />
         </div>
       )}
     </div>

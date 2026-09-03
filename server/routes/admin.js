@@ -86,7 +86,7 @@ router.get('/risky-users', requireAdmin, async (req, res) => {
         id: u.id,
         name: u.name,
         email: u.email,
-        role: u.email.toLowerCase() === 'balujunivas@gmail.com' ? 'admin' : u.role,
+        role: u.role,
         createdAt: u.created_at,
         docCount,
         activeSessions,

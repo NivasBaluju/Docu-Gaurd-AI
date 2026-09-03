@@ -1,0 +1,32 @@
+{
+  "heading": "Engineered for zero-trust precision.",
+  "lede": "DocuGuard AI operates under strict mathematical invariants: your contracts never train public models, every mutation is cryptographically signed, and every AI suggestion is backed by statutory citations.",
+  "methodology": [
+    {
+      "step": "01",
+      "title": "Ingest with hardware-grade isolation",
+      "description": "Contracts are ingested into memory-isolated environments. SHA-256 digests are computed immediately upon receipt, anchoring the document state before processing begins."
+    },
+    {
+      "step": "02",
+      "title": "Frame exposure against corporate baselines",
+      "description": "Clauses are evaluated against Delaware Chancery, Uniform Commercial Code, and enterprise risk thresholds. Uncapped liabilities and non-standard terms are immediately flagged."
+    },
+    {
+      "step": "03",
+      "title": "Govern mutations through dual-signatory policies",
+      "description": "High-risk contract transitions and bulk deadline updates require explicit policy checks. Self-approval is forbidden, and stale previews abort automatically to prevent race conditions."
+    },
+    {
+      "step": "04",
+      "title": "Prove compliance with cryptographic non-repudiation",
+      "description": "All actions are recorded in an append-only SHA-256 audit ledger. Evidence packages can be independently verified without contacting our servers."
+    }
+  ],
+  "stats": [
+    { "value": "1,248", "label": "Cryptographic Blocks Verified", "sublabel": "100% Chain Integrity" },
+    { "value": "40+", "label": "Compliance Frameworks", "sublabel": "Continuous Monitoring" },
+    { "value": "0ms", "label": "Data Retention for Model Training", "sublabel": "Zero-Knowledge Architecture" },
+    { "value": "100%", "label": "Deterministic Policy Rollback", "sublabel": "Zero Mutation Guarantee" }
+  ]
+}

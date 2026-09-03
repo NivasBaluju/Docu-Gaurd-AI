@@ -5,30 +5,50 @@ except ImportError:
 
 class DocumentModel:
     @staticmethod
-    def get_all():
+    def get_all(user_id=None):
         """
-        Fetches all documents from PostgreSQL including analysis states.
+        Fetches documents from PostgreSQL including analysis states.
+        Strictly scoped by user_id if provided.
         """
         conn = None
         try:
             conn = get_db_connection()
             cur = conn.cursor()
-            cur.execute("""
-                SELECT 
-                    d.id, 
-                    COALESCE(d.original_name, d.filename) AS filename, 
-                    COALESCE(d.risk_score, 5) AS risk_score,
-                    d.size,
-                    d.sha256,
-                    COALESCE(d.analysis_status, 'NOT_STARTED') AS analysis_status,
-                    d.analysis_error,
-                    d.created_at,
-                    (COUNT(c.id) > 0) AS has_previous_analysis
-                FROM documents d
-                LEFT JOIN document_clauses c ON d.id = c.document_id
-                GROUP BY d.id, d.original_name, d.filename, d.risk_score, d.size, d.sha256, d.analysis_status, d.analysis_error, d.created_at
-                ORDER BY d.created_at DESC;
-            """)
+            if user_id:
+                cur.execute("""
+                    SELECT 
+                        d.id, 
+                        COALESCE(d.original_name, d.filename) AS filename, 
+                        COALESCE(d.risk_score, 5) AS risk_score,
+                        d.size,
+                        d.sha256,
+                        COALESCE(d.analysis_status, 'NOT_STARTED') AS analysis_status,
+                        d.analysis_error,
+                        d.created_at,
+                        (COUNT(c.id) > 0) AS has_previous_analysis
+                    FROM documents d
+                    LEFT JOIN document_clauses c ON d.id = c.document_id
+                    WHERE d.user_id = %s
+                    GROUP BY d.id, d.original_name, d.filename, d.risk_score, d.size, d.sha256, d.analysis_status, d.analysis_error, d.created_at
+                    ORDER BY d.created_at DESC;
+                """, (user_id,))
+            else:
+                cur.execute("""
+                    SELECT 
+                        d.id, 
+                        COALESCE(d.original_name, d.filename) AS filename, 
+                        COALESCE(d.risk_score, 5) AS risk_score,
+                        d.size,
+                        d.sha256,
+                        COALESCE(d.analysis_status, 'NOT_STARTED') AS analysis_status,
+                        d.analysis_error,
+                        d.created_at,
+                        (COUNT(c.id) > 0) AS has_previous_analysis
+                    FROM documents d
+                    LEFT JOIN document_clauses c ON d.id = c.document_id
+                    GROUP BY d.id, d.original_name, d.filename, d.risk_score, d.size, d.sha256, d.analysis_status, d.analysis_error, d.created_at
+                    ORDER BY d.created_at DESC;
+                """)
             rows = cur.fetchall()
             cur.close()
             

@@ -17,10 +17,15 @@ const integrityService = require('../services/evidenceIntegrityService');
  */
 router.post('/verify', requireAuth, (req, res) => {
   try {
-    const { evidence, expectedHash } = req.body || {};
+    const evidence = req.body?.evidence;
+    const expectedHash = req.body?.expectedHash 
+      || req.body?.manifest?.integrity?.canonicalHash 
+      || req.body?.manifest?.canonicalHash
+      || req.body?.manifest?.evidenceHash 
+      || req.body?.manifest?.sha256;
     if (!evidence || !expectedHash) {
       return res.status(400).json({
-        error: 'Both evidence object and expectedHash string are required for verification',
+        error: 'Both evidence object and expectedHash string (or manifest.integrity.canonicalHash) are required for verification',
         valid: false
       });
     }
@@ -38,9 +43,10 @@ router.post('/verify', requireAuth, (req, res) => {
 
 /**
  * GET /api/compliance/documents/:documentId/evidence
+ * GET /api/compliance/contracts/:documentId
  * Fetch canonical evidence and manifest for a specific document.
  */
-router.get('/documents/:documentId/evidence', requireAuth, async (req, res) => {
+router.get(['/documents/:documentId/evidence', '/contracts/:documentId/evidence', '/contracts/:documentId', '/documents/:documentId'], requireAuth, async (req, res) => {
   try {
     const data = await complianceService.getContractEvidence(req.params.documentId, req.user);
     return res.status(200).json(data);
@@ -53,9 +59,10 @@ router.get('/documents/:documentId/evidence', requireAuth, async (req, res) => {
 
 /**
  * GET /api/compliance/documents/:documentId/export/json
+ * GET /api/compliance/contracts/:documentId/export/json
  * Download full machine-readable canonical evidence package as JSON.
  */
-router.get('/documents/:documentId/export/json', requireAuth, async (req, res) => {
+router.get(['/documents/:documentId/export/json', '/contracts/:documentId/export/json'], requireAuth, async (req, res) => {
   try {
     const evidencePackage = await complianceService.getContractEvidence(req.params.documentId, req.user);
     const jsonOutput = exportService.generateJsonExport(evidencePackage);
@@ -72,9 +79,10 @@ router.get('/documents/:documentId/export/json', requireAuth, async (req, res) =
 
 /**
  * GET /api/compliance/documents/:documentId/export/pdf
+ * GET /api/compliance/contracts/:documentId/export/pdf
  * Download formatted executive compliance audit summary as PDF.
  */
-router.get('/documents/:documentId/export/pdf', requireAuth, async (req, res) => {
+router.get(['/documents/:documentId/export/pdf', '/contracts/:documentId/export/pdf'], requireAuth, async (req, res) => {
   try {
     const evidencePackage = await complianceService.getContractEvidence(req.params.documentId, req.user);
     const pdfBuffer = await exportService.generatePdfExport('CONTRACT_GOVERNANCE_AUDIT', evidencePackage);
@@ -94,10 +102,31 @@ router.get('/documents/:documentId/export/pdf', requireAuth, async (req, res) =>
 });
 
 /**
+ * GET /api/compliance/documents/:documentId/export/csv
+ * GET /api/compliance/contracts/:documentId/export/csv
+ * Unified CSV export by type (actions, decisions, activity, batches).
+ */
+router.get(['/documents/:documentId/export/csv', '/contracts/:documentId/export/csv'], requireAuth, async (req, res) => {
+  try {
+    const evidencePackage = await complianceService.getContractEvidence(req.params.documentId, req.user);
+    const type = req.query.type || 'actions';
+    const csvOutput = exportService.generateCsvExport(type, evidencePackage);
+
+    const safeName = (evidencePackage.subject?.filename || req.params.documentId).replace(/[^a-zA-Z0-9_-]/g, '_');
+    res.setHeader('Content-Type', 'text/csv');
+    res.setHeader('Content-Disposition', `attachment; filename="contract_${type}_${safeName}.csv"`);
+    return res.send(csvOutput);
+  } catch (err) {
+    const status = err.status || 500;
+    return res.status(status).json({ error: err.message });
+  }
+});
+
+/**
  * GET /api/compliance/documents/:documentId/export/actions.csv
  * Download flattened action items CSV for spreadsheet analysis.
  */
-router.get('/documents/:documentId/export/actions.csv', requireAuth, async (req, res) => {
+router.get(['/documents/:documentId/export/actions.csv', '/contracts/:documentId/export/actions.csv'], requireAuth, async (req, res) => {
   try {
     const evidencePackage = await complianceService.getContractEvidence(req.params.documentId, req.user);
     const csvOutput = exportService.generateCsvExport('actions', evidencePackage);
@@ -156,9 +185,10 @@ router.get('/documents/:documentId/export/activity.csv', requireAuth, async (req
 
 /**
  * GET /api/compliance/portfolio/evidence
+ * GET /api/compliance/portfolio
  * Fetch complete portfolio governance evidence and manifest.
  */
-router.get('/portfolio/evidence', requireAuth, async (req, res) => {
+router.get(['/portfolio/evidence', '/portfolio'], requireAuth, async (req, res) => {
   try {
     const data = await complianceService.getPortfolioEvidence(req.user);
     return res.status(200).json(data);
@@ -207,6 +237,26 @@ router.get('/portfolio/export/pdf', requireAuth, async (req, res) => {
     if (!res.headersSent) {
       return res.status(status).json({ error: err.message });
     }
+  }
+});
+
+/**
+ * GET /api/compliance/portfolio/export/csv
+ * Unified portfolio CSV export by type (portfolio_actions, portfolio_contracts, governed_batches).
+ */
+router.get('/portfolio/export/csv', requireAuth, async (req, res) => {
+  try {
+    const evidencePackage = await complianceService.getPortfolioEvidence(req.user);
+    const type = req.query.type || 'portfolio_actions';
+    const csvOutput = exportService.generateCsvExport(type, evidencePackage);
+
+    res.setHeader('Content-Type', 'text/csv');
+    res.setHeader('Content-Disposition', `attachment; filename="portfolio_${type}.csv"`);
+    return res.send(csvOutput);
+  } catch (err) {
+    console.error('[Portfolio CSV Export Error]:', err);
+    const status = err.status || 500;
+    return res.status(status).json({ error: err.message });
   }
 });
 

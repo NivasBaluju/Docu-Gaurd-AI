@@ -56,7 +56,7 @@ def log_test(name, passed, detail=""):
 
 def register_and_login(email_prefix="compliance_user"):
     unique_id = uuid.uuid4().hex[:8]
-    email = f"{email_prefix}_{unique_id}@example.com"
+    email = f"{email_prefix}_{unique_id}@example.com".lower()
     password = "TestPassword123!"
     name = f"Compliance Test User {unique_id}"
 
@@ -76,19 +76,25 @@ def register_and_login(email_prefix="compliance_user"):
 
     if login_res.get("mfaRequired"):
         pre_token = login_res.get("preToken")
-        conn = get_db_connection()
-        cur = conn.cursor()
-        cur.execute("""
-            SELECT o.code 
-            FROM otp_codes o
-            JOIN users u ON u.id = o.user_id
-            WHERE u.email = %s AND o.used = false
-            ORDER BY o.created_at DESC LIMIT 1
-        """, (email,))
-        row = cur.fetchone()
-        dev_code = row['code'] if row else '123456'
-        cur.close()
-        conn.close()
+        dev_code = login_res.get("devCode")
+        if not dev_code:
+            for _ in range(5):
+                conn = get_db_connection()
+                cur = conn.cursor()
+                cur.execute("""
+                    SELECT code FROM otp_codes
+                    WHERE user_id = (SELECT id FROM users WHERE LOWER(email) = LOWER(%s))
+                    ORDER BY created_at DESC LIMIT 1
+                """, (email,))
+                row = cur.fetchone()
+                cur.close()
+                conn.close()
+                if row:
+                    dev_code = row['code'] if isinstance(row, dict) else row[0]
+                    break
+                time.sleep(0.5)
+            if not dev_code:
+                dev_code = '123456'
 
         mfa_res = requests.post(f"{NODE_BASE_URL}/api/auth/mfa/totp/verify", json={
             "preToken": pre_token,
@@ -103,10 +109,10 @@ def register_and_login(email_prefix="compliance_user"):
     if not user_id:
         conn = get_db_connection()
         cur = conn.cursor()
-        cur.execute("SELECT id FROM users WHERE email = %s;", (email,))
+        cur.execute("SELECT id FROM users WHERE LOWER(email) = LOWER(%s);", (email,))
         row = cur.fetchone()
         if row:
-            user_id = row['id']
+            user_id = row['id'] if isinstance(row, dict) else row[0]
         cur.close()
         conn.close()
 

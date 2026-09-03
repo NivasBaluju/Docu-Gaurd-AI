@@ -85,7 +85,7 @@ export const Security = () => {
   const threatsCount = (threats?.threats || []).filter(t => t.severity === 'high').length;
   const auditBlocksCount = dash?.auditLedger?.totalBlocks || (audit?.blocks || []).length || 124;
 
-  const isAdmin = user?.role === 'admin' || (user?.email || '').toLowerCase() === 'balujunivas@gmail.com';
+  const isAdmin = user?.role === 'admin';
 
   return (
     <PageTransition>
@@ -139,7 +139,7 @@ export const Security = () => {
         activeSessionsCount={activeSessionsCount}
       />
 
-      {/* Special Admin Watchtower Radar (Only visible to Institutional Admin / balujunivas@gmail.com) */}
+      {/* Special Admin Watchtower Radar (Only visible to Institutional Admin) */}
       {isAdmin && <AdminWatchtower />}
     </PageTransition>
   );

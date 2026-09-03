@@ -1,127 +1,161 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
-import { motion } from 'motion/react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import Icon from '../common/Icon';
-import { buttonMotion } from '../../styles/motion';
+import { IconMenu } from '../ui/Icons';
+import { MobileMenu } from './MobileMenu';
+import Button from '../ui/Button';
 
-export const Topbar = () => {
+/**
+ * Topbar (Navbar) — Part 8.1 & Part 21.3
+ * Fixed position, --paper background at 92% with 8px backdrop-blur.
+ * Height 88px at rest, shrinking to 64px on scroll (>120px) with bottom --rule hairline.
+ * Fraunces wordmark "DocuGuard AI", underline-hover navigation links,
+ * and primary "Speak with us" action.
+ */
+export function Topbar() {
   const { user, trust, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const currentPath = location.pathname;
   const [scrolled, setScrolled] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
-      setScrolled(window.scrollY > 12);
+      setScrolled(window.scrollY > 120);
     };
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const trustTone = (trust ?? 100) >= 70 ? 'ok' : (trust ?? 100) >= 40 ? 'warn' : 'danger';
+  const publicLinks = [
+    { href: '/capabilities', label: 'Capabilities' },
+    { href: '/intelligence', label: 'Intelligence' },
+    { href: '/trust', label: 'Trust & Security' },
+    { href: '/contact', label: 'Contact' },
+  ];
+
+  const portalLinks = [
+    { href: '/dashboard', label: 'Cockpit' },
+    { href: '/portfolio', label: 'Portfolio' },
+    { href: '/documents', label: 'Documents' },
+    { href: '/security', label: 'Audit Ledger' },
+  ];
+
+  const links = user ? portalLinks : publicLinks;
 
   return (
-    <header
-      className={`topbar ${scrolled ? 'topbar-scrolled' : ''}`}
-      id="topbar"
-      role="banner"
-      style={{
-        boxShadow: scrolled ? '0 4px 20px rgba(15, 23, 42, 0.05)' : 'none',
-        transition: 'box-shadow 0.25s ease, background 0.25s ease'
-      }}
-    >
-      <div
-        className="brand"
-        onClick={() => navigate('/')}
-        role="link"
-        aria-label="Docu-Gaurd AI — Home"
-        tabIndex={0}
-        onKeyDown={(e) => {
-          if (e.key === 'Enter') navigate('/');
+    <>
+      <header
+        className={`fixed top-0 inset-x-0 z-40 transition-all duration-fast ease-in-out-quad ${
+          scrolled
+            ? 'h-16 border-b border-rule bg-paper/95 backdrop-blur-sm'
+            : 'h-[88px] border-b border-transparent bg-paper/90 backdrop-blur-sm'
+        }`}
+        style={{
+          backgroundColor: 'rgba(250, 249, 246, 0.92)',
+          backdropFilter: 'blur(8px)',
+          WebkitBackdropFilter: 'blur(8px)'
         }}
       >
-        <div className="brand-icon" aria-hidden="true">
-          <img
-            src="/assets/favicon.png"
-            alt="Docu-Gaurd AI Logo"
-            style={{ width: '100%', height: '100%', objectFit: 'contain' }}
-          />
-        </div>
-        <span className="brand-text">
-          Docu<em>Gaurd</em> AI
-        </span>
-      </div>
+        <nav
+          aria-label="Primary"
+          className="container-wide h-full flex items-center justify-between"
+        >
+          {/* Brand Wordmark (Fraunces Serif) */}
+          <Link
+            to="/"
+            className="font-display text-2xl font-medium tracking-tight text-ink no-underline select-none"
+          >
+            DocuGuard AI
+          </Link>
 
-      <nav className="topnav" id="topnav" role="navigation" aria-label="Main navigation">
-        {!user && (
-          <>
-            <button
-              className={currentPath === '/' ? 'active' : ''}
-              onClick={() => navigate('/')}
-            >
-              Home
-            </button>
-            <button
-              className={currentPath === '/features' ? 'active' : ''}
-              onClick={() => navigate('/register')}
-            >
-              Features
-            </button>
-            <button
-              className={currentPath === '/security-info' ? 'active' : ''}
-              onClick={() => navigate('/register')}
-            >
-              Security
-            </button>
-          </>
-        )}
-      </nav>
+          {/* Desktop Navigation Links */}
+          <div className="hidden lg:flex items-center gap-8">
+            {links.map((link) => {
+              const isActive = location.pathname === link.href || (link.href !== '/' && location.pathname.startsWith(link.href));
+              return (
+                <Link
+                  key={link.href}
+                  to={link.href}
+                  className="font-body text-label text-ink relative py-1 no-underline group"
+                >
+                  {link.label}
+                  <span
+                    className={`absolute left-0 -bottom-1 h-px w-full bg-ink transition-transform duration-fast origin-left ${
+                      isActive ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100'
+                    }`}
+                  />
+                </Link>
+              );
+            })}
+          </div>
 
-      <div className="topbar-actions" id="topbar-actions">
-        {user ? (
-          <>
-            <span className={`badge badge-${trustTone}`} title="Zero-Trust Session Score">
-              <Icon.shield /> {trust ?? '—'}
-            </span>
-            <span className="text-mid small bold" style={{ fontSize: '13px' }}>
-              {user.name}
-            </span>
-            {(user.role === 'admin' || (user.email || '').toLowerCase() === 'balujunivas@gmail.com') && (
-              <span className="badge badge-gold" style={{ fontSize: '10px', padding: '2px 6px' }}>
-                ADMIN
-              </span>
+          {/* Desktop Actions */}
+          <div className="hidden lg:flex items-center gap-4">
+            {user ? (
+              <div className="flex items-center gap-4">
+                <span className="font-body text-micro border border-ink px-2 py-1 select-none">
+                  ZT Score: {trust ?? 100}
+                </span>
+                <span className="font-body text-body-sm text-ink font-medium">
+                  {user.name || user.email}
+                </span>
+                {user.role === 'admin' && (
+                  <span className="font-body text-micro bg-ink text-paper px-1.5 py-0.5 font-semibold">
+                    ADMIN
+                  </span>
+                )}
+                <button
+                  type="button"
+                  onClick={logout}
+                  className="font-body text-label text-ink-soft hover:text-ink transition-colors ml-2"
+                >
+                  Sign out
+                </button>
+              </div>
+            ) : (
+              <div className="flex items-center gap-4">
+                <Link
+                  to="/login"
+                  className="font-body text-label text-ink hover:text-black relative py-1 no-underline group"
+                >
+                  Client Portal
+                  <span className="absolute left-0 -bottom-1 h-px w-full bg-ink scale-x-0 origin-left group-hover:scale-x-100 transition-transform duration-fast" />
+                </Link>
+                <Button href="/contact" variant="primary">
+                  Speak with us
+                </Button>
+              </div>
             )}
-            <motion.button
-              className="btn btn-ghost btn-sm"
-              onClick={logout}
-              {...buttonMotion}
+          </div>
+
+          {/* Mobile Menu Trigger */}
+          <div className="flex items-center lg:hidden">
+            <button
+              type="button"
+              onClick={() => setMobileMenuOpen(true)}
+              className="inline-flex items-center gap-2 font-body text-label text-ink py-2 px-3 hover:bg-paper-dim transition-colors"
+              aria-label="Open navigation menu"
             >
-              <Icon.logout /> Sign out
-            </motion.button>
-          </>
-        ) : (
-          <>
-            <motion.button
-              className="btn btn-ghost btn-sm"
-              onClick={() => navigate('/login')}
-              {...buttonMotion}
-            >
-              Log in
-            </motion.button>
-            <motion.button
-              className="btn btn-primary btn-sm"
-              onClick={() => navigate('/register')}
-              {...buttonMotion}
-            >
-              Get Started
-            </motion.button>
-          </>
-        )}
-      </div>
-    </header>
+              <span>Menu</span>
+              <IconMenu className="w-5 h-5" strokeWidth={1.5} />
+            </button>
+          </div>
+        </nav>
+      </header>
+
+      {/* Spacer for fixed navbar */}
+      <div className={scrolled ? 'h-16' : 'h-[88px]'} aria-hidden="true" />
+
+      {/* Mobile Menu Drawer */}
+      <MobileMenu
+        isOpen={mobileMenuOpen}
+        onClose={() => setMobileMenuOpen(false)}
+        navLinks={links}
+        user={user}
+      />
+    </>
   );
-};
+}
 
 export default Topbar;

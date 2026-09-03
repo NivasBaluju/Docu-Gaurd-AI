@@ -36,7 +36,9 @@ router.post('/register', async (req, res) => {
     );
 
     await recordAudit(id, 'USER_REGISTERED', { email: email.toLowerCase(), mfaEnabled });
-    sendWelcomeEmail(email.toLowerCase(), name).catch(err => console.error('Welcome email error:', err.message));
+    setImmediate(() => {
+      sendWelcomeEmail(email.toLowerCase(), name).catch(err => console.warn('Welcome email background dispatch error:', err.message));
+    });
     res.json({ ok: true, message: 'Account created. Please log in.' });
   } catch (err) {
     console.error('Register error:', err);
@@ -83,8 +85,9 @@ router.post('/login', async (req, res) => {
         mfaRequired: true,
         method: 'email',
         preToken,
-        devMode: emailRes.devMode,
-        devCode: emailRes.devMode ? code : undefined
+        devMode: Boolean(emailRes.devMode),
+        devCode: emailRes.devMode ? code : undefined,
+        deliveryFailed: Boolean(emailRes.deliveryFailed)
       });
     }
 

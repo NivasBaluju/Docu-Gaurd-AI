@@ -1,122 +1,164 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import Icon from '../common/Icon';
 
-export const Footer = () => {
+/**
+ * Footer — Part 8.3
+ * --ink background takeover, four-column layout on desktop,
+ * top structural hairline rule, bottom legal links with 16px real spacing.
+ * Zero box shadows, zero middots.
+ */
+export function Footer() {
   return (
     <footer
-      className="footer"
-      id="main-footer"
+      className="bg-ink text-paper mt-auto border-t border-neutral-800"
       role="contentinfo"
       style={{
-        background: '#000000',
-        borderTop: '1px solid rgba(255, 255, 255, 0.08)',
-        padding: '56px 24px 36px',
-        color: '#71717A',
-        fontSize: '13px',
-        lineHeight: '1.6'
+        backgroundColor: '#0A0A0A',
+        color: '#FAF9F6'
       }}
     >
-      <div style={{ maxWidth: '1180px', margin: '0 auto' }}>
+      <div className="container-wide py-16 sm:py-24">
         {/* Top 4-Column Directory */}
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-            gap: '36px',
-            marginBottom: '48px'
-          }}
-        >
-          {/* Column 1: Brand & Philosophy */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 sm:gap-8 pb-16 border-b border-neutral-800">
+          {/* Column 1: Offices */}
           <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '14px' }}>
-              <div
-                style={{
-                  width: '28px',
-                  height: '28px',
-                  borderRadius: '6px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  overflow: 'hidden'
-                }}
-              >
-                <img
-                  src="/assets/favicon.png"
-                  alt="Docu-Gaurd AI Logo"
-                  style={{ width: '100%', height: '100%', objectFit: 'contain' }}
-                />
+            <h4 className="font-body text-heading-02 text-paper font-semibold mb-4">
+              Offices
+            </h4>
+            <div className="space-y-4 font-body text-body-sm text-neutral-400">
+              <div>
+                <p className="text-paper font-medium">New York</p>
+                <p>123 Example Avenue, New York, NY 10001</p>
+                <p className="text-neutral-500">+1 (212) 555-0100</p>
               </div>
-              <strong style={{ color: '#FFFFFF', fontSize: '15px', fontWeight: '700' }}>Docu-Gaurd AI</strong>
+              <div>
+                <p className="text-paper font-medium">London</p>
+                <p>45 Example Street, London EC2A 4NE</p>
+                <p className="text-neutral-500">+44 20 7946 0100</p>
+              </div>
+              <div>
+                <p className="text-paper font-medium">Singapore</p>
+                <p>8 Example Road, #20-01, Singapore 018956</p>
+                <p className="text-neutral-500">+65 6100 0100</p>
+              </div>
             </div>
-            <p style={{ color: '#71717A', fontSize: '13px', lineHeight: '1.6' }}>
-              Enterprise legal intelligence &amp; document verification platform. Engineered for law firms and general counsel.
-            </p>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '16px' }}>
-              <span style={{ width: '7px', height: '7px', borderRadius: '50%', background: '#22C55E' }} />
-              <span style={{ color: '#E4E4E7', fontWeight: '500', fontSize: '12px' }}>Chamber Operational</span>
+          </div>
+
+          {/* Column 2: Capabilities */}
+          <div>
+            <h4 className="font-body text-heading-02 text-paper font-semibold mb-4">
+              Capabilities
+            </h4>
+            <ul className="space-y-3 font-body text-body-sm list-none p-0 m-0">
+              <li>
+                <Link to="/capabilities/contract-diligence" className="text-neutral-400 hover:text-paper transition-colors no-underline">
+                  Contract Diligence & Examination
+                </Link>
+              </li>
+              <li>
+                <Link to="/capabilities/risk-radar" className="text-neutral-400 hover:text-paper transition-colors no-underline">
+                  Autonomous Risk Radar
+                </Link>
+              </li>
+              <li>
+                <Link to="/capabilities/autonomous-negotiation" className="text-neutral-400 hover:text-paper transition-colors no-underline">
+                  Bilateral Negotiation Workbench
+                </Link>
+              </li>
+              <li>
+                <Link to="/capabilities/portfolio-governance" className="text-neutral-400 hover:text-paper transition-colors no-underline">
+                  Portfolio Health & Governance
+                </Link>
+              </li>
+              <li>
+                <Link to="/capabilities/compliance-audit" className="text-neutral-400 hover:text-paper transition-colors no-underline">
+                  Cryptographic Audit Ledger
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          {/* Column 3: Firm & Trust */}
+          <div>
+            <h4 className="font-body text-heading-02 text-paper font-semibold mb-4">
+              Platform &amp; Trust
+            </h4>
+            <ul className="space-y-3 font-body text-body-sm list-none p-0 m-0">
+              <li>
+                <Link to="/trust" className="text-neutral-400 hover:text-paper transition-colors no-underline">
+                  Zero-Trust Architecture
+                </Link>
+              </li>
+              <li>
+                <Link to="/intelligence" className="text-neutral-400 hover:text-paper transition-colors no-underline">
+                  Legal Engineering Research
+                </Link>
+              </li>
+              <li>
+                <Link to="/security" className="text-neutral-400 hover:text-paper transition-colors no-underline">
+                  Audit Ledger Verification
+                </Link>
+              </li>
+              <li>
+                <Link to="/trust" className="text-neutral-400 hover:text-paper transition-colors no-underline">
+                  SOC 2 Type II Compliance
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          {/* Column 4: Connect */}
+          <div>
+            <h4 className="font-body text-heading-02 text-paper font-semibold mb-4">
+              Connect
+            </h4>
+            <div className="space-y-4 font-body text-body-sm text-neutral-400">
+              <p>
+                Enterprise counsel and executive inquiries:
+                <br />
+                <span className="text-paper font-medium">briefings@docuguard.ai</span>
+              </p>
+              <div>
+                <Link
+                  to="/contact"
+                  className="editorial-link text-paper hover:text-white"
+                >
+                  Schedule Executive Briefing →
+                </Link>
+              </div>
+              <div className="pt-2">
+                <Link
+                  to="/login"
+                  className="editorial-link text-neutral-400 hover:text-paper"
+                >
+                  Client Portal Access
+                </Link>
+              </div>
             </div>
-          </div>
-
-          {/* Column 2: Platform */}
-          <div>
-            <div style={{ color: '#FFFFFF', fontWeight: '600', marginBottom: '12px', fontSize: '13px' }}>Platform</div>
-            <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              <li><Link to="/upload" style={{ color: '#A1A1AA' }}>Document Ingestion</Link></li>
-              <li><Link to="/contracts" style={{ color: '#A1A1AA' }}>Contract Authoring Studio</Link></li>
-              <li><Link to="/deadlines" style={{ color: '#A1A1AA' }}>Deadline &amp; Expiry Tracker</Link></li>
-              <li><Link to="/security" style={{ color: '#A1A1AA' }}>Zero-Trust Security Center</Link></li>
-            </ul>
-          </div>
-
-          {/* Column 3: Cryptography & Security */}
-          <div>
-            <div style={{ color: '#FFFFFF', fontWeight: '600', marginBottom: '12px', fontSize: '13px' }}>Security &amp; Standards</div>
-            <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              <li style={{ color: '#A1A1AA' }}>AES-256-GCM Envelope Encryption</li>
-              <li style={{ color: '#A1A1AA' }}>RSA-2048 PKCS#1v15 Signatures</li>
-              <li style={{ color: '#A1A1AA' }}>SHA-256 Blockchain Audit Chain</li>
-              <li style={{ color: '#A1A1AA' }}>Hardware TOTP Multi-Factor Auth</li>
-            </ul>
-          </div>
-
-          {/* Column 4: Compliance */}
-          <div>
-            <div style={{ color: '#FFFFFF', fontWeight: '600', marginBottom: '12px', fontSize: '13px' }}>Compliance</div>
-            <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              <li style={{ color: '#A1A1AA' }}>SOC 2 Type II Certified</li>
-              <li style={{ color: '#A1A1AA' }}>GDPR Article 32 Compliant</li>
-              <li style={{ color: '#A1A1AA' }}>Indian Information Technology Act</li>
-              <li style={{ color: '#A1A1AA' }}>ISO/IEC 27001 Certified</li>
-            </ul>
           </div>
         </div>
 
-        {/* Bottom Bar */}
-        <div
-          style={{
-            borderTop: '1px solid rgba(255, 255, 255, 0.08)',
-            paddingTop: '24px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            flexWrap: 'wrap',
-            gap: '12px'
-          }}
-        >
-          <div style={{ color: '#71717A', fontSize: '12px' }}>
-            Copyright © {new Date().getFullYear()} Docu-Gaurd AI Inc. All rights reserved.
-          </div>
-          <div style={{ display: 'flex', gap: '18px', fontSize: '12px' }}>
-            <span style={{ color: '#71717A' }}>Privacy Policy</span>
-            <span style={{ color: '#71717A' }}>Terms of Service</span>
-            <span style={{ color: '#71717A' }}>Security Disclosure</span>
-            <span style={{ color: '#71717A' }}>Legal Notice</span>
+        {/* Bottom Metadata Bar */}
+        <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 font-body text-micro text-neutral-500">
+          <p className="m-0">
+            © 2026 DocuGuard AI. Precision legal intelligence and zero-trust contract governance.
+          </p>
+
+          <div className="flex items-center gap-4">
+            <Link to="/privacy" className="text-neutral-500 hover:text-neutral-300 no-underline">
+              Privacy Policy
+            </Link>
+            <Link to="/terms" className="text-neutral-500 hover:text-neutral-300 no-underline">
+              Terms of Use
+            </Link>
+            <Link to="/accessibility" className="text-neutral-500 hover:text-neutral-300 no-underline">
+              Accessibility Statement
+            </Link>
           </div>
         </div>
       </div>
     </footer>
   );
-};
+}
 
 export default Footer;

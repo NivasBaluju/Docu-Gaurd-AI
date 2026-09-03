@@ -22,6 +22,7 @@ const { v4: uuidv4 } = require('uuid');
 const crypto = require('crypto');
 const db = require('../db');
 const { WORKFLOW_STATES, ALLOWED_TRANSITIONS, isValidTransition } = require('./actionWorkflowService');
+const { evaluateBatchPolicy, POLICY_VERSION, GOVERNANCE_POLICY_FLAGS } = require('./operationPolicyEngine');
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -39,10 +40,13 @@ const BATCH_MODES = {
 };
 
 const BATCH_STATUS = {
-  PREVIEWED:  'PREVIEWED',
-  EXECUTING:  'EXECUTING',
-  COMPLETED:  'COMPLETED',
-  FAILED:     'FAILED',
+  PREVIEWED:         'PREVIEWED',
+  PENDING_APPROVAL:  'PENDING_APPROVAL',
+  APPROVED:          'APPROVED',
+  REJECTED:          'REJECTED',
+  EXECUTING:         'EXECUTING',
+  COMPLETED:         'COMPLETED',
+  FAILED:            'FAILED',
 };
 
 const MAX_BATCH_SIZE = 100;
@@ -253,7 +257,7 @@ async function previewBulkOperation(user, { operation, mode, actionIds, payload 
 
     // Load + authorize
     const { rows } = await db.query(
-      `SELECT a.id, a.status, a.owner_id, a.due_date, a.priority_score, a.title, a.category,
+      `SELECT a.id, a.document_id, a.status, a.owner_id, a.due_date, a.priority_score, a.title, a.category,
               d.user_id AS doc_owner_id
        FROM contract_actions a
        JOIN documents d ON d.id = a.document_id
@@ -306,6 +310,7 @@ async function previewBulkOperation(user, { operation, mode, actionIds, payload 
 
     eligible.push({
       actionId: action.id,
+      documentId: action.document_id,
       title: action.title,
       category: action.category,
       currentStatus: action.status,
@@ -319,6 +324,7 @@ async function previewBulkOperation(user, { operation, mode, actionIds, payload 
     return {
       previewId: null,
       executable: false,
+      requiresApproval: false,
       operation: op,
       mode: md,
       requested: actionIds.length,
@@ -334,6 +340,7 @@ async function previewBulkOperation(user, { operation, mode, actionIds, payload 
     return {
       previewId: null,
       executable: false,
+      requiresApproval: false,
       operation: op,
       mode: md,
       requested: actionIds.length,
@@ -345,29 +352,42 @@ async function previewBulkOperation(user, { operation, mode, actionIds, payload 
     };
   }
 
-  // 5. Compute canonical preview hash
-  const eligibleIds = eligible.map(e => e.actionId).sort();
-  const previewHash = computePreviewHash(op, md, eligibleIds, payload);
+  // 5. Evaluate deterministic governance policy (v1.0)
+  const policyResult = evaluateBatchPolicy({
+    operation: op,
+    mode: md,
+    eligibleActions: eligible,
+    payload,
+  });
 
-  // 6. Persist preview record
-  const previewId = uuidv4();
   const normalizedPayload = {
     ...payload,
     ...(op === OPERATION_TYPES.BULK_ASSIGN ? { ownerId: resolvedOwnerId } : {}),
     ...(op === OPERATION_TYPES.BULK_TRANSITION ? { targetStatus: payload.targetStatus.toUpperCase() } : {}),
   };
 
+  // 6. Compute canonical preview hash
+  const eligibleIds = eligible.map(e => e.actionId).sort();
+  const previewHash = computePreviewHash(op, md, eligibleIds, normalizedPayload);
+
+  // 7. Persist preview record
+  const previewId = uuidv4();
+  const initialStatus = policyResult.requiresApproval
+    ? BATCH_STATUS.PENDING_APPROVAL
+    : BATCH_STATUS.PREVIEWED;
+
   await db.query(
     `INSERT INTO portfolio_operation_batches (
        id, user_id, operation_type, status, mode,
        requested_count, eligible_count, blocked_count,
-       preview_hash, payload_json, blocked_json
-     ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)`,
+       preview_hash, payload_json, blocked_json,
+       requires_approval, policy_version, policy_flags, policy_details
+     ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15)`,
     [
       previewId,
       user.id,
       op,
-      BATCH_STATUS.PREVIEWED,
+      initialStatus,
       md,
       actionIds.length,
       eligible.length,
@@ -378,12 +398,21 @@ async function previewBulkOperation(user, { operation, mode, actionIds, payload 
         eligibleActionIds: eligibleIds,
       }),
       JSON.stringify(blocked),
+      policyResult.requiresApproval,
+      policyResult.policyVersion,
+      JSON.stringify(policyResult.policyFlags),
+      JSON.stringify(policyResult.ruleDetails),
     ]
   );
 
   return {
     previewId,
-    executable: true,
+    executable: !policyResult.requiresApproval,
+    requiresApproval: policyResult.requiresApproval,
+    policyVersion: policyResult.policyVersion,
+    policyFlags: policyResult.policyFlags,
+    policyDetails: policyResult.ruleDetails,
+    status: initialStatus,
     operation: op,
     mode: md,
     requested: actionIds.length,
@@ -391,6 +420,10 @@ async function previewBulkOperation(user, { operation, mode, actionIds, payload 
     blockedCount: blocked.length,
     blockedReasons: blocked,
     expectedChanges: eligible,
+    previewHash,
+    message: policyResult.requiresApproval
+      ? 'Governance Policy v1.0: Independent peer approval required before execution.'
+      : 'Operation is approval-exempt and ready for execution.',
   };
 }
 
@@ -467,15 +500,43 @@ async function executeBulkOperation(user, previewId, idempotencyKey) {
     }
   }
 
-  // 6. Verify preview is in PREVIEWED status
-  if (preview.status !== BATCH_STATUS.PREVIEWED && preview.status !== BATCH_STATUS.FAILED) {
-    if (preview.status === BATCH_STATUS.COMPLETED) {
-      return { errorStatus: 409, errorMessage: 'This preview has already been executed. Create a new preview to run another operation.', code: 'PREVIEW_ALREADY_CONSUMED' };
+  // 6. Verify preview status based on governance approval rules
+  if (preview.requires_approval) {
+    if (preview.status === BATCH_STATUS.PENDING_APPROVAL) {
+      return {
+        errorStatus: 403,
+        errorMessage: 'Operation requires independent peer approval before execution. Submit for approval first.',
+        code: 'APPROVAL_REQUIRED',
+        policyFlags: preview.policy_flags,
+      };
     }
-    if (preview.status === BATCH_STATUS.EXECUTING) {
-      return { errorStatus: 409, errorMessage: 'This preview is currently executing.', code: 'OPERATION_IN_PROGRESS' };
+    if (preview.status === BATCH_STATUS.REJECTED) {
+      return {
+        errorStatus: 409,
+        errorMessage: 'This operation batch was rejected by an authorized reviewer and cannot be executed.',
+        code: 'BATCH_REJECTED',
+        rejectionReason: preview.rejection_reason,
+      };
     }
-    return { errorStatus: 409, errorMessage: `Preview is in unexpected status '${preview.status}'.` };
+    if (preview.status !== BATCH_STATUS.APPROVED && preview.status !== BATCH_STATUS.FAILED) {
+      if (preview.status === BATCH_STATUS.COMPLETED) {
+        return { errorStatus: 409, errorMessage: 'This preview has already been executed. Create a new preview to run another operation.', code: 'PREVIEW_ALREADY_CONSUMED' };
+      }
+      if (preview.status === BATCH_STATUS.EXECUTING) {
+        return { errorStatus: 409, errorMessage: 'This preview is currently executing.', code: 'OPERATION_IN_PROGRESS' };
+      }
+      return { errorStatus: 409, errorMessage: `Governed batch is in status '${preview.status}', expected 'APPROVED'.`, code: 'INVALID_BATCH_STATUS' };
+    }
+  } else {
+    if (preview.status !== BATCH_STATUS.PREVIEWED && preview.status !== BATCH_STATUS.FAILED) {
+      if (preview.status === BATCH_STATUS.COMPLETED) {
+        return { errorStatus: 409, errorMessage: 'This preview has already been executed. Create a new preview to run another operation.', code: 'PREVIEW_ALREADY_CONSUMED' };
+      }
+      if (preview.status === BATCH_STATUS.EXECUTING) {
+        return { errorStatus: 409, errorMessage: 'This preview is currently executing.', code: 'OPERATION_IN_PROGRESS' };
+      }
+      return { errorStatus: 409, errorMessage: `Preview is in unexpected status '${preview.status}'.` };
+    }
   }
 
   // 7. Load operation details from stored preview record (NOT from request body)
@@ -503,6 +564,8 @@ async function executeBulkOperation(user, previewId, idempotencyKey) {
 
   try {
     await client.query('BEGIN');
+    await client.query("SET LOCAL statement_timeout = '15000'");
+    await client.query("SET LOCAL lock_timeout = '5000'");
 
     for (const actionId of eligibleActionIds) {
       // Re-load and re-validate under row-level lock
@@ -543,10 +606,26 @@ async function executeBulkOperation(user, previewId, idempotencyKey) {
 
       // Operation-specific re-validation and mutation
       try {
-        if (operation === OPERATION_TYPES.BULK_ASSIGN) {
-          await executeSingleAssign(client, action, storedPayload, user, previewId);
-        } else if (operation === OPERATION_TYPES.BULK_DEADLINE) {
-          await executeSingleDeadline(client, action, storedPayload, user, previewId);
+        if (operation === OPERATION_TYPES.BULK_ASSIGN || operation === OPERATION_TYPES.BULK_DEADLINE) {
+          if (action.status === WORKFLOW_STATES.RESOLVED || action.status === WORKFLOW_STATES.DISMISSED) {
+            executionBlocked.push({ actionId, reason: BLOCK_REASONS.ACTION_NOT_ACTIVE });
+            if (mode === BATCH_MODES.STRICT) {
+              await client.query('ROLLBACK');
+              await db.query('UPDATE portfolio_operation_batches SET status=$1 WHERE id=$2', [BATCH_STATUS.FAILED, previewId]);
+              return {
+                errorStatus: 409,
+                errorMessage: `STRICT mode: action ${actionId} is ${action.status} and cannot be modified. Transaction rolled back.`,
+                code: 'ACTION_BLOCKED_IN_STRICT_MODE',
+                rolledBack: true,
+              };
+            }
+            continue;
+          }
+          if (operation === OPERATION_TYPES.BULK_ASSIGN) {
+            await executeSingleAssign(client, action, storedPayload, user, previewId);
+          } else {
+            await executeSingleDeadline(client, action, storedPayload, user, previewId);
+          }
         } else if (operation === OPERATION_TYPES.BULK_TRANSITION) {
           // Re-validate state transition (state may have changed since preview)
           const targetStatus = storedPayload.targetStatus;
@@ -556,9 +635,9 @@ async function executeBulkOperation(user, previewId, idempotencyKey) {
               await client.query('ROLLBACK');
               await db.query('UPDATE portfolio_operation_batches SET status=$1 WHERE id=$2', [BATCH_STATUS.FAILED, previewId]);
               return {
-                errorStatus: 422,
+                errorStatus: 409,
                 errorMessage: `STRICT mode: action ${actionId} state changed (${action.status} → ${targetStatus} no longer valid). Transaction rolled back.`,
-                code: 'STRICT_MODE_ABORTED',
+                code: 'ACTION_BLOCKED_IN_STRICT_MODE',
                 rolledBack: true,
               };
             }
@@ -621,6 +700,11 @@ async function executeBulkOperation(user, previewId, idempotencyKey) {
       blocked: (preview.blocked_count || 0) + executionBlocked.length,
       blockedReasons: [...(preview.blocked_json || []), ...executionBlocked],
       executedActionIds,
+      requiresApproval: preview.requires_approval,
+      policyVersion: preview.policy_version,
+      policyFlags: preview.policy_flags,
+      approvedBy: preview.approved_by,
+      approvedAt: preview.approved_at,
       completedAt: new Date().toISOString(),
     };
   } catch (err) {
@@ -755,7 +839,10 @@ async function getBatchHistory(user, { page = 1, limit = 20 } = {}) {
   const { rows: batches } = await db.query(
     `SELECT id, operation_type, status, mode,
             requested_count, eligible_count, executed_count, blocked_count,
-            blocked_json, result_json, created_at, completed_at
+            blocked_json, result_json, created_at, completed_at,
+            requires_approval, policy_version, policy_flags, policy_details,
+            approved_by, approved_at, approval_comments,
+            rejected_by, rejected_at, rejection_reason
      FROM portfolio_operation_batches
      WHERE user_id = $1
      ORDER BY created_at DESC
@@ -780,6 +867,295 @@ async function getBatchHistory(user, { page = 1, limit = 20 } = {}) {
 }
 
 // ---------------------------------------------------------------------------
+// Governed Operations: Approval & Review Engine (Phase 8.1)
+// ---------------------------------------------------------------------------
+
+/**
+ * Predicate determining whether an authenticated user is authorized to approve/reject a batch.
+ * Strictly uses the codebase's existing user role / administrative model:
+ * 1. User must be authenticated
+ * 2. Strict separation of duties: requester cannot approve their own batch
+ * 3. Authority: user.role === 'admin'
+ * 4. Batch must be in PENDING_APPROVAL
+ */
+function canUserApproveBatch(user, batch) {
+  if (!user || !user.id || !batch) return false;
+  if (user.id === batch.user_id) return false; // Anti-self-approval
+  if (user.role !== 'admin') return false;     // Administrative authority required
+  if (batch.status !== BATCH_STATUS.PENDING_APPROVAL) return false;
+  return true;
+}
+
+/**
+ * Scoped inbox: returns batches currently awaiting peer approval that the authenticated user is eligible to review.
+ * Only administrative reviewers can approve batches.
+ * A user can NEVER view their own batch in this approval inbox (anti-self-approval).
+ */
+async function getPendingApprovals(user, { page = 1, limit = 20 } = {}) {
+  const pageNum = Math.max(1, parseInt(page, 10) || 1);
+  const limitNum = Math.min(100, Math.max(1, parseInt(limit, 10) || 20));
+  const offset = (pageNum - 1) * limitNum;
+
+  // If user is not an admin, they have no governance authority to approve -> empty inbox
+  if (user.role !== 'admin') {
+    return {
+      pending: [],
+      pagination: { page: pageNum, limit: limitNum, total: 0, totalPages: 0 },
+    };
+  }
+
+  const { rows: countRows } = await db.query(
+    `SELECT COUNT(*)::int AS total
+     FROM portfolio_operation_batches
+     WHERE status = $1 AND user_id != $2`,
+    [BATCH_STATUS.PENDING_APPROVAL, user.id]
+  );
+  const total = countRows[0]?.total || 0;
+
+  const { rows: pending } = await db.query(
+    `SELECT b.id, b.user_id, b.operation_type, b.status, b.mode,
+            b.requested_count, b.eligible_count, b.blocked_count,
+            b.preview_hash, b.payload_json, b.blocked_json,
+            b.requires_approval, b.policy_version, b.policy_flags, b.policy_details,
+            b.created_at,
+            u.name AS requester_name, u.email AS requester_email
+     FROM portfolio_operation_batches b
+     JOIN users u ON u.id = b.user_id
+     WHERE b.status = $1 AND b.user_id != $2
+     ORDER BY b.created_at DESC
+     LIMIT $3 OFFSET $4`,
+    [BATCH_STATUS.PENDING_APPROVAL, user.id, limitNum, offset]
+  );
+
+  return {
+    pending,
+    pagination: {
+      page: pageNum,
+      limit: limitNum,
+      total,
+      totalPages: Math.ceil(total / limitNum),
+    },
+  };
+}
+
+/**
+ * Approves a batch that requires four-eyes authorization.
+ * Uses an atomic transaction and row-level lock (SELECT ... FOR UPDATE) to prevent concurrent decisions.
+ */
+async function approveBatchOperation(user, batchId, { comments = '' } = {}) {
+  const client = await db.connect();
+  try {
+    await client.query('BEGIN');
+    await client.query("SET LOCAL statement_timeout = '15000'");
+    await client.query("SET LOCAL lock_timeout = '5000'");
+    const { rows } = await client.query(
+      'SELECT * FROM portfolio_operation_batches WHERE id = $1 FOR UPDATE',
+      [batchId]
+    );
+
+    if (rows.length === 0) {
+      await client.query('ROLLBACK');
+      return { errorStatus: 404, errorMessage: 'Batch operation not found' };
+    }
+    const batch = rows[0];
+
+    // 1. Separation of duties: requester cannot approve their own batch
+    if (batch.user_id === user.id) {
+      await client.query('ROLLBACK');
+      return {
+        errorStatus: 403,
+        errorMessage: 'Separation of duties violation: Requester cannot approve their own operation.',
+        code: 'SELF_APPROVAL_FORBIDDEN',
+      };
+    }
+
+    // 2. Approver authorization: must have existing admin authority
+    if (user.role !== 'admin') {
+      await client.query('ROLLBACK');
+      return {
+        errorStatus: 403,
+        errorMessage: 'Unauthorized: Only authorized administrative reviewers can approve governed operations.',
+        code: 'APPROVER_UNAUTHORIZED',
+      };
+    }
+
+    // 3. Status check: must be currently in PENDING_APPROVAL
+    if (batch.status !== BATCH_STATUS.PENDING_APPROVAL) {
+      await client.query('ROLLBACK');
+      return {
+        errorStatus: 409,
+        errorMessage: `Batch is in status '${batch.status}' and cannot be approved. Expected PENDING_APPROVAL.`,
+        code: 'BATCH_ALREADY_DECIDED',
+      };
+    }
+
+    // 4. Exact preview hash re-verification
+    const storedPayload = batch.payload_json || {};
+    const { eligibleActionIds = [], ...operationPayload } = storedPayload;
+    const expectedHash = computePreviewHash(batch.operation_type, batch.mode, eligibleActionIds, operationPayload);
+    if (batch.preview_hash !== expectedHash) {
+      await client.query('ROLLBACK');
+      return {
+        errorStatus: 400,
+        errorMessage: 'Preview hash verification failed. Batch definition does not match canonical preview hash.',
+        code: 'HASH_MISMATCH',
+      };
+    }
+
+    const now = new Date().toISOString();
+    await client.query(
+      `UPDATE portfolio_operation_batches
+       SET status = $1, approved_by = $2, approved_at = $3, approval_comments = $4
+       WHERE id = $5`,
+      [BATCH_STATUS.APPROVED, user.id, now, comments?.trim() || null, batchId]
+    );
+
+    // Audit trail
+    await client.query(
+      `INSERT INTO activity_logs (id, user_id, action, metadata, ip_address, created_at)
+       VALUES ($1, $2, $3, $4, $5, NOW())`,
+      [
+        uuidv4(),
+        user.id,
+        'BATCH_OPERATION_APPROVED',
+        JSON.stringify({
+          batchId,
+          operation: batch.operation_type,
+          requesterId: batch.user_id,
+          policyVersion: batch.policy_version,
+          policyFlags: batch.policy_flags,
+          comments: comments?.trim() || null,
+          previewHash: batch.preview_hash,
+        }),
+        'internal',
+      ]
+    );
+
+    await client.query('COMMIT');
+
+    return {
+      batchId,
+      status: BATCH_STATUS.APPROVED,
+      approvedBy: user.id,
+      approvedAt: now,
+      approvalComments: comments?.trim() || null,
+      message: 'Operation approved successfully. Ready for execution.',
+    };
+  } catch (err) {
+    await client.query('ROLLBACK');
+    throw err;
+  } finally {
+    client.release();
+  }
+}
+
+/**
+ * Rejects a batch that was submitted for approval.
+ * Rejection is terminal: batch cannot be approved, executed, or reopened.
+ */
+async function rejectBatchOperation(user, batchId, { reason = '' } = {}) {
+  if (!reason || typeof reason !== 'string' || reason.trim().length < 10) {
+    return {
+      errorStatus: 400,
+      errorMessage: 'Rejection requires a meaningful explanation (minimum 10 characters).',
+      code: 'REJECTION_REASON_REQUIRED',
+    };
+  }
+
+  const client = await db.connect();
+  try {
+    await client.query('BEGIN');
+    await client.query("SET LOCAL statement_timeout = '15000'");
+    await client.query("SET LOCAL lock_timeout = '5000'");
+    const { rows } = await client.query(
+      'SELECT * FROM portfolio_operation_batches WHERE id = $1 FOR UPDATE',
+      [batchId]
+    );
+
+    if (rows.length === 0) {
+      await client.query('ROLLBACK');
+      return { errorStatus: 404, errorMessage: 'Batch operation not found' };
+    }
+    const batch = rows[0];
+
+    // 1. Separation of duties: requester cannot reject their own batch
+    if (batch.user_id === user.id) {
+      await client.query('ROLLBACK');
+      return {
+        errorStatus: 403,
+        errorMessage: 'Separation of duties violation: Requester cannot reject their own operation.',
+        code: 'SELF_APPROVAL_FORBIDDEN',
+      };
+    }
+
+    // 2. Approver authorization: must have existing admin authority
+    if (user.role !== 'admin') {
+      await client.query('ROLLBACK');
+      return {
+        errorStatus: 403,
+        errorMessage: 'Unauthorized: Only authorized administrative reviewers can reject governed operations.',
+        code: 'APPROVER_UNAUTHORIZED',
+      };
+    }
+
+    // 3. Status check: must be currently in PENDING_APPROVAL
+    if (batch.status !== BATCH_STATUS.PENDING_APPROVAL) {
+      await client.query('ROLLBACK');
+      return {
+        errorStatus: 409,
+        errorMessage: `Batch is in status '${batch.status}' and cannot be rejected. Expected PENDING_APPROVAL.`,
+        code: 'BATCH_ALREADY_DECIDED',
+      };
+    }
+
+    const now = new Date().toISOString();
+    await client.query(
+      `UPDATE portfolio_operation_batches
+       SET status = $1, rejected_by = $2, rejected_at = $3, rejection_reason = $4, completed_at = $3
+       WHERE id = $5`,
+      [BATCH_STATUS.REJECTED, user.id, now, reason.trim(), batchId]
+    );
+
+    // Audit trail
+    await client.query(
+      `INSERT INTO activity_logs (id, user_id, action, metadata, ip_address, created_at)
+       VALUES ($1, $2, $3, $4, $5, NOW())`,
+      [
+        uuidv4(),
+        user.id,
+        'BATCH_OPERATION_REJECTED',
+        JSON.stringify({
+          batchId,
+          operation: batch.operation_type,
+          requesterId: batch.user_id,
+          policyVersion: batch.policy_version,
+          policyFlags: batch.policy_flags,
+          reason: reason.trim(),
+          previewHash: batch.preview_hash,
+        }),
+        'internal',
+      ]
+    );
+
+    await client.query('COMMIT');
+
+    return {
+      batchId,
+      status: BATCH_STATUS.REJECTED,
+      rejectedBy: user.id,
+      rejectedAt: now,
+      rejectionReason: reason.trim(),
+      message: 'Operation batch was rejected. Rejection is terminal.',
+    };
+  } catch (err) {
+    await client.query('ROLLBACK');
+    throw err;
+  } finally {
+    client.release();
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Exports
 // ---------------------------------------------------------------------------
 
@@ -794,4 +1170,8 @@ module.exports = {
   previewBulkOperation,
   executeBulkOperation,
   getBatchHistory,
+  canUserApproveBatch,
+  getPendingApprovals,
+  approveBatchOperation,
+  rejectBatchOperation,
 };

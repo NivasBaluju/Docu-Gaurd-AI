@@ -72,10 +72,6 @@ async function requireAuth(req, res, next) {
     const user = userRows[0];
     if (!user) return res.status(401).json({ error: 'User not found' });
 
-    if ((user.email || '').toLowerCase() === 'balujunivas@gmail.com') {
-      user.role = 'admin';
-    }
-
     req.user = user;
     req.session = session;
     req.trust = { score, reasons };
@@ -88,9 +84,7 @@ async function requireAuth(req, res, next) {
 
 async function requireAdmin(req, res, next) {
   requireAuth(req, res, () => {
-    const email = (req.user?.email || '').toLowerCase();
-    if (req.user?.role === 'admin' || email === 'balujunivas@gmail.com') {
-      req.user.role = 'admin';
+    if (req.user?.role === 'admin') {
       return next();
     }
     return res.status(403).json({ error: 'Access denied: Administrator privileges required.' });

@@ -104,10 +104,8 @@ app.get('*', (req, res) => {
 });
 
 // Central error handler
-app.use((err, req, res, next) => {
-  console.error(err);
-  res.status(err.status || 500).json({ error: err.message || 'Internal server error' });
-});
+const errorHandler = require('./middleware/errorHandler');
+app.use(errorHandler);
 
 // Local dev: start HTTP server. On Vercel, the file is imported as a module.
 if (require.main === module) {

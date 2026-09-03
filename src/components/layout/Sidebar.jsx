@@ -17,7 +17,6 @@ export const Sidebar = () => {
     { path: '/documents', icon: <Icon.document />, label: 'Documents' },
     { path: '/upload', icon: <Icon.upload />, label: 'Upload Document' },
     { path: '/contracts', icon: <Icon.pen />, label: 'Generate Contract' },
-    { path: '/deadlines', icon: <Icon.calendar />, label: 'Deadlines' },
   ];
 
   const secItems = [

@@ -188,6 +188,51 @@ function generateCsvExport(type, evidencePackage) {
     return toCsv(headers, rows);
   }
 
+  if (type === 'batches' || type === 'governed_batches') {
+    const headers = [
+      { key: 'batchId', label: 'Batch ID' },
+      { key: 'operationType', label: 'Operation Type' },
+      { key: 'mode', label: 'Execution Mode' },
+      { key: 'status', label: 'Status' },
+      { key: 'requestedCount', label: 'Requested Count' },
+      { key: 'eligibleCount', label: 'Eligible Count' },
+      { key: 'executedCount', label: 'Executed Count' },
+      { key: 'blockedCount', label: 'Blocked Count' },
+      { key: 'policyVersion', label: 'Policy Version' },
+      { key: 'policyFlags', label: 'Policy Flags' },
+      { key: 'previewHash', label: 'Preview Hash' },
+      { key: 'requesterId', label: 'Requester ID' },
+      { key: 'approvedBy', label: 'Approved By' },
+      { key: 'approvedAt', label: 'Approved At' },
+      { key: 'approvalComments', label: 'Approval Comments' },
+      { key: 'createdAt', label: 'Created At' },
+      { key: 'completedAt', label: 'Completed At' }
+    ];
+
+    const batches = evidence.governedBatches || evidence.governedOperationsHistory || [];
+    const rows = batches.map(b => ({
+      batchId: b.batchId,
+      operationType: b.operationType,
+      mode: b.mode,
+      status: b.status,
+      requestedCount: b.requestedCount,
+      eligibleCount: b.eligibleCount,
+      executedCount: b.executedCount,
+      blockedCount: b.blockedCount,
+      policyVersion: b.policyVersion,
+      policyFlags: Array.isArray(b.policyFlags) ? b.policyFlags.join('; ') : '',
+      previewHash: b.previewHash || '',
+      requesterId: b.requesterId || '',
+      approvedBy: b.approvedBy || '',
+      approvedAt: b.approvedAt || '',
+      approvalComments: b.approvalComments || '',
+      createdAt: b.createdAt || '',
+      completedAt: b.completedAt || ''
+    }));
+
+    return toCsv(headers, rows);
+  }
+
   throw new Error(`Unsupported CSV export type: ${type}`);
 }
 
@@ -351,6 +396,29 @@ function generatePdfExport(exportType, evidencePackage) {
       doc.fontSize(8.5).font('Helvetica-Oblique').fillColor(MUTED).text('No decisions recorded in ledger.', 50, y);
       y += 16;
     }
+
+    // 6. Governed Operations Lineage
+    const batches = evidence.governedOperationsHistory || [];
+    if (batches.length > 0) {
+      if (y > 650) { doc.addPage(); y = 50; }
+      doc.fillColor(PRIMARY).fontSize(11).font('Helvetica-Bold').text('6. Governed Operations & Separation-of-Duties Lineage', 40, y);
+      y += 16;
+      for (const b of batches.slice(0, 10)) {
+        if (y > 740) { doc.addPage(); y = 50; }
+        const flagsStr = (b.policyFlags || []).join(', ') || 'NONE';
+        doc.fontSize(8).font('Helvetica-Bold').fillColor(PRIMARY)
+          .text(`Batch ${b.batchId.slice(0, 8)}… [${b.operationType} - ${b.status}]`, 50, y);
+        y += 11;
+        doc.fontSize(7.5).font('Helvetica').fillColor('#334155')
+          .text(`Executed: ${b.executedCount}/${b.requestedCount} | Policy v${b.policyVersion} (${flagsStr}) | Preview Hash: ${(b.previewHash || '').slice(0, 16)}…`, 50, y);
+        y += 11;
+        if (b.approvedBy) {
+          doc.text(`Approved by: ${b.approvedBy} at ${b.approvedAt || 'N/A'}${b.approvalComments ? ` — Note: "${b.approvalComments}"` : ''}`, 50, y);
+          y += 11;
+        }
+        y += 4;
+      }
+    }
   } else {
     // Portfolio Level Report
     const summary = evidence.portfolioSummary || {};
@@ -397,6 +465,29 @@ function generatePdfExport(exportType, evidencePackage) {
     } else {
       doc.fontSize(8.5).font('Helvetica-Oblique').fillColor(MUTED).text('No contracts found in portfolio.', 50, y);
       y += 16;
+    }
+
+    // 4. Governed Operation Batches
+    const pBatches = evidence.governedBatches || [];
+    if (pBatches.length > 0) {
+      if (y > 650) { doc.addPage(); y = 50; }
+      doc.fillColor(PRIMARY).fontSize(11).font('Helvetica-Bold').text('4. Governed Portfolio Operations & Approval Lineage', 40, y);
+      y += 16;
+      for (const b of pBatches.slice(0, 10)) {
+        if (y > 740) { doc.addPage(); y = 50; }
+        const flagsStr = (b.policyFlags || []).join(', ') || 'NONE';
+        doc.fontSize(8).font('Helvetica-Bold').fillColor(PRIMARY)
+          .text(`Batch ${b.batchId.slice(0, 8)}… [${b.operationType} - ${b.status}]`, 50, y);
+        y += 11;
+        doc.fontSize(7.5).font('Helvetica').fillColor('#334155')
+          .text(`Executed: ${b.executedCount}/${b.requestedCount} | Policy v${b.policyVersion} (${flagsStr}) | Preview Hash: ${(b.previewHash || '').slice(0, 16)}…`, 50, y);
+        y += 11;
+        if (b.approvedBy) {
+          doc.text(`Approved by: ${b.approvedBy} at ${b.approvedAt || 'N/A'}${b.approvalComments ? ` — Note: "${b.approvalComments}"` : ''}`, 50, y);
+          y += 11;
+        }
+        y += 4;
+      }
     }
   }
 

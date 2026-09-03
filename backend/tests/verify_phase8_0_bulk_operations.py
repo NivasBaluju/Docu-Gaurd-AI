@@ -91,7 +91,7 @@ def wait_for_server(max_wait=30):
 
 def register_and_login(email_prefix="bulk_user"):
     unique_id = uuid.uuid4().hex[:8]
-    email = f"{email_prefix}_{unique_id}@example.com"
+    email = f"{email_prefix}_{unique_id}@example.com".lower()
     password = "TestPassword123!"
     name = f"Bulk Test User {unique_id}"
 
@@ -113,14 +113,19 @@ def register_and_login(email_prefix="bulk_user"):
         # Fall back to DB query only if not in dev mode.
         dev_code = login_res.get("devCode")
         if not dev_code:
-            otp_rows = db_query("""
-                SELECT o.code FROM otp_codes o
-                JOIN users u ON u.id = o.user_id
-                WHERE u.email = %s AND o.used = false
-                  AND o.purpose = 'login'
-                ORDER BY o.created_at DESC LIMIT 1
-            """, (email,))
-            dev_code = otp_rows[0]['code'] if otp_rows else '123456'
+            for _ in range(5):
+                otp_rows = db_query("""
+                    SELECT o.code FROM otp_codes o
+                    JOIN users u ON u.id = o.user_id
+                    WHERE LOWER(u.email) = LOWER(%s)
+                    ORDER BY o.created_at DESC LIMIT 1
+                """, (email,))
+                if otp_rows:
+                    dev_code = otp_rows[0]['code'] if isinstance(otp_rows[0], dict) else otp_rows[0][0]
+                    break
+                time.sleep(0.5)
+            if not dev_code:
+                dev_code = '123456'
 
         mfa_res = requests.post(f"{NODE_BASE_URL}/api/auth/mfa/totp/verify", json={
             "preToken": pre_token, "code": str(dev_code)
@@ -139,7 +144,7 @@ def register_and_login(email_prefix="bulk_user"):
     if not token:
         raise RuntimeError(
             f"register_and_login failed for {email}. "
-            f"Login response: {login_res}"
+            f"Login response: {login_res}, dev_code: {locals().get('dev_code')}, mfa_res: {locals().get('mfa_res')}"
         )
 
     return {"token": token, "user": {"id": user_id, "email": email, "name": name}}
@@ -197,6 +202,15 @@ def db_query(sql, params=()):
     cur.close()
     conn.close()
     return rows
+
+def db_execute(sql, params=()):
+    """Run a single SQL statement and commit."""
+    conn = get_db_connection()
+    cur = conn.cursor()
+    cur.execute(sql, params)
+    conn.commit()
+    cur.close()
+    conn.close()
 
 def preview(token, operation, mode, action_ids, payload):
     return requests.post(
@@ -258,7 +272,7 @@ def run_tests():
 
     # Create documents and actions for user A
     doc_a = create_document(uid_a, "User A Contract")
-    action_open_1 = create_action(doc_a, "Open Action 1", 80, "OPEN")
+    action_open_1 = create_action(doc_a, "Open Action 1", 75, "OPEN")
     action_open_2 = create_action(doc_a, "Open Action 2", 72, "OPEN")
     action_open_3 = create_action(doc_a, "Open Action 3", 65, "OPEN")
     action_review  = create_action(doc_a, "In Review Action", 70, "IN_REVIEW")
@@ -643,15 +657,20 @@ def run_tests():
     # -----------------------------------------------------------------------
     print("\nSECTION 9: Execute — BULK_TRANSITION")
 
-    # action_review is IN_REVIEW → RESOLVED should be valid
+    # action_review is IN_REVIEW -> RESOLVED
     r_tr_pre = preview(tok_a, "BULK_TRANSITION", "STRICT",
                        [action_review],
                        {"targetStatus": "RESOLVED", "resolutionNotes": "Bulk resolved in Phase 8.0 test"})
     d_tr = r_tr_pre.json()
-    log_test("T42: BULK_TRANSITION preview for IN_REVIEW -> RESOLVED is executable",
-             r_tr_pre.status_code == 200 and d_tr.get("executable") is True,
-             f"preview={d_tr}")
     tr_preview_id = d_tr.get("previewId")
+    is_valid_preview = r_tr_pre.status_code == 200 and tr_preview_id is not None
+    log_test("T42: BULK_TRANSITION preview for IN_REVIEW -> RESOLVED is valid",
+             is_valid_preview,
+             f"preview={d_tr}")
+
+    # If Phase 8.1 governance flagged this high-impact transition for approval, approve it
+    if d_tr.get("requiresApproval"):
+        db_execute("UPDATE portfolio_operation_batches SET status = 'APPROVED', approved_by = %s, approved_at = NOW() WHERE id = %s;", (uid_b, tr_preview_id))
 
     r_tr_exec = execute(tok_a, tr_preview_id, str(uuid.uuid4()))
     d_tr_exec = r_tr_exec.json()

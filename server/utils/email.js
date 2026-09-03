@@ -24,7 +24,10 @@ async function getTransporter() {
     port: config.port,
     secure: config.secure,
     auth: { user: config.user, pass: config.pass },
-    tls: { rejectUnauthorized: false }
+    tls: { rejectUnauthorized: false },
+    connectionTimeout: 3000,
+    greetingTimeout: 3000,
+    socketTimeout: 5000
   });
 
   return { transporter, from: config.from };
@@ -63,11 +66,10 @@ async function sendOtpEmail(toEmail, code) {
       text: `Your Docu-Gaurd AI verification code is: ${code}. It expires in 10 minutes.`,
       html
     });
-    return { devMode: false };
+    return { devMode: false, success: true };
   } catch (err) {
-    console.error('SMTP Email Send Error:', err.message);
-    console.log(`[FALLBACK DEV MODE] OTP for ${toEmail}: ${code}`);
-    return { devMode: true, error: err.message };
+    console.error('SMTP Email Delivery Failure:', err.message);
+    return { devMode: false, deliveryFailed: true, error: err.message };
   }
 }
 

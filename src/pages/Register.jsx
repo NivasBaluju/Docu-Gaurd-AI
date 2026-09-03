@@ -1,17 +1,19 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { motion } from 'motion/react';
 import Api from '../services/api';
 import { useToast } from '../context/ToastContext';
-import Icon from '../components/common/Icon';
-import PageTransition from '../components/common/PageTransition';
-import { buttonMotion } from '../styles/motion';
+import FormField from '../components/ui/FormField';
+import Button from '../components/ui/Button';
 
-export const Register = () => {
+/**
+ * Register — Enterprise Account Registration
+ * Paper & Ink monochrome styling, underline inputs,
+ * preserving all registration contracts and validation.
+ */
+export function Register() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
   const [fieldErrors, setFieldErrors] = useState({ name: '', email: '', password: '' });
   const [submitting, setSubmitting] = useState(false);
 
@@ -20,17 +22,17 @@ export const Register = () => {
 
   const handleNameChange = (e) => {
     setName(e.target.value);
-    if (fieldErrors.name) setFieldErrors(prev => ({ ...prev, name: '' }));
+    if (fieldErrors.name) setFieldErrors((prev) => ({ ...prev, name: '' }));
   };
 
   const handleEmailChange = (e) => {
     setEmail(e.target.value);
-    if (fieldErrors.email) setFieldErrors(prev => ({ ...prev, email: '' }));
+    if (fieldErrors.email) setFieldErrors((prev) => ({ ...prev, email: '' }));
   };
 
   const handlePasswordChange = (e) => {
     setPassword(e.target.value);
-    if (fieldErrors.password) setFieldErrors(prev => ({ ...prev, password: '' }));
+    if (fieldErrors.password) setFieldErrors((prev) => ({ ...prev, password: '' }));
   };
 
   const handleSubmit = async (e) => {
@@ -39,15 +41,15 @@ export const Register = () => {
 
     let hasErr = false;
     if (!name.trim()) {
-      setFieldErrors(prev => ({ ...prev, name: 'Please enter your full name' }));
+      setFieldErrors((prev) => ({ ...prev, name: 'Please enter your full name' }));
       hasErr = true;
     }
     if (!email.trim()) {
-      setFieldErrors(prev => ({ ...prev, email: 'Please enter your work email' }));
+      setFieldErrors((prev) => ({ ...prev, email: 'Please enter your work email' }));
       hasErr = true;
     }
     if (!password || password.length < 8) {
-      setFieldErrors(prev => ({ ...prev, password: 'Password must be at least 8 characters' }));
+      setFieldErrors((prev) => ({ ...prev, password: 'Password must be at least 8 characters' }));
       hasErr = true;
     }
     if (hasErr) return;
@@ -59,13 +61,10 @@ export const Register = () => {
       navigate('/login');
     } catch (err) {
       const errMsg = err.message || 'Registration failed';
-      const lower = errMsg.toLowerCase();
-      if (lower.includes('email already exists') || lower.includes('email')) {
-        setFieldErrors(prev => ({ ...prev, email: errMsg }));
-      } else if (lower.includes('password')) {
-        setFieldErrors(prev => ({ ...prev, password: errMsg }));
+      if (errMsg.toLowerCase().includes('already') || errMsg.toLowerCase().includes('exists')) {
+        setFieldErrors({ name: '', email: 'An account with this email already exists', password: '' });
       } else {
-        setFieldErrors(prev => ({ ...prev, email: errMsg }));
+        setFieldErrors({ name: '', email: '', password: errMsg });
       }
     } finally {
       setSubmitting(false);
@@ -73,154 +72,75 @@ export const Register = () => {
   };
 
   return (
-    <PageTransition>
-      <div className="auth-minimal-wrapper">
-        {/* Landscape Ambient Background Glow */}
-        <div className="auth-landscape-bg" />
-        <div className="auth-landscape-overlay" />
+    <div className="w-full min-h-[85vh] bg-paper flex items-center justify-center py-20 px-6">
+      <div className="max-w-md w-full bg-paper-dim border border-rule p-8 sm:p-12">
+        <div className="text-center mb-10 pb-6 border-b border-rule">
+          <span className="font-body text-micro text-neutral-500 block mb-2 select-none">
+            [ENTERPRISE REGISTRATION]
+          </span>
+          <h1 className="display-03 text-ink tracking-tight mb-2">
+            Create Account
+          </h1>
+          <p className="font-body text-body-sm text-ink-soft">
+            Register your enterprise account to access legal copilot capabilities.
+          </p>
+        </div>
 
-        {/* Compact Centered Minimalist Auth Card */}
-        <motion.div
-          className="auth-compact-card"
-          initial={{ opacity: 0, scale: 0.98, y: 8 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
-        >
-          {/* Landscape Dither Header Banner */}
-          <div className="auth-card-landscape-banner">
-            <img
-              src="/assets/lady-justice.jpg"
-              alt="Lady Justice Landscape Dither Art"
-              className="auth-card-banner-img"
-            />
-            <div className="auth-card-banner-overlay" />
+        <form onSubmit={handleSubmit} noValidate>
+          <FormField
+            id="name"
+            label="Full Name & Title"
+            required
+            value={name}
+            onChange={handleNameChange}
+            error={fieldErrors.name}
+            placeholder="e.g. David Vance, Managing Counsel"
+          />
+
+          <FormField
+            id="email"
+            label="Corporate Email"
+            type="email"
+            autoComplete="username"
+            required
+            value={email}
+            onChange={handleEmailChange}
+            error={fieldErrors.email}
+            placeholder="counsel@enterprise.com"
+          />
+
+          <FormField
+            id="password"
+            label="Password (min. 8 characters)"
+            type="password"
+            autoComplete="new-password"
+            required
+            value={password}
+            onChange={handlePasswordChange}
+            error={fieldErrors.password}
+            placeholder="••••••••••••"
+          />
+
+          <Button
+            type="submit"
+            variant="primary"
+            loading={submitting}
+            disabled={submitting}
+            className="w-full mt-4 mb-6"
+          >
+            Register Account
+          </Button>
+
+          <div className="text-center pt-6 border-t border-rule text-body-sm text-neutral-500">
+            Already have an account?{' '}
+            <Link to="/login" className="editorial-link text-ink font-medium">
+              Sign in
+            </Link>
           </div>
-
-          <div style={{ padding: '24px 28px 28px' }}>
-            <div style={{ textAlign: 'center', marginBottom: '22px' }}>
-              <span className="mono" style={{ fontSize: '11px', color: '#71717A', letterSpacing: '0.06em' }}>
-                [FIRM_PROVISIONING]
-              </span>
-              <h1 style={{ fontSize: '22px', fontWeight: '700', letterSpacing: '-0.03em', color: '#FFFFFF', margin: '4px 0 2px' }}>
-                Create Account
-              </h1>
-              <p style={{ fontSize: '13px', color: '#A1A1AA', margin: 0 }}>
-                Initialize your firm's encrypted workspace
-              </p>
-            </div>
-
-            <form id="regForm" onSubmit={handleSubmit} noValidate>
-              {/* Full Name */}
-              <div style={{ marginBottom: '14px' }}>
-                <label style={{ display: 'block', fontSize: '12px', fontWeight: '500', color: '#A1A1AA', marginBottom: '5px' }}>
-                  Full name
-                </label>
-                <input
-                  id="reg-name"
-                  className={`auth-input-field ${fieldErrors.name ? 'input-error' : ''}`}
-                  name="name"
-                  value={name}
-                  onChange={handleNameChange}
-                  autoComplete="name"
-                  required
-                />
-                {fieldErrors.name && (
-                  <div className="auth-field-error">
-                    <span>⚠</span>
-                    <span>{fieldErrors.name}</span>
-                  </div>
-                )}
-              </div>
-
-              {/* Work Email */}
-              <div style={{ marginBottom: '14px' }}>
-                <label style={{ display: 'block', fontSize: '12px', fontWeight: '500', color: '#A1A1AA', marginBottom: '5px' }}>
-                  Work email
-                </label>
-                <input
-                  id="reg-email"
-                  className={`auth-input-field ${fieldErrors.email ? 'input-error' : ''}`}
-                  type="email"
-                  name="email"
-                  value={email}
-                  onChange={handleEmailChange}
-                  autoComplete="email"
-                  required
-                />
-                {fieldErrors.email && (
-                  <div className="auth-field-error">
-                    <span>⚠</span>
-                    <span>{fieldErrors.email}</span>
-                  </div>
-                )}
-              </div>
-
-              {/* Password with Show/Hide Toggle */}
-              <div style={{ marginBottom: '20px' }}>
-                <label style={{ display: 'block', fontSize: '12px', fontWeight: '500', color: '#A1A1AA', marginBottom: '5px' }}>
-                  Password
-                </label>
-                <div className="auth-password-wrapper">
-                  <input
-                    id="reg-pw"
-                    className={`auth-input-field ${fieldErrors.password ? 'input-error' : ''}`}
-                    type={showPassword ? 'text' : 'password'}
-                    name="password"
-                    value={password}
-                    onChange={handlePasswordChange}
-                    minLength={8}
-                    autoComplete="new-password"
-                    required
-                  />
-                  <button
-                    type="button"
-                    className="auth-password-toggle"
-                    onClick={() => setShowPassword(!showPassword)}
-                    aria-label={showPassword ? 'Hide password' : 'Show password'}
-                    title={showPassword ? 'Hide password' : 'Show password'}
-                  >
-                    {showPassword ? (
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
-                        <line x1="1" y1="1" x2="23" y2="23" />
-                      </svg>
-                    ) : (
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-                        <circle cx="12" cy="12" r="3" />
-                      </svg>
-                    )}
-                  </button>
-                </div>
-                {fieldErrors.password && (
-                  <div className="auth-field-error">
-                    <span>⚠</span>
-                    <span>{fieldErrors.password}</span>
-                  </div>
-                )}
-              </div>
-
-              <motion.button
-                className="auth-btn-action"
-                type="submit"
-                disabled={submitting}
-                {...buttonMotion}
-              >
-                {submitting ? 'Creating Account…' : 'Create Account'}
-              </motion.button>
-            </form>
-
-            <div style={{ textAlign: 'center', marginTop: '20px', fontSize: '12.5px', color: '#71717A' }}>
-              Already registered?{' '}
-              <Link to="/login" style={{ color: '#FFFFFF', fontWeight: '500' }}>
-                Sign in
-              </Link>
-            </div>
-          </div>
-        </motion.div>
+        </form>
       </div>
-    </PageTransition>
+    </div>
   );
-};
+}
 
 export default Register;
