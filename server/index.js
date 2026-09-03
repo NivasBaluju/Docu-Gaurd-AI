@@ -14,6 +14,11 @@ const contractRoutes = require('./routes/contracts');
 const securityRoutes = require('./routes/security');
 const shareRoutes = require('./routes/share');
 const adminRoutes = require('./routes/admin');
+const contractActionsRoutes = require('./routes/contractActions');
+const notificationRoutes = require('./routes/notifications');
+const portfolioRoutes = require('./routes/portfolioAnalytics');
+const portfolioOperationsRoutes = require('./routes/portfolioOperations');
+const complianceRoutes = require('./routes/complianceAudit');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -52,6 +57,19 @@ app.use((req, res, next) => {
 
 app.use('/api/auth', authRoutes);
 app.use('/api/documents', documentRoutes);
+app.use('/api/actions', contractActionsRoutes.router);
+app.use('/api/notifications', notificationRoutes);
+app.use('/api/portfolio/operations', portfolioOperationsRoutes);
+app.use('/api/portfolio', portfolioRoutes);
+app.use('/api/compliance', complianceRoutes);
+app.use('/api/documents/:documentId/compliance', (req, res, next) => {
+  req.url = `/documents/${req.params.documentId}${req.url}`;
+  complianceRoutes(req, res, next);
+});
+app.use('/api/portfolio/compliance', (req, res, next) => {
+  req.url = `/portfolio${req.url}`;
+  complianceRoutes(req, res, next);
+});
 app.use('/api/ai', aiRoutes);
 app.use('/api/contracts', contractRoutes);
 app.use('/api/security', securityRoutes);

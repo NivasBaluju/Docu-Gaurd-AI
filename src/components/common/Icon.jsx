@@ -166,6 +166,89 @@ export const Icon = {
     <svg viewBox="0 0 24 24" {...defaultProps} {...props}>
       <path d="M21 2l-2 2m-1.5 1.5L14 9l-1.5-1.5-2 2 1.5 1.5-3 3A6 6 0 117 8a6 6 0 014.24 1.76l6.76-6.76z" />
     </svg>
+  ),
+  brain: (props) => (
+    <svg viewBox="0 0 24 24" {...defaultProps} {...props}>
+      <path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 4.44-2.04z" />
+      <path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-4.44-2.04z" />
+    </svg>
+  ),
+  target: (props) => (
+    <svg viewBox="0 0 24 24" {...defaultProps} {...props}>
+      <circle cx="12" cy="12" r="10" />
+      <circle cx="12" cy="12" r="6" />
+      <circle cx="12" cy="12" r="2" />
+    </svg>
+  ),
+  zap: (props) => (
+    <svg viewBox="0 0 24 24" {...defaultProps} {...props}>
+      <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+    </svg>
+  ),
+  refresh: (props) => (
+    <svg viewBox="0 0 24 24" {...defaultProps} {...props}>
+      <polyline points="23 4 23 10 17 10" />
+      <polyline points="1 20 1 14 7 14" />
+      <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
+    </svg>
+  ),
+  user: (props) => (
+    <svg viewBox="0 0 24 24" {...defaultProps} {...props}>
+      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+      <circle cx="12" cy="7" r="4" />
+    </svg>
+  ),
+  clock: (props) => (
+    <svg viewBox="0 0 24 24" {...defaultProps} {...props}>
+      <circle cx="12" cy="12" r="10" />
+      <polyline points="12 6 12 12 16 14" />
+    </svg>
+  ),
+  filter: (props) => (
+    <svg viewBox="0 0 24 24" {...defaultProps} {...props}>
+      <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
+    </svg>
+  ),
+  x: (props) => (
+    <svg viewBox="0 0 24 24" {...defaultProps} {...props}>
+      <line x1="18" y1="6" x2="6" y2="18" />
+      <line x1="6" y1="6" x2="18" y2="18" />
+    </svg>
+  ),
+  info: (props) => (
+    <svg viewBox="0 0 24 24" {...defaultProps} {...props}>
+      <circle cx="12" cy="12" r="10" />
+      <line x1="12" y1="16" x2="12" y2="12" />
+      <line x1="12" y1="8" x2="12.01" y2="8" />
+    </svg>
+  ),
+  chevronRight: (props) => (
+    <svg viewBox="0 0 24 24" {...defaultProps} {...props}>
+      <polyline points="9 18 15 12 9 6" />
+    </svg>
+  ),
+  chevronDown: (props) => (
+    <svg viewBox="0 0 24 24" {...defaultProps} {...props}>
+      <polyline points="6 9 12 15 18 9" />
+    </svg>
+  ),
+  arrowRight: (props) => (
+    <svg viewBox="0 0 24 24" {...defaultProps} {...props}>
+      <line x1="5" y1="12" x2="19" y2="12" />
+      <polyline points="12 5 19 12 12 19" />
+    </svg>
+  ),
+  history: (props) => (
+    <svg viewBox="0 0 24 24" {...defaultProps} {...props}>
+      <path d="M12 8v4l3 3" />
+      <path d="M3.05 11a9 9 0 1 1 .5 4m-.5 5v-5h5" />
+    </svg>
+  ),
+  checkCircle: (props) => (
+    <svg viewBox="0 0 24 24" {...defaultProps} {...props}>
+      <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+      <polyline points="22 4 12 14.01 9 11.01" />
+    </svg>
   )
 };
 

@@ -13,6 +13,7 @@ export const Sidebar = () => {
 
   const navItems = [
     { path: '/dashboard', icon: <Icon.grid />, label: 'Dashboard' },
+    { path: '/portfolio', icon: <Icon.trending />, label: 'Portfolio Oversight' },
     { path: '/documents', icon: <Icon.document />, label: 'Documents' },
     { path: '/upload', icon: <Icon.upload />, label: 'Upload Document' },
     { path: '/contracts', icon: <Icon.pen />, label: 'Generate Contract' },

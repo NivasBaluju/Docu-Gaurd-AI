@@ -3,48 +3,23 @@ const fs = require('fs');
 const path = require('path');
 
 // --- AES-256-GCM master key management -------------------------------------
-// On Vercel (read-only fs), AES_MASTER_KEY env var MUST be set.
-// Locally, falls back to a file in data/db/master.key (auto-created).
+const rawKey = process.env.ENCRYPTION_KEY || process.env.AES_MASTER_KEY || 'docuguard-secret-encryption-key-32-bytes!!';
+const MASTER_KEY = crypto.createHash('sha256').update(rawKey).digest();
 
-function loadOrCreateMasterKey() {
-  // 1. Prefer env var (required on Vercel / any read-only host)
-  if (process.env.AES_MASTER_KEY && process.env.AES_MASTER_KEY.length === 64) {
-    return Buffer.from(process.env.AES_MASTER_KEY, 'hex');
-  }
-  // 2. Try reading from file (local dev only)
-  const keyFile = path.join(__dirname, '..', '..', 'data', 'db', 'master.key');
-  try {
-    if (fs.existsSync(keyFile)) {
-      return Buffer.from(fs.readFileSync(keyFile, 'utf8').trim(), 'hex');
-    }
-    // 3. Create new key and save to file (local dev only)
-    const key = crypto.randomBytes(32);
-    fs.mkdirSync(path.dirname(keyFile), { recursive: true });
-    fs.writeFileSync(keyFile, key.toString('hex'));
-    return key;
-  } catch {
-    // 4. Vercel / read-only: generate an in-memory key (ephemeral, fine for sessions)
-    console.warn('[crypto] No AES_MASTER_KEY env var and filesystem is read-only — using ephemeral key. Set AES_MASTER_KEY in Vercel env vars for persistence.');
-    return crypto.randomBytes(32);
-  }
-}
-
-const MASTER_KEY = loadOrCreateMasterKey();
-
-/** Encrypt a buffer with AES-256-GCM. Returns a single buffer: [iv(12)][authTag(16)][ciphertext]. */
+/** Encrypt a buffer with AES-256-GCM. Returns: [iv(12)][ciphertext][authTag(16)]. */
 function encryptBuffer(buffer) {
   const iv = crypto.randomBytes(12);
   const cipher = crypto.createCipheriv('aes-256-gcm', MASTER_KEY, iv);
   const ciphertext = Buffer.concat([cipher.update(buffer), cipher.final()]);
   const authTag = cipher.getAuthTag();
-  return Buffer.concat([iv, authTag, ciphertext]);
+  return Buffer.concat([iv, ciphertext, authTag]);
 }
 
-/** Decrypt a buffer produced by encryptBuffer. */
+/** Decrypt a buffer produced by encryptBuffer or Python AESGCM. */
 function decryptBuffer(payload) {
   const iv = payload.subarray(0, 12);
-  const authTag = payload.subarray(12, 28);
-  const ciphertext = payload.subarray(28);
+  const authTag = payload.subarray(payload.length - 16);
+  const ciphertext = payload.subarray(12, payload.length - 16);
   const decipher = crypto.createDecipheriv('aes-256-gcm', MASTER_KEY, iv);
   decipher.setAuthTag(authTag);
   return Buffer.concat([decipher.update(ciphertext), decipher.final()]);

@@ -61,6 +61,9 @@ export const Api = {
   post(url, body) {
     return this.request('POST', url, body || {});
   },
+  patch(url, body) {
+    return this.request('PATCH', url, body || {});
+  },
   del(url) {
     return this.request('DELETE', url);
   },

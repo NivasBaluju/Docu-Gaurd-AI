@@ -8,3 +8,6 @@ data/uploads/*
 !data/uploads/.gitkeep
 !data/db/.gitkeep
 scratch/
+__pycache__/
+*.py[cod]
+*$py.class
