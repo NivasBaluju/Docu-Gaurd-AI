@@ -100,6 +100,7 @@ const staticDir = fs.existsSync(distDir) ? distDir : publicDir;
 app.use(express.static(staticDir));
 app.get('*', (req, res) => {
   if (req.path.startsWith('/api/')) return res.status(404).json({ error: 'Not found' });
+  res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
   res.sendFile(path.join(staticDir, 'index.html'));
 });
 

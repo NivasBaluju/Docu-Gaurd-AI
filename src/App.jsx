@@ -43,7 +43,7 @@ const RouteLoadingFallback = () => (
   <div className="w-full bg-paper min-h-[70vh] flex items-center justify-center py-24">
     <ThinkingLoader
       state="working"
-      size={56}
+      size={64}
       caption="Loading DocuGuard chamber..."
       subcaption="Establishing isolated session and preparing secure workspace"
     />
