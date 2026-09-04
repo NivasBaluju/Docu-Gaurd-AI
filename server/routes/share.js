@@ -76,15 +76,23 @@ router.post('/:token/access', async (req, res) => {
   const { rows: docRows } = await db.query('SELECT * FROM documents WHERE id = $1', [link.document_id]);
   const doc = docRows[0];
   if (!doc) return res.status(410).json({ error: 'File no longer available' });
-  const filePath = path.join(uploadsDir, doc.filename);
-  if (!fs.existsSync(filePath)) return res.status(410).json({ error: 'File no longer available' });
+  const resolvedPath = path.resolve(uploadsDir, doc.filename);
+  if (!resolvedPath.startsWith(path.resolve(uploadsDir) + path.sep)) {
+    return res.status(403).json({ error: 'Access denied: Invalid file storage path' });
+  }
+  if (!fs.existsSync(resolvedPath)) return res.status(410).json({ error: 'File no longer available' });
 
-  const decrypted = decryptBuffer(fs.readFileSync(filePath));
+  const decrypted = decryptBuffer(fs.readFileSync(resolvedPath));
   await db.query('UPDATE share_links SET download_count = download_count + 1 WHERE id = $1', [link.id]);
   await recordAudit(null, 'SHARED_DOCUMENT_ACCESSED', { linkId: link.id, documentId: doc.id });
 
+  // Sanitize filename against CRLF (\r\n), quotes, and header splitting injection
+  const safeFilename = (doc.original_name || 'shared_document.pdf')
+    .replace(/[\r\n"';]/g, '_')
+    .replace(/[^\w.-]/g, '_');
+
   res.setHeader('Content-Type', doc.mime_type || 'application/octet-stream');
-  res.setHeader('Content-Disposition', `attachment; filename="${doc.original_name}"`);
+  res.setHeader('Content-Disposition', `attachment; filename="${safeFilename}"`);
   res.send(decrypted);
 });
 

@@ -10,6 +10,7 @@ const { encryptBuffer, decryptBuffer, sha256 } = require('../utils/crypto');
 const { recordAudit } = require('../utils/audit');
 const { riskScore } = require('../utils/aiEngine');
 const { getDocumentActions, syncDocumentActions } = require('./contractActions');
+const { aiLimiter } = require('../middleware/rateLimiter');
 
 const router = express.Router();
 const uploadsDir = path.join(__dirname, '..', '..', 'data', 'uploads');
@@ -186,7 +187,10 @@ router.delete('/:id', requireAuth, async (req, res) => {
     const { rows } = await db.query('SELECT * FROM documents WHERE id = $1 AND user_id = $2', [req.params.id, req.user.id]);
     const doc = rows[0];
     if (!doc) return res.status(404).json({ error: 'Document not found' });
-    const filePath = path.join(uploadsDir, doc.filename);
+    const filePath = path.resolve(uploadsDir, doc.filename);
+    if (!filePath.startsWith(path.resolve(uploadsDir) + path.sep)) {
+      return res.status(403).json({ error: 'Access denied: Invalid file path' });
+    }
     if (fs.existsSync(filePath)) {
       try {
         fs.unlinkSync(filePath);
@@ -211,7 +215,10 @@ router.get('/:id/verify', requireAuth, async (req, res) => {
     const { rows } = await db.query('SELECT * FROM documents WHERE id = $1 AND user_id = $2', [req.params.id, req.user.id]);
     const doc = rows[0];
     if (!doc) return res.status(404).json({ error: 'Document not found' });
-    const filePath = path.join(uploadsDir, doc.filename);
+    const filePath = path.resolve(uploadsDir, doc.filename);
+    if (!filePath.startsWith(path.resolve(uploadsDir) + path.sep)) {
+      return res.status(403).json({ error: 'Access denied: Invalid file path' });
+    }
     if (!fs.existsSync(filePath)) return res.status(410).json({ error: 'File missing from storage' });
     const encrypted = fs.readFileSync(filePath);
     let decrypted, currentHash, valid;
@@ -298,7 +305,7 @@ router.get('/:id/risks', requireAuth, async (req, res) => {
   }
 });
 
-router.post('/:id/analyze', requireAuth, async (req, res) => {
+router.post('/:id/analyze', requireAuth, aiLimiter, async (req, res) => {
   try {
     const authCheck = await authorizeDocument(req.params.id, req.user);
     if (authCheck.errorStatus) {
@@ -317,7 +324,7 @@ router.post('/:id/analyze', requireAuth, async (req, res) => {
 });
 
 // --- Phase 6.1: Document AI Chat with RAG --------------------------------
-router.post('/:id/chat', requireAuth, async (req, res) => {
+router.post('/:id/chat', requireAuth, aiLimiter, async (req, res) => {
   try {
     const { id } = req.params;
 
@@ -406,7 +413,7 @@ router.get('/:id/chat', requireAuth, async (req, res) => {
 });
 
 // --- Phase 6.2: AI Contract Negotiation & Intelligent Redlining -----------
-router.post('/:id/negotiate', requireAuth, async (req, res) => {
+router.post('/:id/negotiate', requireAuth, aiLimiter, async (req, res) => {
   try {
     const { id } = req.params;
 
@@ -462,7 +469,7 @@ router.get('/:id/negotiation-suggestions', requireAuth, async (req, res) => {
 });
 
 // --- Phase 6.3: AI Contract Risk Simulation & What-If Analysis -----------
-router.post('/:id/simulate', requireAuth, async (req, res) => {
+router.post('/:id/simulate', requireAuth, aiLimiter, async (req, res) => {
   try {
     const { id } = req.params;
 

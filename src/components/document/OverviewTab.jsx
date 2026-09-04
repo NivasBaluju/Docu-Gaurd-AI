@@ -4,7 +4,6 @@ import Api from '../../services/api';
 import { useToast } from '../../context/ToastContext';
 import Icon from '../common/Icon';
 import SkeletonLoader from '../common/SkeletonLoader';
-import { esc } from '../../utils/formatters';
 import { buttonMotion, EASE_OUT } from '../../styles/motion';
 
 export const OverviewTab = ({ doc, analysisData, loadingAnalysis }) => {
@@ -22,11 +21,6 @@ export const OverviewTab = ({ doc, analysisData, loadingAnalysis }) => {
     } finally {
       setSimplifying(false);
     }
-  };
-
-  const getHighlightedText = () => {
-    if (!doc?.extracted_text) return '(no extractable text available in document record)';
-    return esc(doc.extracted_text);
   };
 
   const riskScore = analysisData?.risk?.score ?? doc?.risk_score ?? 0;
@@ -90,9 +84,10 @@ export const OverviewTab = ({ doc, analysisData, loadingAnalysis }) => {
 
           <div
             className="doc-text"
-            dangerouslySetInnerHTML={{ __html: getHighlightedText() }}
             style={{ maxHeight: '460px', overflowY: 'auto', lineHeight: '1.75', fontSize: '13.5px', whiteSpace: 'pre-wrap' }}
-          />
+          >
+            {doc?.extracted_text || '(no extractable text available in document record)'}
+          </div>
 
           <motion.button
             className="btn btn-outline btn-sm mt-16"

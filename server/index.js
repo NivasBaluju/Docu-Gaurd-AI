@@ -23,6 +23,9 @@ const complianceRoutes = require('./routes/complianceAudit');
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+// Trust reverse proxy hops (Vercel, Cloudflare, Nginx, ALB) for accurate client IP identification
+app.set('trust proxy', 1);
+
 // --- CORS -------------------------------------------------------------------
 // Allow the Vercel-hosted frontend and local dev to reach the API.
 const ALLOWED_ORIGINS = [
@@ -44,14 +47,21 @@ app.use((req, res, next) => {
 });
 // ---------------------------------------------------------------------------
 
-app.use(express.json({ limit: '10mb' }));
+// Enforce standard request body boundary (1MB) to prevent CPU starvation attacks
+app.use(express.json({ limit: '1mb' }));
 app.use(cookieParser());
 
-// Basic security headers (zero-trust posture) without extra dependencies.
+// Comprehensive modern security headers (defense-in-depth posture)
 app.use((req, res, next) => {
   res.setHeader('X-Content-Type-Options', 'nosniff');
   res.setHeader('X-Frame-Options', 'DENY');
-  res.setHeader('Referrer-Policy', 'no-referrer');
+  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+  res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload');
+  res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
+  res.setHeader(
+    'Content-Security-Policy',
+    "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob: https:; connect-src 'self' ws: wss:; frame-ancestors 'none'; object-src 'none'; base-uri 'self';"
+  );
   next();
 });
 

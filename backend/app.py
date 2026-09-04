@@ -28,7 +28,8 @@ load_dotenv()
 
 def create_app():
     app = Flask(__name__)
-    CORS(app, resources={r"/api/*": {"origins": "*"}})
+    allowed_origins = [o.strip() for o in os.getenv("ALLOWED_ORIGINS", "http://127.0.0.1:5000,http://localhost:5000,http://127.0.0.1:3000,http://localhost:3000").split(",") if o.strip()]
+    CORS(app, resources={r"/api/*": {"origins": allowed_origins}})
 
     # Internal Microservice Boundary Verification
     env = os.getenv("FLASK_ENV", os.getenv("NODE_ENV", "development")).lower()

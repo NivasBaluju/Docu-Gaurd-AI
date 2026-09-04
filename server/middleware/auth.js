@@ -3,7 +3,18 @@ const db = require('../db');
 const { sha256 } = require('../utils/crypto');
 const { logThreat } = require('../utils/audit');
 
-const JWT_SECRET = process.env.JWT_SECRET || 'dev_insecure_secret_change_me';
+const DEFAULT_JWT_SECRET = 'dev_insecure_secret_change_me';
+const rawJwtSecret = process.env.JWT_SECRET;
+
+if (process.env.NODE_ENV === 'production') {
+  if (!rawJwtSecret || rawJwtSecret === DEFAULT_JWT_SECRET) {
+    throw new Error('FATAL SECURITY VIOLATION: JWT_SECRET must be configured with a high-entropy secret in production.');
+  }
+} else if (!rawJwtSecret) {
+  console.warn('[SECURITY WARNING] Using default fallback JWT_SECRET. Set JWT_SECRET in .env before deploying to production.');
+}
+
+const JWT_SECRET = rawJwtSecret || DEFAULT_JWT_SECRET;
 
 function fingerprint(req) {
   const ua = req.headers['user-agent'] || 'unknown';
@@ -84,10 +95,16 @@ async function requireAuth(req, res, next) {
 
 async function requireAdmin(req, res, next) {
   requireAuth(req, res, () => {
-    if (req.user?.role === 'admin') {
-      return next();
+    if (req.user?.role !== 'admin') {
+      return res.status(403).json({ error: 'Access denied: Administrator privileges required.' });
     }
-    return res.status(403).json({ error: 'Access denied: Administrator privileges required.' });
+    // If administrator has MFA enabled, require MFA completion for administrative actions
+    if (req.user.mfa_enabled && !req.session?.mfa_verified) {
+      return res.status(403).json({
+        error: 'Access denied: Multi-factor authentication verification required for administrative operations.'
+      });
+    }
+    return next();
   });
 }
 

@@ -3,8 +3,19 @@ const fs = require('fs');
 const path = require('path');
 
 // --- AES-256-GCM master key management -------------------------------------
-const rawKey = process.env.ENCRYPTION_KEY || process.env.AES_MASTER_KEY || 'docuguard-secret-encryption-key-32-bytes!!';
-const MASTER_KEY = crypto.createHash('sha256').update(rawKey).digest();
+const DEFAULT_KEY_FALLBACK = 'docuguard-secret-encryption-key-32-bytes!!';
+const rawKey = process.env.ENCRYPTION_KEY || process.env.AES_MASTER_KEY;
+
+if (process.env.NODE_ENV === 'production') {
+  if (!rawKey || rawKey === DEFAULT_KEY_FALLBACK) {
+    throw new Error('FATAL SECURITY VIOLATION: ENCRYPTION_KEY or AES_MASTER_KEY must be set to a secure secret in production.');
+  }
+} else if (!rawKey) {
+  console.warn('[SECURITY WARNING] Using default fallback AES encryption key. Set ENCRYPTION_KEY in .env before deploying to production.');
+}
+
+const activeKey = rawKey || DEFAULT_KEY_FALLBACK;
+const MASTER_KEY = crypto.createHash('sha256').update(activeKey).digest();
 
 /** Encrypt a buffer with AES-256-GCM. Returns: [iv(12)][ciphertext][authTag(16)]. */
 function encryptBuffer(buffer) {
@@ -23,6 +34,27 @@ function decryptBuffer(payload) {
   const decipher = crypto.createDecipheriv('aes-256-gcm', MASTER_KEY, iv);
   decipher.setAuthTag(authTag);
   return Buffer.concat([decipher.update(ciphertext), decipher.final()]);
+}
+
+/** Encrypt a sensitive string secret (such as TOTP seed) returning base64 string */
+function encryptSecret(plaintext) {
+  if (!plaintext) return plaintext;
+  const buf = Buffer.from(String(plaintext), 'utf8');
+  return encryptBuffer(buf).toString('base64');
+}
+
+/** Decrypt a sensitive string secret from base64 string, falling back to plaintext for legacy rows */
+function decryptSecret(payloadStr) {
+  if (!payloadStr) return payloadStr;
+  try {
+    const buf = Buffer.from(payloadStr, 'base64');
+    // Minimal GCM payload: 12 bytes IV + 16 bytes AuthTag = 28 bytes
+    if (buf.length < 28) return payloadStr;
+    const decrypted = decryptBuffer(buf);
+    return decrypted.toString('utf8');
+  } catch {
+    return payloadStr;
+  }
 }
 
 function sha256(bufferOrString) {
@@ -103,6 +135,8 @@ function randomToken(bytes = 24) {
 module.exports = {
   encryptBuffer,
   decryptBuffer,
+  encryptSecret,
+  decryptSecret,
   sha256,
   signData,
   verifySignature,

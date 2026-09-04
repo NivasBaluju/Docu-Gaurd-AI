@@ -29,7 +29,12 @@ def get_documents():
     Internal service endpoint. Requires user_id parameter when called internally.
     """
     user_id = request.args.get('user_id')
-    docs = DocumentModel.get_all(user_id=user_id)
+    if not user_id or not user_id.strip():
+        return jsonify({
+            "error": "Access denied: user_id parameter is strictly required for multi-tenant data isolation.",
+            "code": "TENANT_USER_REQUIRED"
+        }), 400
+    docs = DocumentModel.get_all(user_id=user_id.strip())
     return jsonify(docs), 200
 
 # -------------------------------------------------------------

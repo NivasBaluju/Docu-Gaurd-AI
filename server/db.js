@@ -16,11 +16,26 @@ function sanitizeDbUrl(url) {
 const connectionString = sanitizeDbUrl(process.env.DATABASE_URL);
 const isLocal = connectionString && connectionString.includes('localhost');
 
+// Enterprise-hardened database TLS configuration
+const isServerless = Boolean(process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME || process.env.NETLIFY);
+const allowSelfSigned = process.env.DB_SSL_ALLOW_SELF_SIGNED === 'true';
+
+let sslConfig = false;
+if (!isLocal && connectionString) {
+  sslConfig = {
+    rejectUnauthorized: !allowSelfSigned,
+    ca: process.env.DATABASE_CA_CERT || undefined
+  };
+  if (allowSelfSigned) {
+    console.warn('[SECURITY WARNING] PostgreSQL TLS certificate verification is disabled via DB_SSL_ALLOW_SELF_SIGNED=true.');
+  }
+}
+
 // Enterprise-hardened connection pool configuration
 const pool = new Pool({
   connectionString,
-  ssl: isLocal ? false : { rejectUnauthorized: false },
-  max: 30,
+  ssl: sslConfig,
+  max: isServerless ? 5 : (Number(process.env.DB_POOL_MAX) || 20),
   idleTimeoutMillis: 30000,
   connectionTimeoutMillis: 30000,
   statement_timeout: 15000,
