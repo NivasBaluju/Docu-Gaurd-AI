@@ -37,25 +37,9 @@ export const Sidebar = () => {
         key={item.path}
         className={`sidebar-item ${active ? 'active' : ''}`}
         onClick={() => navigate(item.path)}
-        style={{ position: 'relative' }}
       >
-        {active && (
-          <motion.div
-            layoutId="activeSidebarIndicator"
-            style={{
-              position: 'absolute',
-              left: 0,
-              top: '15%',
-              bottom: '15%',
-              width: '3px',
-              backgroundColor: 'var(--royal)',
-              borderRadius: '0 4px 4px 0'
-            }}
-            transition={{ duration: DURATIONS.fast, ease: EASE_OUT }}
-          />
-        )}
         {item.icon}
-        <span style={{ position: 'relative', zIndex: 1 }}>{item.label}</span>
+        <span>{item.label}</span>
       </button>
     );
   };

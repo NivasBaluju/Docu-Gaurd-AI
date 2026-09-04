@@ -3,8 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import Api from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
-import FormField from '../components/ui/FormField';
-import Button from '../components/ui/Button';
+import MetalFx from '../components/ui/MetalFx';
 
 /**
  * Login — Client Portal Access
@@ -72,10 +71,10 @@ export function Login() {
   };
 
   return (
-    <div className="w-full min-h-[85vh] bg-paper flex items-center justify-center py-20 px-6">
-      <div className="max-w-md w-full bg-paper-dim border border-rule p-8 sm:p-12">
+    <div className="w-full min-h-[85vh] bg-paper flex items-center justify-center py-16 px-4">
+      <div className="max-w-md w-full bg-paper p-8 sm:p-12 border border-rule shadow-none mx-auto">
         <div className="text-center mb-10 pb-6 border-b border-rule">
-          <span className="font-body text-micro text-neutral-500 block mb-2 select-none">
+          <span className="font-body text-micro text-ink-soft block mb-2 select-none">
             [CLIENT PORTAL ACCESS]
           </span>
           <h1 className="display-03 text-ink tracking-tight mb-2">
@@ -111,24 +110,28 @@ export function Login() {
             placeholder="••••••••••••"
           />
 
-          <Button
-            type="submit"
-            variant="primary"
-            loading={submitting}
-            disabled={submitting}
-            className="w-full mt-4 mb-6"
-          >
-            Authenticate
-          </Button>
+          <div className="mt-6 mb-6">
+            <MetalFx preset="chromatic" strength={0.90} className="w-full">
+              <Button
+                type="submit"
+                variant="primary"
+                loading={submitting}
+                disabled={submitting}
+                className="w-full"
+              >
+                Authenticate
+              </Button>
+            </MetalFx>
+          </div>
 
-          <div className="text-center pt-6 border-t border-rule text-body-sm text-neutral-500 flex flex-col gap-2">
+          <div className="text-center pt-6 border-t border-rule text-body-sm text-ink-soft flex flex-col gap-2">
             <p className="m-0">
               New to DocuGuard?{' '}
               <Link to="/register" className="editorial-link text-ink font-medium">
                 Register enterprise account
               </Link>
             </p>
-            <p className="m-0 text-micro text-neutral-400">
+            <p className="m-0 text-micro text-ink-soft">
               Protected by Zero-Trust hardware isolation
             </p>
           </div>

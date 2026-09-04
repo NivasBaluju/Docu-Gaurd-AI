@@ -24,6 +24,10 @@
   --ink-section-rule: #2A2927;
   --ink-section-caption: #A8A6A0;
 
+  /* Product-surface signal color — Part 3.2. Used exclusively to mean "needs human attention." */
+  --signal: #6E2A22;
+  --signal-soft: #F4E9E7;
+
   /* Spacing Tokens — Part 4.3 (8px Base Unit) */
   --space-0: 0px;
   --space-1: 4px;
@@ -69,6 +73,14 @@
   --border-strong: #0A0A0A;
   --card-bg: #FAF9F6;
   --white: #FAF9F6;
+  --off-white: var(--paper);
+  --font-head: var(--font-display);
+  --text-hi: var(--ink);
+  --text-mid: var(--ink-soft);
+  --text-lo: #6B6862;
+  --border-color: var(--rule);
+  --radius: 0px;
+  --radius-sm: 0px;
 }
 
 /* Base Resets & Global Rules */
@@ -76,8 +88,19 @@
   box-sizing: border-box;
   margin: 0;
   padding: 0;
-  border-radius: 0px !important;
-  box-shadow: none !important;
+}
+
+button, input, textarea, select, .card, .panel, img {
+  border-radius: 0px;
+  box-shadow: none;
+}
+
+.floating-panel,
+.modal-panel,
+.toast,
+.mobile-menu-panel {
+  box-shadow: 0 8px 24px rgba(10, 10, 10, 0.12), 0 2px 6px rgba(10, 10, 10, 0.08);
+  border-radius: 0px;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -592,10 +615,11 @@ a.editorial-link:hover, .editorial-link:hover {
   background-color: var(--ink);
 }
 
-/* Badge (Monochrome Replacement) */
+/* Badge (Monochrome & Signal System) — Part 7.3 */
 .badge-editorial {
   display: inline-flex;
   align-items: center;
+  gap: var(--space-1);
   padding: 2px var(--space-2);
   font-family: var(--font-body);
   font-size: 0.75rem;
@@ -610,4 +634,120 @@ a.editorial-link:hover, .editorial-link:hover {
   background-color: var(--ink);
   color: var(--paper);
   border: 1px solid var(--ink);
+}
+
+/* "Resolved / verified / compliant" — filled */
+.badge-ok {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: 2px var(--space-2);
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  font-weight: 600;
+  border: 1px solid var(--ink);
+  background-color: var(--ink);
+  color: var(--paper);
+}
+
+/* "Pending / in progress" — outlined, neutral */
+.badge-warn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: 2px var(--space-2);
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  font-weight: 600;
+  border: 1px solid var(--rule-strong);
+  background: transparent;
+  color: var(--ink-soft);
+}
+
+/* "Needs attention / high risk / failed" — the one place --signal appears */
+.badge-danger {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: 2px var(--space-2);
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  font-weight: 600;
+  border: 1px solid var(--signal);
+  background-color: var(--signal-soft);
+  color: var(--signal);
+}
+
+/* Metric Icon Wrapper Overrides — Part 7.4 */
+.metric-icon-wrap {
+  display: none !important;
+}
+
+/* ==========================================================================
+   SIDEBAR STYLING — Part 5.2 & Part 2.3
+   ========================================================================== */
+
+.sidebar {
+  width: 264px;
+  flex-shrink: 0;
+  background-color: var(--paper);
+  border-right: 1px solid var(--rule);
+  padding: var(--space-6) var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-height: 100vh;
+}
+
+.sidebar-label {
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--ink-soft);
+  padding: var(--space-4) var(--space-3) var(--space-2);
+  letter-spacing: 0.02em;
+}
+
+.sidebar-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  padding: var(--space-3) var(--space-3);
+  min-height: 44px;
+  background: transparent;
+  border: none;
+  border-left: 3px solid transparent;
+  font-family: var(--font-body);
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: var(--ink-soft);
+  cursor: pointer;
+  transition: color var(--duration-fast) var(--ease-in-out-quad),
+              border-left-color var(--duration-fast) var(--ease-in-out-quad),
+              background-color var(--duration-fast) var(--ease-in-out-quad);
+}
+
+.sidebar-item:hover {
+  color: var(--ink);
+  background-color: var(--paper-dim);
+}
+
+.sidebar-item.active {
+  color: var(--ink);
+  font-weight: 600;
+  border-left-color: var(--ink);
+  background-color: var(--paper-dim);
+}
+
+.sidebar-divider {
+  height: 1px;
+  background-color: var(--rule);
+  margin: var(--space-4) var(--space-3);
+}
+
+.sidebar-bottom {
+  margin-top: auto;
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--rule);
 }

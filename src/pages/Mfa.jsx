@@ -5,6 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import Button from '../components/ui/Button';
 import AuthThresholdModal from '../components/common/AuthThresholdModal';
+import MetalFx from '../components/ui/MetalFx';
 
 /**
  * Mfa — The Threshold Crossing Entry
@@ -155,15 +156,19 @@ export function Mfa() {
             )}
           </div>
 
-          <Button
-            type="submit"
-            variant="primary"
-            loading={submitting}
-            disabled={otpCode.length < 6 || submitting}
-            className="w-full mb-6"
-          >
-            Verify &amp; Enter Cockpit
-          </Button>
+          <div className="mt-6 mb-6">
+            <MetalFx preset="chromatic" strength={0.90} className="w-full">
+              <Button
+                type="submit"
+                variant="primary"
+                loading={submitting}
+                disabled={otpCode.length < 6 || submitting}
+                className="w-full"
+              >
+                Verify &amp; Enter Cockpit
+              </Button>
+            </MetalFx>
+          </div>
 
           <div className="text-center pt-4 border-t border-rule">
             <button
