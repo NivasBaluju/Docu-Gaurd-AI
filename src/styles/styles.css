@@ -703,8 +703,7 @@ a.editorial-link:hover, .editorial-link:hover {
   width: 100%;
   min-height: calc(100vh - 88px);
   margin-top: 88px;
-  background: #000000 url('/assets/courtroom-bg.jpg') no-repeat center fixed;
-  background-size: cover;
+  background: #000000;
   color: var(--ink);
 }
 
