@@ -141,13 +141,16 @@ body {
 
 #root {
   min-height: 100vh;
+  width: 100%;
   display: flex;
   flex-direction: column;
 }
 
 main#app {
-  flex: 1;
+  flex: 1 0 auto;
   width: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
 /* Reduced Motion Compliance — Part 12.3 */

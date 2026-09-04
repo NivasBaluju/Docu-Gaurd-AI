@@ -74,20 +74,23 @@ export function Register() {
 
   return (
     <div className="w-full min-h-[85vh] bg-paper flex items-center justify-center py-16 px-4">
-      <div className="max-w-md w-full bg-paper p-8 sm:p-12 border border-rule shadow-none mx-auto">
+      <div 
+        className="w-full bg-paper p-8 sm:p-12 border border-rule shadow-none mx-auto"
+        style={{ maxWidth: '480px' }}
+      >
         <div className="text-center mb-10 pb-6 border-b border-rule">
-          <span className="font-body text-micro text-ink-soft block mb-2 select-none">
-            [ENTERPRISE REGISTRATION]
+          <span className="font-body text-micro text-ink-soft block mb-2 select-none tracking-widest uppercase">
+            [Enterprise Registration]
           </span>
-          <h1 className="display-03 text-ink tracking-tight mb-2">
+          <h1 className="font-display text-4xl text-ink tracking-tight mb-3">
             Create Account
           </h1>
-          <p className="font-body text-body-sm text-ink-soft">
+          <p className="font-body text-body-sm text-ink-soft max-w-sm mx-auto">
             Register your enterprise account to access legal copilot capabilities.
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} noValidate>
+        <form onSubmit={handleSubmit} noValidate className="w-full">
           <FormField
             id="name"
             label="Full Name & Title"
@@ -122,14 +125,14 @@ export function Register() {
             placeholder="••••••••••••"
           />
 
-          <div className="mt-6 mb-6">
+          <div className="mt-8 mb-6">
             <MetalFx preset="chromatic" strength={0.90} className="w-full">
               <Button
                 type="submit"
                 variant="primary"
                 loading={submitting}
                 disabled={submitting}
-                className="w-full"
+                className="w-full py-4 text-center font-medium"
               >
                 Register Account
               </Button>

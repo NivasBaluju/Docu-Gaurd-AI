@@ -112,15 +112,18 @@ export function Mfa() {
 
   return (
     <div className="w-full min-h-[85vh] bg-paper flex items-center justify-center py-20 px-6">
-      <div className="max-w-md w-full bg-paper-dim border border-rule p-8 sm:p-12">
+      <div 
+        className="w-full bg-paper-dim border border-rule p-8 sm:p-12 mx-auto"
+        style={{ maxWidth: '480px' }}
+      >
         <div className="text-center mb-10 pb-6 border-b border-rule">
-          <span className="font-body text-micro text-neutral-500 block mb-2 select-none">
-            [ZERO-TRUST VERIFICATION]
+          <span className="font-body text-micro text-neutral-500 block mb-2 select-none tracking-widest uppercase">
+            [Zero-Trust Verification]
           </span>
-          <h1 className="display-03 text-ink tracking-tight mb-2">
+          <h1 className="font-display text-4xl text-ink tracking-tight mb-3">
             Security Pass
           </h1>
-          <p className="font-body text-body-sm text-ink-soft">
+          <p className="font-body text-body-sm text-ink-soft max-w-sm mx-auto">
             Enter the 6-digit one-time code dispatched to your email address.
           </p>
           {devCode && (
@@ -132,7 +135,7 @@ export function Mfa() {
           )}
         </div>
 
-        <form onSubmit={handleSubmit} noValidate>
+        <form onSubmit={handleSubmit} noValidate className="w-full">
           <div className="mb-8">
             <label htmlFor="otpCode" className="block font-body text-label text-ink-soft mb-2 text-center">
               One-Time Passcode
@@ -157,14 +160,14 @@ export function Mfa() {
             )}
           </div>
 
-          <div className="mt-6 mb-6">
+          <div className="mt-8 mb-6">
             <MetalFx preset="chromatic" strength={0.90} className="w-full">
               <Button
                 type="submit"
                 variant="primary"
                 loading={submitting}
                 disabled={otpCode.length < 6 || submitting}
-                className="w-full"
+                className="w-full py-4 text-center font-medium"
               >
                 Verify &amp; Enter Cockpit
               </Button>

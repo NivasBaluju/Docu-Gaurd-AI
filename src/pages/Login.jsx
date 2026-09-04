@@ -74,24 +74,29 @@ export function Login() {
 
   return (
     <div className="w-full min-h-[85vh] bg-paper flex items-center justify-center py-16 px-4">
-      <div className="max-w-md w-full bg-paper p-8 sm:p-12 border border-rule shadow-none mx-auto">
+      <div 
+        className="w-full bg-paper p-8 sm:p-12 border border-rule shadow-none mx-auto"
+        style={{ maxWidth: '480px' }}
+      >
         <div className="text-center mb-10 pb-6 border-b border-rule">
-          <span className="font-body text-micro text-ink-soft block mb-2 select-none">
-            [CLIENT PORTAL ACCESS]
+          <span className="font-body text-micro text-ink-soft block mb-2 select-none tracking-widest uppercase">
+            [Client Portal Access]
           </span>
-          <h1 className="display-03 text-ink tracking-tight mb-2">
+          <h1 className="font-display text-4xl text-ink tracking-tight mb-3">
             Sign In
           </h1>
-          <p className="font-body text-body-sm text-ink-soft">
+          <p className="font-body text-body-sm text-ink-soft max-w-sm mx-auto">
             Enter your credentials to access the DocuGuard executive cockpit.
           </p>
         </div>
 
         {/* Demo Fast-Login Helper */}
-        <div className="mb-6 p-3.5 bg-paper-dim border border-rule flex items-center justify-between gap-3 text-left">
-          <div>
+        <div className="mb-6 p-4 bg-paper-dim border border-rule flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-left">
+          <div className="min-w-0 flex-1">
             <span className="font-body text-micro text-ink font-semibold block">Demo Cockpit Access</span>
-            <span className="font-body text-micro text-ink-soft select-all">admin@docugaurd.ai / Password123!</span>
+            <span className="font-body text-micro text-ink-soft select-all block truncate sm:overflow-visible">
+              admin@docugaurd.ai / Password123!
+            </span>
           </div>
           <button
             type="button"
@@ -100,13 +105,13 @@ export function Login() {
               setPassword('Password123!');
               setFieldErrors({ email: '', password: '' });
             }}
-            className="btn btn-ghost py-1 px-3 text-micro whitespace-nowrap"
+            className="btn btn-ghost py-1 px-3 text-micro whitespace-nowrap self-start sm:self-auto"
           >
             Auto-fill
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} noValidate>
+        <form onSubmit={handleSubmit} noValidate className="w-full">
           <FormField
             id="email"
             label="Corporate Email"
@@ -131,14 +136,14 @@ export function Login() {
             placeholder="••••••••••••"
           />
 
-          <div className="mt-6 mb-6">
+          <div className="mt-8 mb-6">
             <MetalFx preset="chromatic" strength={0.90} className="w-full">
               <Button
                 type="submit"
                 variant="primary"
                 loading={submitting}
                 disabled={submitting}
-                className="w-full"
+                className="w-full py-4 text-center font-medium"
               >
                 Authenticate
               </Button>
