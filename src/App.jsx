@@ -175,17 +175,76 @@ const AppContent = () => {
   );
 };
 
+// Clean up path + hash mismatch (e.g. /login#/login -> /#/login)
+if (typeof window !== 'undefined' && window.location.pathname !== '/' && window.location.pathname !== '') {
+  try {
+    const hashPart = window.location.hash ? window.location.hash.replace(/^#\/?/, '/') : window.location.pathname;
+    window.history.replaceState(null, '', '/#' + hashPart);
+  } catch (e) {
+    // Ignore history state errors in restricted environments
+  }
+}
+
+class AppErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+  static getDerivedStateFromError(error) {
+    return { hasError: true, error };
+  }
+  componentDidCatch(error, errorInfo) {
+    console.error('DocuGuard App Error Caught:', error, errorInfo);
+  }
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="w-full min-h-screen bg-paper flex items-center justify-center p-8">
+          <div className="max-w-md w-full border border-rule bg-paper-dim p-8 text-center">
+            <h2 className="font-display text-2xl text-ink mb-3">Session Interrupted</h2>
+            <p className="font-body text-body-sm text-ink-soft mb-6">
+              A temporary interface error occurred. You can return home or reload the chamber.
+            </p>
+            <div className="flex gap-4 justify-center">
+              <button
+                type="button"
+                onClick={() => {
+                  this.setState({ hasError: false });
+                  window.location.href = '/#/';
+                }}
+                className="btn btn-primary"
+              >
+                Return to Home
+              </button>
+              <button
+                type="button"
+                onClick={() => window.location.reload()}
+                className="btn btn-ghost"
+              >
+                Reload
+              </button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
 export function App() {
   return (
-    <ToastProvider>
-      <AuthProvider>
-        <HashRouter>
-          <LenisProvider>
-            <AppContent />
-          </LenisProvider>
-        </HashRouter>
-      </AuthProvider>
-    </ToastProvider>
+    <AppErrorBoundary>
+      <ToastProvider>
+        <AuthProvider>
+          <HashRouter>
+            <LenisProvider>
+              <AppContent />
+            </LenisProvider>
+          </HashRouter>
+        </AuthProvider>
+      </ToastProvider>
+    </AppErrorBoundary>
   );
 }
 
