@@ -71,7 +71,7 @@ export function HeroEntrance({ headline, subheadline, children }) {
 
   return (
     <div ref={containerRef} className="w-full">
-      <h1 className="display-01 text-white relative inline-block mb-6 max-w-4xl tracking-tight">
+      <h1 className="display-01 text-white relative inline-block mb-6 max-w-4xl tracking-tight" style={{ color: '#FFFFFF' }}>
         <span className="relative inline-block">
           {headline}
           <span
@@ -83,7 +83,8 @@ export function HeroEntrance({ headline, subheadline, children }) {
               backgroundColor: '#000000',
               border: '1px solid rgba(255, 255, 255, 0.2)',
               transformOrigin: 'right',
-              zIndex: 20
+              zIndex: 20,
+              pointerEvents: 'none'
             }}
           />
         </span>
@@ -92,7 +93,7 @@ export function HeroEntrance({ headline, subheadline, children }) {
       <p
         ref={subRef}
         className="body-lg measure-body mb-8 text-neutral-200"
-        style={{ maxWidth: '36rem' }}
+        style={{ maxWidth: '36rem', color: '#E4E4E7' }}
       >
         {subheadline}
       </p>

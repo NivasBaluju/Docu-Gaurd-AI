@@ -24,7 +24,7 @@ export const Button = forwardRef(({
   const variants = {
     primary: 'bg-ink text-paper border-ink hover:bg-paper hover:text-ink focus-visible:outline-ink',
     ghost: 'bg-transparent text-ink border-ink hover:border-b-2 hover:border-t-2 hover:border-l-2 hover:border-r-2 focus-visible:outline-ink',
-    'ghost-light': 'bg-transparent text-paper border-paper hover:bg-paper hover:text-ink focus-visible:outline-paper'
+    'ghost-light': 'bg-transparent text-white border-white/50 hover:bg-white hover:text-black hover:border-white focus-visible:outline-white'
   };
 
   const classes = `${base} ${variants[variant] || variants.primary} ${disabled || loading ? 'opacity-60 cursor-not-allowed pointer-events-none' : ''} ${className}`;

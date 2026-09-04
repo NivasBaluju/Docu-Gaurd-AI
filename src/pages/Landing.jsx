@@ -22,10 +22,14 @@ export function Landing() {
       {/* SECTION 01: Full-Bleed Hero (Ink Section) with Statue Black Art */}
       <section
         className="section-ink relative flex items-center min-h-[88vh] py-28 sm:py-36 border-b border-neutral-800 bg-black overflow-hidden"
+        style={{
+          backgroundColor: '#000000',
+          color: '#FFFFFF'
+        }}
       >
         {/* Lady Justice Dithered Black & White Statue Background Art */}
         <div 
-          className="absolute right-0 top-0 bottom-0 w-full lg:w-1/2 pointer-events-none select-none flex items-center justify-end overflow-hidden opacity-30 sm:opacity-45 lg:opacity-65 z-0"
+          className="absolute right-0 top-0 bottom-0 w-full lg:w-1/2 pointer-events-none select-none flex items-center justify-end overflow-hidden opacity-60 sm:opacity-75 lg:opacity-85 z-0"
           style={{
             maskImage: 'linear-gradient(to left, rgba(0,0,0,1) 40%, transparent 100%)',
             WebkitMaskImage: 'linear-gradient(to left, rgba(0,0,0,1) 40%, transparent 100%)'

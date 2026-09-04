@@ -172,7 +172,7 @@ main#app {
 }
 
 .section-ink :focus-visible {
-  outline: 2px solid var(--paper) !important;
+  outline: 2px solid #FFFFFF !important;
   outline-offset: 2px !important;
 }
 
@@ -264,8 +264,8 @@ main#app {
 
 /* Section Inversion (Ink Section) — Part 7.4 */
 .section-ink {
-  background-color: var(--ink) !important;
-  color: var(--paper) !important;
+  background-color: #000000 !important;
+  color: #FFFFFF !important;
 }
 .section-ink hr, .section-ink .rule-divider {
   border-color: var(--ink-section-rule) !important;
@@ -510,7 +510,7 @@ a.editorial-link:hover, .editorial-link:hover {
 }
 
 .section-ink a.editorial-link, .section-ink .editorial-link {
-  color: var(--paper);
+  color: #FFFFFF !important;
 }
 
 /* ==========================================================================
