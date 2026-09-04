@@ -81,12 +81,13 @@ router.post('/login', async (req, res) => {
 
       const emailRes = await sendOtpEmail(user.email, code);
 
+      const isDev = process.env.NODE_ENV !== 'production';
       return res.json({
         mfaRequired: true,
         method: 'email',
         preToken,
-        devMode: Boolean(emailRes.devMode),
-        devCode: emailRes.devMode ? code : undefined,
+        devMode: isDev || Boolean(emailRes.devMode),
+        devCode: isDev ? code : (emailRes.devMode ? code : undefined),
         deliveryFailed: Boolean(emailRes.deliveryFailed)
       });
     }
@@ -271,7 +272,12 @@ router.post('/mfa/otp/request', async (req, res) => {
     );
 
     const result = await sendOtpEmail(user.email, code);
-    res.json({ ok: true, devMode: result.devMode, devCode: result.devMode ? code : undefined });
+    const isDev = process.env.NODE_ENV !== 'production';
+    res.json({
+      ok: true,
+      devMode: isDev || Boolean(result.devMode),
+      devCode: isDev ? code : (result.devMode ? code : undefined)
+    });
   } catch (err) {
     console.error('OTP request error:', err);
     res.status(500).json({ error: 'Internal server error' });

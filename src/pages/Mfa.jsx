@@ -40,6 +40,7 @@ export function Mfa() {
     const savedDevCode = sessionStorage.getItem('devCode');
     if (savedDevCode) {
       setDevCode(savedDevCode);
+      setOtpCode(savedDevCode);
       sessionStorage.removeItem('devCode');
     }
   }, [preToken, navigate]);

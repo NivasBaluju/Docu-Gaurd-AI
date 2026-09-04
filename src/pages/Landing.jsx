@@ -99,11 +99,11 @@ export function Landing() {
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-stretch">
-            {/* Feature 01: 7 Columns */}
+            {/* Feature: Diligence Engine (7 Columns) */}
             <div className="lg:col-span-7 bg-paper-dim border border-rule p-8 sm:p-12 flex flex-col justify-between">
               <div>
-                <span className="font-body text-micro text-neutral-500 uppercase tracking-widest block mb-3">
-                  01 / Diligence Engine
+                <span className="font-body text-micro text-ink-soft block mb-3 font-medium">
+                  Diligence Engine
                 </span>
                 <h4 className="font-display text-2xl sm:text-3xl text-ink font-medium mb-4">
                   {diligenceCap.name}
@@ -127,11 +127,11 @@ export function Landing() {
               </div>
             </div>
 
-            {/* Feature 02: 5 Columns */}
+            {/* Feature: Risk Surveillance (5 Columns) */}
             <div className="lg:col-span-5 border border-rule p-8 sm:p-12 flex flex-col justify-between bg-paper">
               <div>
-                <span className="font-body text-micro text-neutral-500 uppercase tracking-widest block mb-3">
-                  02 / Risk Surveillance
+                <span className="font-body text-micro text-ink-soft block mb-3 font-medium">
+                  Risk Surveillance
                 </span>
                 <h4 className="font-display text-2xl sm:text-3xl text-ink font-medium mb-4">
                   {riskCap.name}
@@ -139,18 +139,18 @@ export function Landing() {
                 <p className="font-body text-body-sm text-neutral-600 mb-6 leading-relaxed">
                   {riskCap.indexLine}
                 </p>
-                <div className="border-t border-b border-rule py-6 my-6 space-y-4">
-                  <div className="flex justify-between items-center font-body text-body-sm">
-                    <span className="text-neutral-600">Uncapped Indemnity Detection</span>
-                    <span className="font-semibold text-ink">Active</span>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 my-6">
+                  <div className="border border-rule p-3.5 bg-paper-dim">
+                    <span className="font-body text-micro text-ink-soft block mb-1">Indemnity</span>
+                    <span className="font-display text-xl text-ink font-semibold block">Active</span>
                   </div>
-                  <div className="flex justify-between items-center font-body text-body-sm">
-                    <span className="text-neutral-600">Consequential Damage Audit</span>
-                    <span className="font-semibold text-ink">99.4% Accuracy</span>
+                  <div className="border border-rule p-3.5 bg-paper-dim">
+                    <span className="font-body text-micro text-ink-soft block mb-1">Damage Audit</span>
+                    <span className="font-display text-xl text-ink font-semibold block">99.4%</span>
                   </div>
-                  <div className="flex justify-between items-center font-body text-body-sm">
-                    <span className="text-neutral-600">Mathematical Risk Ranking</span>
-                    <span className="font-semibold text-ink">0–100 Scale</span>
+                  <div className="border border-rule p-3.5 bg-paper-dim">
+                    <span className="font-body text-micro text-ink-soft block mb-1">Risk Scale</span>
+                    <span className="font-display text-xl text-ink font-semibold block">0–100</span>
                   </div>
                 </div>
               </div>
@@ -168,7 +168,7 @@ export function Landing() {
       <section className="bg-paper-dim py-24 sm:py-32 border-b border-rule">
         <div className="container-wide">
           <div className="mb-16">
-            <span className="font-body text-label text-ink-soft mb-2 block uppercase tracking-wider">
+            <span className="font-body text-label text-ink-soft mb-2 block font-medium">
               Capability Group II — Execution & Governance
             </span>
             <h3 className="display-03 text-ink tracking-tight">
@@ -177,11 +177,11 @@ export function Landing() {
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-stretch">
-            {/* Feature 03: 5 Columns */}
+            {/* Feature: Negotiation Workbench (5 Columns) */}
             <div className="lg:col-span-5 border border-rule p-8 sm:p-12 flex flex-col justify-between bg-paper">
               <div>
-                <span className="font-body text-micro text-neutral-500 uppercase tracking-widest block mb-3">
-                  03 / Negotiation Workbench
+                <span className="font-body text-micro text-ink-soft block mb-3 font-medium">
+                  Negotiation Workbench
                 </span>
                 <h4 className="font-display text-2xl sm:text-3xl text-ink font-medium mb-4">
                   {negotiationCap.name}
@@ -200,11 +200,11 @@ export function Landing() {
               </div>
             </div>
 
-            {/* Feature 04: 7 Columns */}
+            {/* Feature: Portfolio Health Engine (7 Columns) */}
             <div className="lg:col-span-7 bg-paper border border-rule p-8 sm:p-12 flex flex-col justify-between">
               <div>
-                <span className="font-body text-micro text-neutral-500 uppercase tracking-widest block mb-3">
-                  04 / Portfolio Health Engine
+                <span className="font-body text-micro text-ink-soft block mb-3 font-medium">
+                  Portfolio Health Engine
                 </span>
                 <h4 className="font-display text-2xl sm:text-3xl text-ink font-medium mb-4">
                   {governanceCap.name}
@@ -213,12 +213,12 @@ export function Landing() {
                   {governanceCap.overview}
                 </p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
-                  <div className="border border-rule p-4">
-                    <span className="font-body text-micro text-neutral-500 uppercase block mb-1">Health Index</span>
+                  <div className="border border-rule p-4 bg-paper-dim">
+                    <span className="font-body text-micro text-ink-soft block mb-1">Health Index</span>
                     <span className="font-display text-2xl text-ink font-semibold">88.4 / 100</span>
                   </div>
-                  <div className="border border-rule p-4">
-                    <span className="font-body text-micro text-neutral-500 uppercase block mb-1">Phase 8.1 Engine</span>
+                  <div className="border border-rule p-4 bg-paper-dim">
+                    <span className="font-body text-micro text-ink-soft block mb-1">Phase 8.1 Engine</span>
                     <span className="font-display text-2xl text-ink font-semibold">Dual Signoff</span>
                   </div>
                 </div>
@@ -237,7 +237,7 @@ export function Landing() {
       <section className="bg-paper py-24 sm:py-32 border-b border-rule">
         <div className="container-wide">
           <div className="mb-16">
-            <span className="font-body text-label text-ink-soft mb-2 block uppercase tracking-wider">
+            <span className="font-body text-label text-ink-soft mb-2 block font-medium">
               Capability Group III — Integrity & Compliance
             </span>
             <h3 className="display-03 text-ink tracking-tight">
@@ -249,8 +249,8 @@ export function Landing() {
             {/* 9 Columns Main Content */}
             <div className="lg:col-span-9 space-y-12">
               <div className="border border-rule p-8 sm:p-12 bg-paper-dim">
-                <span className="font-body text-micro text-neutral-500 uppercase tracking-widest block mb-3">
-                  05 / Audit Ledger
+                <span className="font-body text-micro text-ink-soft block mb-3 font-medium">
+                  Audit Ledger
                 </span>
                 <h4 className="font-display text-2xl sm:text-3xl text-ink font-medium mb-4">
                   {complianceCap.name}
@@ -264,8 +264,8 @@ export function Landing() {
               </div>
 
               <div className="border border-rule p-8 sm:p-12 bg-paper">
-                <span className="font-body text-micro text-neutral-500 uppercase tracking-widest block mb-3">
-                  06 / Statutory Audit
+                <span className="font-body text-micro text-ink-soft block mb-3 font-medium">
+                  Statutory Audit
                 </span>
                 <h4 className="font-display text-2xl sm:text-3xl text-ink font-medium mb-4">
                   {crosscheckCap.name}

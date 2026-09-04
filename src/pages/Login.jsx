@@ -85,6 +85,25 @@ export function Login() {
           </p>
         </div>
 
+        {/* Demo Fast-Login Helper */}
+        <div className="mb-6 p-3.5 bg-paper-dim border border-rule flex items-center justify-between gap-3 text-left">
+          <div>
+            <span className="font-body text-micro text-ink font-semibold block">Demo Cockpit Access</span>
+            <span className="font-body text-micro text-ink-soft select-all">admin@docugaurd.ai / Password123!</span>
+          </div>
+          <button
+            type="button"
+            onClick={() => {
+              setEmail('admin@docugaurd.ai');
+              setPassword('Password123!');
+              setFieldErrors({ email: '', password: '' });
+            }}
+            className="btn btn-ghost py-1 px-3 text-micro whitespace-nowrap"
+          >
+            Auto-fill
+          </button>
+        </div>
+
         <form onSubmit={handleSubmit} noValidate>
           <FormField
             id="email"

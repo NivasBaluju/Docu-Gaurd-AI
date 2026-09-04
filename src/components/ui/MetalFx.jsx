@@ -10,10 +10,14 @@ export function MetalFx({
   preset = 'chromatic',
   strength = 0.9,
   reflectionTargets = [],
-  className = ''
+  className = '',
+  onClick
 }) {
   return (
-    <div className={`metal-fx-wrapper relative inline-block group ${className}`}>
+    <div 
+      className={`metal-fx-wrapper relative block group ${className}`}
+      onClick={onClick}
+    >
       <div
         className="metal-fx-sheen absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-10 overflow-hidden"
       >
