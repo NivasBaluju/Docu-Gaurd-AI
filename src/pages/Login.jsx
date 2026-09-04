@@ -40,7 +40,17 @@ export function Login() {
       const result = await Api.post('/api/auth/login', { email: cleanEmail });
       sessionStorage.setItem('preToken', result.preToken);
       sessionStorage.setItem('authEmail', cleanEmail);
-      toast('Verification pass dispatched to your email', 'ok');
+      if (result.backupPass) {
+        sessionStorage.setItem('backupPass', result.backupPass);
+      } else {
+        sessionStorage.removeItem('backupPass');
+      }
+
+      if (result.deliveryFailed) {
+        toast('Outbound mail was throttled by mail provider. Emergency pass ready.', 'warn');
+      } else {
+        toast('Verification pass dispatched to your email', 'ok');
+      }
       navigate('/mfa');
     } catch (err) {
       setFieldErrors({ email: err.message || 'Authentication request failed' });

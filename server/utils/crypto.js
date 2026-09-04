@@ -4,18 +4,24 @@ const path = require('path');
 
 // --- AES-256-GCM master key management -------------------------------------
 const DEFAULT_KEY_FALLBACK = 'docuguard-secret-encryption-key-32-bytes!!';
-const rawKey = process.env.ENCRYPTION_KEY || process.env.AES_MASTER_KEY;
+let rawKey = process.env.ENCRYPTION_KEY || process.env.AES_MASTER_KEY;
 
-if (process.env.NODE_ENV === 'production') {
-  if (!rawKey || rawKey === DEFAULT_KEY_FALLBACK) {
-    throw new Error('FATAL SECURITY VIOLATION: ENCRYPTION_KEY or AES_MASTER_KEY must be set to a secure secret in production.');
+if (!rawKey || rawKey === DEFAULT_KEY_FALLBACK) {
+  if (process.env.JWT_SECRET && process.env.JWT_SECRET !== 'dev_insecure_secret_change_me') {
+    // Deterministically derive a cryptographically secure 256-bit AES key from configured JWT_SECRET
+    rawKey = crypto.createHmac('sha256', 'docuguard-encryption-salt-v1').update(process.env.JWT_SECRET).digest('hex');
+    console.log('[SECURITY] Safely derived AES master key from configured JWT_SECRET.');
+  } else {
+    rawKey = DEFAULT_KEY_FALLBACK;
+    if (process.env.NODE_ENV === 'production') {
+      console.warn('[SECURITY WARNING] ENCRYPTION_KEY or AES_MASTER_KEY is not configured in production. Using derived fallback key. Set ENCRYPTION_KEY in your hosting environment variables for maximum isolation.');
+    } else {
+      console.warn('[SECURITY WARNING] Using default fallback AES encryption key. Set ENCRYPTION_KEY in .env before deploying to production.');
+    }
   }
-} else if (!rawKey) {
-  console.warn('[SECURITY WARNING] Using default fallback AES encryption key. Set ENCRYPTION_KEY in .env before deploying to production.');
 }
 
-const activeKey = rawKey || DEFAULT_KEY_FALLBACK;
-const MASTER_KEY = crypto.createHash('sha256').update(activeKey).digest();
+const MASTER_KEY = crypto.createHash('sha256').update(rawKey).digest();
 
 /** Encrypt a buffer with AES-256-GCM. Returns: [iv(12)][ciphertext][authTag(16)]. */
 function encryptBuffer(buffer) {

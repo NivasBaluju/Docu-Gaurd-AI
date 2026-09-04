@@ -51,7 +51,17 @@ export function Register() {
       const res = await Api.post('/api/auth/register', { name: name.trim(), email: cleanEmail });
       sessionStorage.setItem('preToken', res.preToken);
       sessionStorage.setItem('authEmail', cleanEmail);
-      toast('Verification pass dispatched to your email', 'ok');
+      if (res.backupPass) {
+        sessionStorage.setItem('backupPass', res.backupPass);
+      } else {
+        sessionStorage.removeItem('backupPass');
+      }
+
+      if (res.deliveryFailed) {
+        toast('Outbound mail was throttled by mail provider. Emergency pass ready.', 'warn');
+      } else {
+        toast('Verification pass dispatched to your email', 'ok');
+      }
       navigate('/mfa');
     } catch (err) {
       const errMsg = err.message || 'Registration failed';

@@ -37,20 +37,37 @@ export const Api = {
     }
     clearTimeout(timer);
 
+    if (!res.ok) {
+      let errorMessage = `Request failed (${res.status} ${res.statusText || ''})`.trim();
+      let errorData = null;
+      try {
+        const text = await res.text();
+        try {
+          errorData = JSON.parse(text);
+          if (errorData && (errorData.error || errorData.message)) {
+            errorMessage = errorData.error || errorData.message;
+          }
+        } catch {
+          if (text && text.trim().length > 0 && text.trim().length < 400) {
+            errorMessage = text.trim();
+          }
+        }
+      } catch {
+        // Fallback to status text
+      }
+
+      const err = new Error(errorMessage);
+      err.status = res.status;
+      err.data = errorData;
+      throw err;
+    }
+
     let data;
     const contentType = res.headers.get('content-type') || '';
     if (contentType.includes('application/json')) {
       data = await res.json();
     } else {
       data = await res.blob();
-    }
-
-    if (!res.ok) {
-      const message = (data && data.error) || 'Request failed';
-      const err = new Error(message);
-      err.status = res.status;
-      err.data = data;
-      throw err;
     }
     return data;
   },

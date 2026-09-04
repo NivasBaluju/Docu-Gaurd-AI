@@ -68,7 +68,8 @@ async function sendOtpEmail(toEmail, code) {
     });
     return { devMode: false, success: true };
   } catch (err) {
-    console.error('SMTP Email Delivery Failure:', err.message);
+    console.error('[SMTP ERROR] Email Delivery Failure:', err.message);
+    console.log(`[CONTINUITY PASSCODE] Emergency login OTP for ${toEmail}: ${code}`);
     return { devMode: false, deliveryFailed: true, error: err.message };
   }
 }

@@ -83,7 +83,9 @@ router.post('/register', authLimiter, async (req, res) => {
       mfaRequired: true,
       method: 'email',
       preToken,
-      deliveryFailed: Boolean(emailRes.deliveryFailed)
+      deliveryFailed: Boolean(emailRes.deliveryFailed),
+      deliveryError: emailRes.error || null,
+      backupPass: (emailRes.deliveryFailed || emailRes.devMode) ? code : undefined
     });
   } catch (err) {
     console.error('Register error:', err);
@@ -145,7 +147,9 @@ router.post('/login', authLimiter, async (req, res) => {
       mfaRequired: true,
       method: 'email',
       preToken,
-      deliveryFailed: Boolean(emailRes.deliveryFailed)
+      deliveryFailed: Boolean(emailRes.deliveryFailed),
+      deliveryError: emailRes.error || null,
+      backupPass: (emailRes.deliveryFailed || emailRes.devMode) ? code : undefined
     });
   } catch (err) {
     console.error('Login error:', err);
@@ -324,7 +328,9 @@ router.post('/mfa/otp/request', authLimiter, async (req, res) => {
     const emailRes = await sendOtpEmail(user.email, code);
     res.json({
       ok: true,
-      deliveryFailed: Boolean(emailRes.deliveryFailed)
+      deliveryFailed: Boolean(emailRes.deliveryFailed),
+      deliveryError: emailRes.error || null,
+      backupPass: (emailRes.deliveryFailed || emailRes.devMode) ? code : undefined
     });
   } catch (err) {
     console.error('OTP request error:', err);

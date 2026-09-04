@@ -57,17 +57,32 @@ export const PortfolioOperationsApi = {
     }
     clearTimeout(timer);
 
-    const contentType = res.headers.get('content-type') || '';
-    const data = contentType.includes('application/json') ? await res.json() : await res.blob();
-
     if (!res.ok) {
-      const message = (data && data.error) || 'Execute failed';
-      const err = new Error(message);
+      let errorMessage = `Execute failed (${res.status} ${res.statusText || ''})`.trim();
+      let errorData = null;
+      try {
+        const text = await res.text();
+        try {
+          errorData = JSON.parse(text);
+          if (errorData && (errorData.error || errorData.message)) {
+            errorMessage = errorData.error || errorData.message;
+          }
+        } catch {
+          if (text && text.trim().length > 0 && text.trim().length < 400) {
+            errorMessage = text.trim();
+          }
+        }
+      } catch {}
+
+      const err = new Error(errorMessage);
       err.status = res.status;
-      err.code = data && data.code;
-      err.data = data;
+      err.code = errorData && errorData.code;
+      err.data = errorData;
       throw err;
     }
+
+    const contentType = res.headers.get('content-type') || '';
+    const data = contentType.includes('application/json') ? await res.json() : await res.blob();
     return data;
   },
 

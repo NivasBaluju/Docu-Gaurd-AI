@@ -18,6 +18,7 @@ export function Mfa() {
   const [requesting, setRequesting] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [resendCooldown, setResendCooldown] = useState(0);
+  const [backupPass, setBackupPass] = useState(() => sessionStorage.getItem('backupPass') || '');
 
   // Threshold modal states
   const [thresholdOpen, setThresholdOpen] = useState(false);
@@ -56,9 +57,15 @@ export function Mfa() {
     setRequesting(true);
     setOtpError('');
     try {
-      await Api.post('/api/auth/mfa/otp/request', { preToken });
+      const res = await Api.post('/api/auth/mfa/otp/request', { preToken });
       setResendCooldown(30);
-      toast('A new verification code was dispatched to your email', 'ok');
+      if (res.backupPass) {
+        setBackupPass(res.backupPass);
+        sessionStorage.setItem('backupPass', res.backupPass);
+        toast('Outbound mail throttled. Emergency security pass updated.', 'warn');
+      } else {
+        toast('A new verification code was dispatched to your email', 'ok');
+      }
     } catch (err) {
       setOtpError(err.message || 'Failed to request new code');
     } finally {
@@ -93,6 +100,7 @@ export function Mfa() {
     if (!authPayload) return;
     sessionStorage.removeItem('preToken');
     sessionStorage.removeItem('authEmail');
+    sessionStorage.removeItem('backupPass');
     await login(authPayload.token, authPayload.user);
     toast('Identity confirmed — workspace initialized', 'ok');
     navigate('/dashboard');
@@ -120,6 +128,37 @@ export function Mfa() {
         </div>
 
         <form onSubmit={handleSubmit} noValidate className="w-full">
+          {backupPass && (
+            <div className="mb-6 p-4 border border-rule bg-paper text-left text-body-sm">
+              <div className="flex items-center justify-between mb-2">
+                <span className="font-mono text-micro uppercase tracking-widest text-ink font-semibold">
+                  [Provider Throttled — Security Pass]
+                </span>
+                <span className="font-mono text-xs px-2 py-0.5 bg-paper-dim border border-rule text-ink">
+                  Continuity
+                </span>
+              </div>
+              <p className="text-ink-soft text-xs mb-3 leading-relaxed">
+                Outbound mail delivery was throttled by the provider daily quota. For secure business continuity, use your session passcode:
+              </p>
+              <div className="flex items-center justify-between bg-paper-dim p-2 border border-rule">
+                <code className="font-display text-2xl tracking-widest text-ink font-bold px-2">
+                  {backupPass}
+                </code>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setOtpCode(backupPass);
+                    if (otpError) setOtpError('');
+                  }}
+                  className="text-xs font-mono uppercase underline hover:text-ink px-2 py-1 text-ink-soft transition-colors cursor-pointer"
+                >
+                  Autofill
+                </button>
+              </div>
+            </div>
+          )}
+
           <div className="mb-8">
             <label htmlFor="otpCode" className="block font-body text-label text-ink-soft mb-2 text-center">
               One-Time Passcode

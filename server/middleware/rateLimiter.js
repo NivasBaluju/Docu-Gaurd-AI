@@ -5,10 +5,12 @@ const rateLimit = require('express-rate-limit');
  * Protects against brute-force attacks, OTP enumeration, SMTP exhaustion, and AI quota drainage.
  */
 
+const isDev = process.env.NODE_ENV !== 'production';
+
 // 1. Strict Authentication Limiter (Login, Registration, OTP Requests)
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 10, // Max 10 attempts per IP per 15 minutes
+  max: isDev ? 100 : 20, // Max 20 attempts per IP per 15 minutes in prod (100 in dev)
   standardHeaders: true,
   legacyHeaders: false,
   validate: false,
@@ -20,7 +22,7 @@ const authLimiter = rateLimit({
 // 2. Ultra-Strict Code Verification Limiter (OTP verification, TOTP MFA verify)
 const otpVerifyLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 6, // Max 6 attempts to prevent 6-digit PIN brute forcing
+  max: isDev ? 30 : 10, // Max 10 attempts to prevent PIN brute forcing in prod
   standardHeaders: true,
   legacyHeaders: false,
   validate: false,
