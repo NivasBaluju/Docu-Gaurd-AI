@@ -8,27 +8,28 @@
    ========================================================================== */
 
 :root {
-  /* Color Tokens — Part 4.1 */
-  --ink: #0A0A0A;
-  --ink-soft: #3A3A38;
-  --paper: #FAF9F6;
-  --paper-dim: #F1EFEA;
-  --rule: #D8D5CC;
-  --rule-strong: #0A0A0A;
-  --redact: #0A0A0A;
-  --focus: #0A0A0A;
+  /* Color Tokens — Inverted for Black Background & White Text ("Vice Versa") */
+  --ink: #FFFFFF;
+  --ink-soft: #D4D4D8;
+  --paper: #000000;
+  --paper-dim: #0C0C10;
+  --paper-wash: #14141A;
+  --rule: rgba(255, 255, 255, 0.12);
+  --rule-strong: rgba(255, 255, 255, 0.28);
+  --redact: #FFFFFF;
+  --focus: #FFFFFF;
 
-  /* Ink Section (Inverted) Equivalents — Part 7.4 */
-  --ink-section-bg: #0A0A0A;
-  --ink-section-text: #FAF9F6;
-  --ink-section-rule: #2A2927;
-  --ink-section-caption: #A8A6A0;
+  /* Ink Section (Inverted) Equivalents */
+  --ink-section-bg: #000000;
+  --ink-section-text: #FFFFFF;
+  --ink-section-rule: rgba(255, 255, 255, 0.15);
+  --ink-section-caption: #A1A1AA;
 
-  /* Product-surface signal color — Part 3.2. Used exclusively to mean "needs human attention." */
-  --signal: #6E2A22;
-  --signal-soft: #F4E9E7;
+  /* Product-surface signal color — Attention / Alerts */
+  --signal: #EF4444;
+  --signal-soft: rgba(239, 68, 68, 0.15);
 
-  /* Spacing Tokens — Part 4.3 (8px Base Unit) */
+  /* Spacing Tokens (8px Base Unit) */
   --space-0: 0px;
   --space-1: 4px;
   --space-2: 8px;
@@ -44,7 +45,7 @@
   --space-12: 192px;
   --space-13: 240px;
 
-  /* Motion Easing & Durations — Part 4.6 */
+  /* Motion Easing & Durations */
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-in-out-quad: cubic-bezier(0.45, 0, 0.55, 1);
   --ease-redact: cubic-bezier(0.83, 0, 0.17, 1);
@@ -58,26 +59,26 @@
   --stagger-tight: 40ms;
   --stagger-loose: 80ms;
 
-  /* Typography Families — Part 5.1 */
+  /* Typography Families */
   --font-display: 'Fraunces', Georgia, serif;
   --font-body: 'Public Sans', -apple-system, BlinkMacSystemFont, sans-serif;
   
-  /* Legacy Color Compatibility (Mapped cleanly to Paper & Ink) */
-  --bg-primary: #FAF9F6;
-  --bg-secondary: #F1EFEA;
-  --bg-tertiary: #E8E5DC;
-  --text-primary: #0A0A0A;
-  --text-secondary: #3A3A38;
-  --text-muted: #6B6862;
-  --border: #D8D5CC;
-  --border-strong: #0A0A0A;
-  --card-bg: #FAF9F6;
-  --white: #FAF9F6;
+  /* Legacy Color Compatibility (Inverted for Dark Theme) */
+  --bg-primary: #000000;
+  --bg-secondary: #0C0C10;
+  --bg-tertiary: #14141A;
+  --text-primary: #FFFFFF;
+  --text-secondary: #D4D4D8;
+  --text-muted: #A1A1AA;
+  --border: rgba(255, 255, 255, 0.12);
+  --border-strong: rgba(255, 255, 255, 0.28);
+  --card-bg: rgba(10, 10, 14, 0.85);
+  --white: #000000;
   --off-white: var(--paper);
   --font-head: var(--font-display);
   --text-hi: var(--ink);
   --text-mid: var(--ink-soft);
-  --text-lo: #6B6862;
+  --text-lo: #A1A1AA;
   --border-color: var(--rule);
   --radius: 0px;
   --radius-sm: 0px;
@@ -121,7 +122,7 @@ button.btn-circle, .btn-circle {
 
 html {
   scroll-behavior: auto; /* Lenis handles smoothing; never combine with CSS smooth scroll */
-  background-color: var(--paper);
+  background-color: #000000;
   color: var(--ink);
   font-family: var(--font-body);
   -webkit-font-smoothing: antialiased;
@@ -129,7 +130,8 @@ html {
 }
 
 body {
-  background-color: var(--paper);
+  background: #000000 url('/assets/statue-bg.jpg') no-repeat right top fixed;
+  background-size: cover;
   color: var(--ink);
   font-family: var(--font-body);
   font-size: 1.0625rem;
@@ -462,31 +464,36 @@ main#app {
 }
 
 .section-ink .btn-primary {
-  background-color: var(--paper);
-  color: var(--ink);
-  border-color: var(--paper);
+  background-color: #FFFFFF;
+  color: #000000 !important;
+  border-color: #FFFFFF;
 }
 
 .section-ink .btn-primary:hover {
-  background-color: var(--ink);
-  color: var(--paper);
-  border-color: var(--paper);
+  background-color: transparent;
+  color: #FFFFFF !important;
+  border-color: #FFFFFF;
 }
 
 .btn-ghost {
   background-color: transparent;
   color: var(--ink);
-  border: 1px solid var(--ink);
+  border: 1px solid var(--rule);
 }
 
 .btn-ghost:hover {
-  border-width: 2px;
-  padding: calc(var(--space-4) - 1px) calc(var(--space-6) - 1px);
+  border-color: var(--ink);
+  background-color: rgba(255, 255, 255, 0.08);
 }
 
 .section-ink .btn-ghost {
-  color: var(--paper);
-  border-color: var(--paper);
+  color: #FFFFFF;
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.section-ink .btn-ghost:hover {
+  border-color: #FFFFFF;
+  background-color: rgba(255, 255, 255, 0.1);
 }
 
 /* Inline Link — Part 8.4 */
@@ -696,13 +703,17 @@ a.editorial-link:hover, .editorial-link:hover {
   width: 100%;
   min-height: calc(100vh - 88px);
   margin-top: 88px;
-  background-color: var(--paper);
+  background: #000000 url('/assets/courtroom-bg.jpg') no-repeat center fixed;
+  background-size: cover;
+  color: var(--ink);
 }
 
 .sidebar {
   width: 264px;
   flex-shrink: 0;
-  background-color: var(--paper);
+  background-color: rgba(8, 8, 12, 0.88);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   border-right: 1px solid var(--rule);
   padding: var(--space-6) var(--space-4);
   display: flex;
@@ -719,7 +730,7 @@ a.editorial-link:hover, .editorial-link:hover {
   min-width: 0;
   padding: var(--space-6) var(--space-8);
   overflow-x: hidden;
-  background-color: var(--paper);
+  background-color: transparent !important;
 }
 
 @media (max-width: 1023px) {
@@ -741,7 +752,8 @@ a.editorial-link:hover, .editorial-link:hover {
   font-weight: 600;
   color: var(--ink-soft);
   padding: var(--space-4) var(--space-3) var(--space-2);
-  letter-spacing: 0.02em;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
 }
 
 .sidebar-item {
@@ -765,15 +777,15 @@ a.editorial-link:hover, .editorial-link:hover {
 }
 
 .sidebar-item:hover {
-  color: var(--ink);
-  background-color: var(--paper-dim);
+  color: #FFFFFF;
+  background-color: rgba(255, 255, 255, 0.06);
 }
 
 .sidebar-item.active {
-  color: var(--ink);
+  color: #FFFFFF;
   font-weight: 600;
-  border-left-color: var(--ink);
-  background-color: var(--paper-dim);
+  border-left-color: #FFFFFF;
+  background-color: rgba(255, 255, 255, 0.1);
 }
 
 .sidebar-divider {
@@ -794,7 +806,9 @@ a.editorial-link:hover, .editorial-link:hover {
    ========================================================================== */
 
 .card {
-  background-color: var(--paper);
+  background-color: rgba(10, 10, 14, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   border: 1px solid var(--rule);
   border-radius: 0px;
   color: var(--ink);
@@ -879,24 +893,26 @@ a.editorial-link:hover, .editorial-link:hover {
 }
 
 .btn-primary {
-  background-color: var(--ink);
-  color: var(--paper) !important;
-  border-color: var(--ink);
+  background-color: #FFFFFF;
+  color: #000000 !important;
+  border-color: #FFFFFF;
   font-weight: 600;
 }
 .btn-primary:hover {
-  background-color: var(--ink-soft);
-  border-color: var(--ink-soft);
+  background-color: #D4D4D8;
+  border-color: #D4D4D8;
+  color: #000000 !important;
 }
 
 .btn-outline {
   background-color: transparent;
-  color: var(--ink);
+  color: #FFFFFF;
   border-color: var(--rule);
 }
 .btn-outline:hover {
-  border-color: var(--ink);
-  background-color: var(--paper-dim);
+  border-color: #FFFFFF;
+  background-color: rgba(255, 255, 255, 0.08);
+  color: #FFFFFF;
 }
 
 .btn-ghost {
@@ -905,17 +921,17 @@ a.editorial-link:hover, .editorial-link:hover {
   border-color: transparent;
 }
 .btn-ghost:hover {
-  background-color: var(--paper-dim);
-  color: var(--ink);
+  background-color: rgba(255, 255, 255, 0.08);
+  color: #FFFFFF;
 }
 
 .btn-danger {
   background-color: var(--signal);
-  color: var(--paper) !important;
+  color: #FFFFFF !important;
   border-color: var(--signal);
 }
 .btn-danger:hover {
-  background-color: #55201A;
+  background-color: #DC2626;
 }
 
 .btn-outline-danger {
@@ -948,32 +964,32 @@ a.editorial-link:hover, .editorial-link:hover {
   height: 12px;
 }
 .badge-ok, .badge-success {
-  background-color: #E8F5E9;
-  color: #1B5E20;
-  border: 1px solid #C8E6C9;
+  background-color: rgba(16, 185, 129, 0.15);
+  color: #34D399;
+  border: 1px solid rgba(16, 185, 129, 0.3);
 }
 .badge-warn, .badge-warning {
-  background-color: #FFF3E0;
-  color: #E65100;
-  border: 1px solid #FFE0B2;
+  background-color: rgba(245, 158, 11, 0.15);
+  color: #FBBF24;
+  border: 1px solid rgba(245, 158, 11, 0.3);
 }
 .badge-danger, .badge-error {
-  background-color: var(--signal-soft);
-  color: var(--signal);
-  border: 1px solid #E0B4B0;
+  background-color: rgba(239, 68, 68, 0.15);
+  color: #F87171;
+  border: 1px solid rgba(239, 68, 68, 0.3);
 }
 .badge-info, .badge-royal {
-  background-color: #E3F2FD;
-  color: #0D47A1;
-  border: 1px solid #BBDEFB;
+  background-color: rgba(59, 130, 246, 0.15);
+  color: #60A5FA;
+  border: 1px solid rgba(59, 130, 246, 0.3);
 }
 .badge-gold {
-  background-color: #FFFDE7;
-  color: #F57F17;
-  border: 1px solid #FFF9C4;
+  background-color: rgba(245, 158, 11, 0.15);
+  color: #FBBF24;
+  border: 1px solid rgba(245, 158, 11, 0.3);
 }
 .badge-neutral {
-  background-color: var(--paper-dim);
+  background-color: rgba(255, 255, 255, 0.08);
   color: var(--ink-soft);
   border: 1px solid var(--rule);
 }
@@ -1021,11 +1037,11 @@ a.editorial-link:hover, .editorial-link:hover {
 }
 .tab-btn:hover {
   color: var(--ink);
-  background-color: rgba(0, 0, 0, 0.04);
+  background-color: rgba(255, 255, 255, 0.08);
 }
 .tab-btn.active {
-  background-color: var(--paper);
-  color: var(--ink);
+  background-color: var(--paper-dim);
+  color: #FFFFFF;
   font-weight: 600;
   border: 1px solid var(--rule);
 }
@@ -1049,7 +1065,7 @@ a.editorial-link:hover, .editorial-link:hover {
 .input-select {
   width: 100%;
   padding: 10px 14px;
-  background-color: var(--paper);
+  background-color: rgba(14, 14, 20, 0.85);
   border: 1px solid var(--rule);
   color: var(--ink);
   font-family: var(--font-body);
@@ -1062,7 +1078,7 @@ a.editorial-link:hover, .editorial-link:hover {
 .input-group select:focus,
 .input-group textarea:focus,
 .input-select:focus {
-  border-color: var(--ink);
+  border-color: #FFFFFF;
 }
 
 /* Spacing and Flex Utilities */
@@ -1136,13 +1152,15 @@ a.editorial-link:hover, .editorial-link:hover {
 .security-observatory-wrapper {
   max-width: 860px;
   margin: 0 auto 16px;
-  background: var(--paper);
+  background: rgba(10, 10, 14, 0.88);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   border: 1px solid var(--rule);
   border-radius: 0px;
   padding: 16px 20px;
   position: relative;
   overflow: hidden;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.03);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
 }
 
 .observatory-container {
@@ -1173,9 +1191,9 @@ a.editorial-link:hover, .editorial-link:hover {
   width: 154px;
   height: 154px;
   border-radius: 50%;
-  background: var(--paper);
-  border: 2px solid var(--ink);
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.05), inset 0 0 16px rgba(0, 0, 0, 0.02);
+  background: rgba(6, 6, 10, 0.96);
+  border: 2px solid #FFFFFF;
+  box-shadow: 0 0 32px rgba(255, 255, 255, 0.1), inset 0 0 24px rgba(0, 0, 0, 0.8);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -1206,7 +1224,7 @@ a.editorial-link:hover, .editorial-link:hover {
   font-family: var(--font-display);
   font-size: 34px;
   font-weight: 700;
-  color: var(--ink);
+  color: #FFFFFF;
 }
 
 .hub-score-max {
@@ -1220,7 +1238,7 @@ a.editorial-link:hover, .editorial-link:hover {
   font-size: 8.5px;
   font-weight: 700;
   letter-spacing: 0.04em;
-  color: var(--ink);
+  color: #FFFFFF;
   text-transform: uppercase;
 }
 
@@ -1228,7 +1246,7 @@ a.editorial-link:hover, .editorial-link:hover {
   font-family: var(--font-mono, monospace);
   font-size: 7.5px;
   font-weight: 700;
-  color: #047857;
+  color: #10B981;
   letter-spacing: 0.06em;
   margin-top: 2px;
 }
@@ -1248,7 +1266,9 @@ a.editorial-link:hover, .editorial-link:hover {
   display: flex;
   align-items: center;
   gap: 10px;
-  background: var(--paper);
+  background: rgba(14, 14, 20, 0.92);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   border: 1px solid var(--rule);
   border-radius: 0px;
   padding: 8px 12px;
@@ -1256,7 +1276,7 @@ a.editorial-link:hover, .editorial-link:hover {
   text-align: left;
   cursor: pointer;
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
 }
 
 .node-identity   { left: 50%; top: 14%; }
@@ -1267,16 +1287,16 @@ a.editorial-link:hover, .editorial-link:hover {
 .node-sessions   { left: 27%; top: 32%; }
 
 .observatory-node-btn:hover {
-  border-color: var(--ink);
-  background: var(--paper-dim);
+  border-color: #FFFFFF;
+  background: rgba(26, 26, 36, 0.96);
   transform: translate(-50%, -50%) scale(1.02);
 }
 
 .observatory-node-btn.selected {
-  border-color: var(--ink);
+  border-color: #FFFFFF;
   border-width: 2px;
-  background: var(--paper-dim);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  background: rgba(30, 30, 42, 0.98);
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.6);
   transform: translate(-50%, -50%) scale(1.03);
 }
 
@@ -1324,12 +1344,12 @@ a.editorial-link:hover, .editorial-link:hover {
   position: absolute;
   top: 14px;
   right: 18px;
-  background: var(--paper);
+  background: rgba(14, 14, 20, 0.95);
   border: 1px solid var(--rule-strong);
   border-radius: 0px;
   padding: 8px 12px;
   z-index: 10;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
   pointer-events: none;
 }
 
@@ -1339,7 +1359,9 @@ a.editorial-link:hover, .editorial-link:hover {
 .observatory-detail-panel {
   max-width: 860px;
   margin: 16px auto 0;
-  background: var(--paper);
+  background: rgba(10, 10, 14, 0.88);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   border: 1px solid var(--rule);
   border-radius: 0px;
   padding: 20px 24px;

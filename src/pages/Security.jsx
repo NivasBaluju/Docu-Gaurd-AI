@@ -10,7 +10,7 @@ import SecuritySignalsStrip from '../components/security/SecuritySignalsStrip';
 import AdminWatchtower from '../components/security/AdminWatchtower';
 
 export const Security = () => {
-  const [dash, setDash] = useState({ auditLedger: { valid: true, totalBlocks: 124 }, documentsUploaded: 0 });
+  const [dash, setDash] = useState({ auditLedger: { valid: true, totalBlocks: 0 }, documentsUploaded: 0 });
   const [sessions, setSessions] = useState({ sessions: [], currentSessionId: '' });
   const [audit, setAudit] = useState({ blocks: [] });
   const [threats, setThreats] = useState({ threats: [] });
@@ -83,7 +83,7 @@ export const Security = () => {
   const isAuditValid = dash?.auditLedger?.valid !== false;
   const activeSessionsCount = (sessions?.sessions || []).filter(s => !s.revoked).length || 1;
   const threatsCount = (threats?.threats || []).filter(t => t.severity === 'high').length;
-  const auditBlocksCount = dash?.auditLedger?.totalBlocks || (audit?.blocks || []).length || 124;
+  const auditBlocksCount = dash?.auditLedger?.totalBlocks ?? (audit?.blocks || []).length ?? 0;
 
   const isAdmin = user?.role === 'admin';
 

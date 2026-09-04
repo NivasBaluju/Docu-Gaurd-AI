@@ -23,8 +23,8 @@ export function Landing() {
       <section
         className="section-ink relative flex items-center min-h-[85vh] py-28 sm:py-36 border-b border-neutral-800"
         style={{
-          backgroundColor: '#0A0A0A',
-          color: '#FAF9F6'
+          backgroundColor: 'transparent',
+          color: '#FFFFFF'
         }}
       >
         <div className="container-wide w-full">

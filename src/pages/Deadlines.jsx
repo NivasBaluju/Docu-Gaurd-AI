@@ -88,7 +88,7 @@ export const Deadlines = () => {
         rawDate: dateObj,
         category: d.category || 'general',
         eventType: cat === 'EXPIRY' ? 'CONTRACT EXPIRY' : cat,
-        documentName: d.documentName || 'Protected_Legal_Document.pdf',
+        documentName: d.documentName || 'Untitled Document',
         documentId: d.documentId,
         context: d.context || 'Extracted critical contractual milestone.',
         clause: d.context

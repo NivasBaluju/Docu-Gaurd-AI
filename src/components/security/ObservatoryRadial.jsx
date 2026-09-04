@@ -19,15 +19,16 @@ export const ObservatoryRadial = ({
   const grade = clampedScore >= 95 ? 'INSTITUTIONAL GRADE A+' : clampedScore >= 80 ? 'ENTERPRISE GRADE A' : clampedScore >= 60 ? 'COMMERCIAL GRADE B' : 'PROBATION GRADE C';
   const scoreColor = clampedScore >= 90 ? '#10B981' : clampedScore >= 70 ? '#3B82F6' : clampedScore >= 50 ? '#F59E0B' : '#EF4444';
 
-  // 7-day activity velocity data
+  const currentDocs = docsEncryptedCount || 0;
+  const currentAuth = activeSessionsCount || 1;
   const activityDays = [
-    { key: 'Mon', day: 'Monday', auth: 18, docs: 24, total: 42 },
-    { key: 'Tue', day: 'Tuesday', auth: 29, docs: 38, total: 67 },
-    { key: 'Wed', day: 'Wednesday', auth: 22, docs: 19, total: 41 },
-    { key: 'Thu', day: 'Thursday', auth: 34, docs: 45, total: 79 },
-    { key: 'Fri', day: 'Friday', auth: 41, docs: 52, total: 93 },
-    { key: 'Sat', day: 'Saturday', auth: 15, docs: 12, total: 27 },
-    { key: 'Sun', day: 'Sunday (Today)', auth: 38, docs: 49, total: 87 }
+    { key: 'Mon', day: 'Monday', auth: 0, docs: 0, total: 0 },
+    { key: 'Tue', day: 'Tuesday', auth: 0, docs: 0, total: 0 },
+    { key: 'Wed', day: 'Wednesday', auth: 0, docs: 0, total: 0 },
+    { key: 'Thu', day: 'Thursday', auth: 0, docs: 0, total: 0 },
+    { key: 'Fri', day: 'Friday', auth: 0, docs: 0, total: 0 },
+    { key: 'Sat', day: 'Saturday', auth: 0, docs: 0, total: 0 },
+    { key: 'Today', day: 'Current Cycle', auth: currentAuth, docs: currentDocs, total: currentAuth + currentDocs }
   ];
 
   // 6 security nodes configuration
@@ -68,7 +69,7 @@ export const ObservatoryRadial = ({
     {
       id: 'audit',
       title: 'AUDIT LEDGER',
-      metric: `${(auditBlocksCount || 124).toLocaleString()} BLOCKS`,
+      metric: `${(auditBlocksCount || 0).toLocaleString()} BLOCKS`,
       statusText: isAuditValid ? 'VALID' : 'TAMPERED',
       status: isAuditValid ? 'ok' : 'danger',
       icon: 'document',

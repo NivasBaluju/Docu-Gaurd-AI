@@ -73,9 +73,9 @@ export function Login() {
   };
 
   return (
-    <div className="w-full min-h-[85vh] bg-paper flex items-center justify-center py-16 px-4">
+    <div className="w-full min-h-[85vh] bg-transparent flex items-center justify-center py-16 px-4">
       <div 
-        className="w-full bg-paper p-8 sm:p-12 border border-rule shadow-none mx-auto"
+        className="w-full card p-8 sm:p-12 border border-rule shadow-none mx-auto"
         style={{ maxWidth: '480px' }}
       >
         <div className="text-center mb-10 pb-6 border-b border-rule">

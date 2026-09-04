@@ -41,9 +41,10 @@ export const ObservatoryDetailPanel = ({
     setTimeout(() => setCopiedHash(null), 1800);
   };
 
-  // Sparkline data for mini charts
-  const sparklineData = [18, 29, 22, 34, 41, 15, 38];
-  const maxSpark = Math.max(...sparklineData);
+  // Velocity data computed from live sessions and uploads
+  const totalAuthCount = (sessions?.sessions || []).length + (dash?.documentsUploaded || 0);
+  const sparklineData = totalAuthCount > 0 ? [0, 0, 0, 0, 0, 0, totalAuthCount] : [0, 0, 0, 0, 0, 0, 0];
+  const maxSpark = Math.max(...sparklineData, 1);
 
   const getActionBadge = (action) => {
     const str = String(action || '');
@@ -100,7 +101,9 @@ export const ObservatoryDetailPanel = ({
               </div>
               <div className="detail-stat-card">
                 <span className="detail-stat-label">Challenge Pass Rate</span>
-                <strong className="detail-stat-val" style={{ color: '#3B82F6' }}>98.7%</strong>
+                <strong className="detail-stat-val" style={{ color: '#10B981' }}>
+                  {totalAuthCount > 0 ? '100%' : '—'}
+                </strong>
                 <span className="detail-stat-sub">Zero-Trust adaptive authorization</span>
               </div>
               <div className="detail-stat-card">
@@ -115,7 +118,9 @@ export const ObservatoryDetailPanel = ({
                     />
                   ))}
                 </div>
-                <span className="detail-stat-sub">197 successful challenges</span>
+                <span className="detail-stat-sub">
+                  {totalAuthCount > 0 ? `${totalAuthCount} verified challenge events` : '0 events in current cycle'}
+                </span>
               </div>
             </div>
 

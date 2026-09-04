@@ -7,14 +7,14 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        ink: '#0A0A0A',
-        'ink-soft': '#3A3A38',
-        paper: '#FAF9F6',
-        'paper-dim': '#F1EFEA',
-        rule: '#D8D5CC',
-        'rule-strong': '#0A0A0A',
-        signal: '#6E2A22',
-        'signal-soft': '#F4E9E7',
+        ink: 'var(--ink)',
+        'ink-soft': 'var(--ink-soft)',
+        paper: 'var(--paper)',
+        'paper-dim': 'var(--paper-dim)',
+        rule: 'var(--rule)',
+        'rule-strong': 'var(--rule-strong)',
+        signal: 'var(--signal)',
+        'signal-soft': 'var(--signal-soft)',
       },
       spacing: {
         'space-0': '0px',

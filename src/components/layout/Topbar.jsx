@@ -48,13 +48,13 @@ export function Topbar() {
       <header
         className={`fixed top-0 inset-x-0 z-40 transition-all duration-fast ease-in-out-quad ${
           scrolled
-            ? 'h-16 border-b border-rule bg-paper/95 backdrop-blur-sm'
-            : 'h-[88px] border-b border-transparent bg-paper/90 backdrop-blur-sm'
+            ? 'h-16 border-b border-rule'
+            : 'h-[88px] border-b border-rule'
         }`}
         style={{
-          backgroundColor: 'rgba(250, 249, 246, 0.92)',
-          backdropFilter: 'blur(8px)',
-          WebkitBackdropFilter: 'blur(8px)'
+          backgroundColor: 'rgba(0, 0, 0, 0.88)',
+          backdropFilter: 'blur(16px)',
+          WebkitBackdropFilter: 'blur(16px)'
         }}
       >
         <nav
@@ -117,7 +117,7 @@ export function Topbar() {
               <div className="flex items-center gap-4">
                 <Link
                   to="/login"
-                  className="font-body text-label text-ink hover:text-black relative py-1 no-underline group"
+                  className="font-body text-label text-ink hover:text-ink-soft relative py-1 no-underline group"
                 >
                   Client Portal
                   <span className="absolute left-0 -bottom-1 h-px w-full bg-ink scale-x-0 origin-left group-hover:scale-x-100 transition-transform duration-fast" />

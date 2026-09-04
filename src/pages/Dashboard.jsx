@@ -64,10 +64,12 @@ export function Dashboard() {
     );
   }
 
-  const healthScore = portfolioSummary?.summary?.healthScore || 88.4;
-  const totalContracts = portfolioSummary?.summary?.totalContracts || documents.length || 142;
-  const criticalExposures = portfolioSummary?.summary?.criticalCount || 3;
-  const upcomingDeadlines = portfolioSummary?.summary?.upcomingDeadlines || 2;
+  const totalContracts = portfolioSummary?.summary?.totalContracts ?? documents.length;
+  const healthScore = totalContracts > 0
+    ? (portfolioSummary?.summary?.portfolioHealthScore ?? 100)
+    : '—';
+  const criticalExposures = portfolioSummary?.summary?.criticalActions ?? 0;
+  const upcomingDeadlines = portfolioSummary?.summary?.overdueActions ?? 0;
 
   return (
     <div className="w-full bg-paper py-12 sm:py-16 min-h-[85vh]">
@@ -98,7 +100,7 @@ export function Dashboard() {
 
         {/* Pending Approvals Callout (Phase 8.1 / 8.2 Invariant) */}
         {pendingApprovalsCount > 0 && user?.role === 'admin' && (
-          <div className="mb-12 p-6 bg-ink text-paper flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+          <div className="mb-12 p-6 bg-paper-dim border border-rule text-ink flex flex-col sm:flex-row sm:items-center justify-between gap-6">
             <div>
               <span className="font-body text-micro text-neutral-400 block mb-1">
                 GOVERNANCE MANDATE
@@ -128,7 +130,7 @@ export function Dashboard() {
                 {healthScore}
               </span>
               <span className="font-body text-body-sm text-neutral-500">
-                / 100 Baseline
+                {totalContracts > 0 ? '/ 100 Baseline' : 'No Active Contracts'}
               </span>
             </div>
 
@@ -137,18 +139,26 @@ export function Dashboard() {
               <p className="font-semibold text-ink text-xs uppercase tracking-wider mb-2">
                 Calculated Provenance
               </p>
-              <div className="flex justify-between text-neutral-600">
-                <span>Critical Risk Exposures</span>
-                <span className="text-ink font-medium">-{criticalExposures * 2.1}</span>
-              </div>
-              <div className="flex justify-between text-neutral-600">
-                <span>Imminent SLA Breaches</span>
-                <span className="text-ink font-medium">-{upcomingDeadlines * 1.7}</span>
-              </div>
-              <div className="flex justify-between text-neutral-600">
-                <span>Statutory Precedent Alignment</span>
-                <span className="text-ink font-medium">94.2%</span>
-              </div>
+              {totalContracts > 0 ? (
+                <>
+                  <div className="flex justify-between text-neutral-400">
+                    <span>Critical Risk Exposures</span>
+                    <span className="text-ink font-medium">-{criticalExposures * 2.1}</span>
+                  </div>
+                  <div className="flex justify-between text-neutral-400">
+                    <span>Imminent SLA Breaches</span>
+                    <span className="text-ink font-medium">-{upcomingDeadlines * 1.7}</span>
+                  </div>
+                  <div className="flex justify-between text-neutral-400">
+                    <span>Active Contracts Audited</span>
+                    <span className="text-ink font-medium">{totalContracts} Dossiers</span>
+                  </div>
+                </>
+              ) : (
+                <div className="text-neutral-400 text-xs leading-relaxed">
+                  No contract exposures detected. Deposit an agreement to activate automated compliance decomposition.
+                </div>
+              )}
             </div>
 
             <div className="mt-8 pt-4 border-t border-rule">
@@ -167,7 +177,10 @@ export function Dashboard() {
 
               {documents.length === 0 ? (
                 <div className="py-8 text-center text-ink-soft font-body text-body-sm">
-                  No documents in current chamber.
+                  <p className="mb-3">No documents in current chamber.</p>
+                  <Button href="/upload" variant="ghost" className="text-xs">
+                    Deposit First Contract →
+                  </Button>
                 </div>
               ) : (
                 <div className="space-y-4">
@@ -206,7 +219,7 @@ export function Dashboard() {
                 <div className="pb-3 border-b border-rule">
                   <p className="text-neutral-500 text-xs">Ledger Blocks Verified</p>
                   <p className="font-display text-2xl text-ink font-medium mt-1">
-                    {data.verifiedBlocks || 1248}
+                    {data?.auditLedger?.totalBlocks ?? (data?.verifiedBlocks || 0)}
                   </p>
                 </div>
                 <div className="pb-3 border-b border-rule">
