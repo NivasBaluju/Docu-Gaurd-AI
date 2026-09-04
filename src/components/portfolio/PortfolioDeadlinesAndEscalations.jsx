@@ -51,7 +51,7 @@ export const PortfolioDeadlinesAndEscalations = () => {
           <div>
             <div className="flex gap-8" style={{ alignItems: 'center' }}>
               <span className="dot dot-amber" />
-              <h4 style={{ margin: 0, fontSize: '16px', fontWeight: 700, color: '#FFF' }}>
+              <h4 style={{ margin: 0, fontSize: '16px', fontWeight: 700, color: 'var(--ink)' }}>
                 Portfolio Deadline Schedule
               </h4>
             </div>
@@ -62,7 +62,7 @@ export const PortfolioDeadlinesAndEscalations = () => {
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-          <div style={{ background: 'rgba(239, 68, 68, 0.08)', padding: '12px', borderRadius: '8px', border: '1px solid rgba(239, 68, 68, 0.2)' }}>
+          <div style={{ background: 'rgba(239, 68, 68, 0.08)', padding: '12px', borderRadius: '0px', border: '1px solid rgba(239, 68, 68, 0.2)' }}>
             <span className="text-muted small" style={{ display: 'block', color: '#EF4444', fontWeight: 600 }}>Overdue</span>
             <span style={{ fontSize: '22px', fontWeight: 800, color: '#EF4444' }}>
               {overdueActions}
@@ -72,7 +72,7 @@ export const PortfolioDeadlinesAndEscalations = () => {
             </span>
           </div>
 
-          <div style={{ background: 'rgba(245, 158, 11, 0.08)', padding: '12px', borderRadius: '8px', border: '1px solid rgba(245, 158, 11, 0.2)' }}>
+          <div style={{ background: 'rgba(245, 158, 11, 0.08)', padding: '12px', borderRadius: '0px', border: '1px solid rgba(245, 158, 11, 0.2)' }}>
             <span className="text-muted small" style={{ display: 'block', color: '#F59E0B', fontWeight: 600 }}>Due Soon (0-3d)</span>
             <span style={{ fontSize: '22px', fontWeight: 800, color: '#F59E0B' }}>
               {dueSoon + dueToday}
@@ -82,16 +82,16 @@ export const PortfolioDeadlinesAndEscalations = () => {
             </span>
           </div>
 
-          <div style={{ background: 'rgba(255, 255, 255, 0.02)', padding: '12px', borderRadius: '8px', border: '1px solid rgba(255, 255, 255, 0.06)' }}>
+          <div style={{ background: 'var(--paper-dim)', padding: '12px', borderRadius: '0px', border: '1px solid var(--rule)' }}>
             <span className="text-muted small" style={{ display: 'block' }}>Upcoming (&gt; 3d)</span>
-            <span style={{ fontSize: '20px', fontWeight: 700, color: '#FFF' }}>
+            <span style={{ fontSize: '20px', fontWeight: 700, color: 'var(--ink)' }}>
               {upcoming}
             </span>
           </div>
 
-          <div style={{ background: 'rgba(255, 255, 255, 0.02)', padding: '12px', borderRadius: '8px', border: '1px solid rgba(255, 255, 255, 0.06)' }}>
+          <div style={{ background: 'var(--paper-dim)', padding: '12px', borderRadius: '0px', border: '1px solid var(--rule)' }}>
             <span className="text-muted small" style={{ display: 'block' }}>Max Overdue Action</span>
-            <span style={{ fontSize: '13px', fontWeight: 600, color: longestOverdueAction ? '#F87171' : '#A1A1AA', display: 'block', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>
+            <span style={{ fontSize: '13px', fontWeight: 600, color: longestOverdueAction ? '#F87171' : 'var(--ink-soft)', display: 'block', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>
               {longestOverdueAction ? `${longestOverdueAction.daysOverdue}d: ${longestOverdueAction.title}` : 'None'}
             </span>
           </div>
@@ -104,7 +104,7 @@ export const PortfolioDeadlinesAndEscalations = () => {
           <div>
             <div className="flex gap-8" style={{ alignItems: 'center' }}>
               <span className="dot dot-red" />
-              <h4 style={{ margin: 0, fontSize: '16px', fontWeight: 700, color: '#FFF' }}>
+              <h4 style={{ margin: 0, fontSize: '16px', fontWeight: 700, color: 'var(--ink)' }}>
                 Portfolio Escalation Intelligence
               </h4>
             </div>
@@ -118,7 +118,7 @@ export const PortfolioDeadlinesAndEscalations = () => {
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-          <div style={{ background: 'rgba(255, 255, 255, 0.02)', padding: '12px', borderRadius: '8px', border: '1px solid rgba(255, 255, 255, 0.06)' }}>
+          <div style={{ background: 'var(--paper-dim)', padding: '12px', borderRadius: '0px', border: '1px solid var(--rule)' }}>
             <span className="text-muted small" style={{ display: 'block' }}>Total Escalated</span>
             <span style={{ fontSize: '22px', fontWeight: 800, color: totalEscalatedActions > 0 ? '#EF4444' : '#10B981' }}>
               {totalEscalatedActions}
@@ -128,9 +128,9 @@ export const PortfolioDeadlinesAndEscalations = () => {
             </span>
           </div>
 
-          <div style={{ background: 'rgba(255, 255, 255, 0.02)', padding: '12px', borderRadius: '8px', border: '1px solid rgba(255, 255, 255, 0.06)' }}>
+          <div style={{ background: 'var(--paper-dim)', padding: '12px', borderRadius: '0px', border: '1px solid var(--rule)' }}>
             <span className="text-muted small" style={{ display: 'block' }}>Overdue &gt; 3d</span>
-            <span style={{ fontSize: '20px', fontWeight: 700, color: overdueEscalations > 0 ? '#F59E0B' : '#A1A1AA' }}>
+            <span style={{ fontSize: '20px', fontWeight: 700, color: overdueEscalations > 0 ? '#F59E0B' : 'var(--ink-soft)' }}>
               {overdueEscalations}
             </span>
             <span className="text-muted small" style={{ display: 'block', fontSize: '11px' }}>
@@ -138,9 +138,9 @@ export const PortfolioDeadlinesAndEscalations = () => {
             </span>
           </div>
 
-          <div style={{ background: 'rgba(255, 255, 255, 0.02)', padding: '12px', borderRadius: '8px', border: '1px solid rgba(255, 255, 255, 0.06)' }}>
+          <div style={{ background: 'var(--paper-dim)', padding: '12px', borderRadius: '0px', border: '1px solid var(--rule)' }}>
             <span className="text-muted small" style={{ display: 'block' }}>Ignored Critical &gt; 5d</span>
-            <span style={{ fontSize: '20px', fontWeight: 700, color: ignoredCriticalEscalations > 0 ? '#EF4444' : '#A1A1AA' }}>
+            <span style={{ fontSize: '20px', fontWeight: 700, color: ignoredCriticalEscalations > 0 ? '#EF4444' : 'var(--ink-soft)' }}>
               {ignoredCriticalEscalations}
             </span>
             <span className="text-muted small" style={{ display: 'block', fontSize: '11px' }}>
@@ -148,9 +148,9 @@ export const PortfolioDeadlinesAndEscalations = () => {
             </span>
           </div>
 
-          <div style={{ background: 'rgba(255, 255, 255, 0.02)', padding: '12px', borderRadius: '8px', border: '1px solid rgba(255, 255, 255, 0.06)' }}>
+          <div style={{ background: 'var(--paper-dim)', padding: '12px', borderRadius: '0px', border: '1px solid var(--rule)' }}>
             <span className="text-muted small" style={{ display: 'block' }}>Unassigned High-Risk</span>
-            <span style={{ fontSize: '20px', fontWeight: 700, color: unassignedHighRiskEscalations > 0 ? '#60A5FA' : '#A1A1AA' }}>
+            <span style={{ fontSize: '20px', fontWeight: 700, color: unassignedHighRiskEscalations > 0 ? '#60A5FA' : 'var(--ink-soft)' }}>
               {unassignedHighRiskEscalations}
             </span>
             <span className="text-muted small" style={{ display: 'block', fontSize: '11px' }}>

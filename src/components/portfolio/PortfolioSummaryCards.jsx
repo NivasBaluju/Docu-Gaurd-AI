@@ -4,7 +4,8 @@ import Icon from '../common/Icon';
 import MetricCard from '../common/MetricCard';
 import { staggerContainer } from '../../styles/motion';
 
-export const PortfolioSummaryCards = ({ summary = {} }) => {
+export const PortfolioSummaryCards = ({ summary }) => {
+  const data = summary || {};
   const {
     totalContracts = 0,
     activeContracts = 0,
@@ -16,123 +17,90 @@ export const PortfolioSummaryCards = ({ summary = {} }) => {
     portfolioHealthScore = 100,
     portfolioHealthGrade = 'EXCELLENT',
     operationalHealth = {}
-  } = summary;
+  } = data;
 
   const getHealthGradeStyle = (grade) => {
     switch (grade) {
       case 'EXCELLENT':
-        return { color: '#10B981', badgeCls: 'badge-ok' };
+        return { color: '#0A0A0A', badgeCls: 'badge-ok' };
       case 'GOOD':
-        return { color: '#3B82F6', badgeCls: 'badge-ok' };
+        return { color: '#1A1A1A', badgeCls: 'badge-ok' };
       case 'ATTENTION':
-        return { color: '#F59E0B', badgeCls: 'badge-warn' };
+        return { color: '#6E2A22', badgeCls: 'badge-warn' };
       case 'AT_RISK':
-        return { color: '#F97316', badgeCls: 'badge-warn' };
+        return { color: '#6E2A22', badgeCls: 'badge-warn' };
       case 'CRITICAL':
       default:
-        return { color: '#EF4444', badgeCls: 'badge-danger' };
+        return { color: '#6E2A22', badgeCls: 'badge-danger' };
     }
   };
 
   const healthStyle = getHealthGradeStyle(portfolioHealthGrade);
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
       {/* Portfolio Health Header Banner */}
       <div
-        className="card"
-        style={{
-          padding: '24px',
-          background: 'linear-gradient(135deg, rgba(30,27,75,0.6), rgba(15,23,42,0.85))',
-          border: '1px solid rgba(255, 255, 255, 0.12)'
-        }}
+        className="card bg-paper-dim border border-rule"
+        style={{ padding: '24px' }}
       >
-        <div className="flex-between" style={{ alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <div className="flex gap-8" style={{ alignItems: 'center', marginBottom: '6px' }}>
-              <span className="dot dot-cyan" />
-              <h2 style={{ margin: 0, fontSize: '20px', fontWeight: 700, color: '#FFF' }}>
-                Contract Portfolio Governance
-              </h2>
-              <span
-                style={{
-                  fontSize: '11px',
-                  fontWeight: 600,
-                  color: '#A1A1AA',
-                  background: 'rgba(255,255,255,0.06)',
-                  padding: '2px 8px',
-                  borderRadius: '4px'
-                }}
-              >
-                v{operationalHealth.formulaVersion || '1.0'}
+            <div className="flex items-center gap-3 mb-2">
+              <span className="font-body text-micro text-neutral-500 uppercase tracking-wider block">
+                [PORTFOLIO GOVERNANCE]
+              </span>
+              <span className="font-mono text-micro text-ink bg-paper border border-rule px-2 py-0.5 select-none">
+                v{operationalHealth?.formulaVersion || '1.0'}
               </span>
             </div>
-            <p className="text-muted small" style={{ margin: 0, maxWidth: '680px' }}>
+            <h2 className="font-display text-2xl text-ink tracking-tight mb-1">
+              Contract Portfolio Governance
+            </h2>
+            <p className="font-body text-body-sm text-ink-soft m-0 max-w-xl">
               Executive oversight score weighting individual contract health, active risk velocity, and portfolio queue discipline.
             </p>
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-            <div style={{ textAlign: 'right' }}>
-              <div style={{ fontSize: '38px', fontWeight: 800, color: healthStyle.color, lineHeight: 1 }}>
-                {portfolioHealthScore} <span style={{ fontSize: '18px', color: '#71717A' }}>/ 100</span>
-              </div>
-              <span
-                style={{
-                  display: 'inline-block',
-                  marginTop: '4px',
-                  fontSize: '11.5px',
-                  fontWeight: 700,
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.05em',
-                  color: healthStyle.color
-                }}
-              >
-                ● {portfolioHealthGrade}
-              </span>
+          <div className="text-left sm:text-right border-t sm:border-t-0 pt-3 sm:pt-0 border-rule">
+            <div className="font-display text-4xl text-ink tracking-tight leading-none">
+              {portfolioHealthScore} <span className="font-body text-lg text-ink-soft">/ 100</span>
             </div>
+            <span className="font-body text-micro font-semibold uppercase tracking-wider text-ink block mt-1">
+              ● {portfolioHealthGrade}
+            </span>
           </div>
         </div>
 
         {/* Penalty details breakdown */}
-        {operationalHealth.penalties && (
-          <div
-            style={{
-              marginTop: '16px',
-              paddingTop: '14px',
-              borderTop: '1px solid rgba(255, 255, 255, 0.06)',
-              display: 'flex',
-              gap: '24px',
-              flexWrap: 'wrap',
-              fontSize: '12px'
-            }}
-          >
+        {operationalHealth?.penalties && (
+          <div className="mt-4 pt-4 border-t border-rule flex flex-wrap gap-6 font-body text-body-sm text-ink-soft">
             <div>
-              <span className="text-muted">Weighted Base Score: </span>
-              <strong style={{ color: '#FFF' }}>{operationalHealth.weightedBase || 100}</strong>
+              <span className="text-neutral-500">Weighted Base Score: </span>
+              <strong className="text-ink font-semibold">{operationalHealth.weightedBase || 100}</strong>
             </div>
             {operationalHealth.penalties.escalationPenalty < 0 && (
               <div>
-                <span className="text-muted">Escalation Penalty: </span>
-                <strong style={{ color: '#EF4444' }}>{operationalHealth.penalties.escalationPenalty} pts</strong>
+                <span className="text-neutral-500">Escalation Penalty: </span>
+                <strong className="text-signal font-semibold">{operationalHealth.penalties.escalationPenalty} pts</strong>
               </div>
             )}
             {operationalHealth.penalties.criticalOverduePenalty < 0 && (
               <div>
-                <span className="text-muted">Critical Overdue Penalty: </span>
-                <strong style={{ color: '#EF4444' }}>{operationalHealth.penalties.criticalOverduePenalty} pts</strong>
+                <span className="text-neutral-500">Critical Overdue Penalty: </span>
+                <strong className="text-signal font-semibold">{operationalHealth.penalties.criticalOverduePenalty} pts</strong>
               </div>
             )}
             <div>
-              <span className="text-muted">Active Contracts: </span>
-              <strong style={{ color: '#60A5FA' }}>{activeContracts} of {totalContracts}</strong>
+              <span className="text-neutral-500">Active Contracts: </span>
+              <strong className="text-ink font-semibold">{activeContracts} of {totalContracts}</strong>
             </div>
           </div>
         )}
       </div>
 
       {/* 6 Key Performance Metric Cards */}
-      <motion.div className="grid grid-3 gap-16" variants={staggerContainer} initial="hidden" animate="show">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <MetricCard
           icon={<Icon.document />}
           iconCls="metric-icon-blue"
@@ -179,7 +147,7 @@ export const PortfolioSummaryCards = ({ summary = {} }) => {
           badgeCls={healthStyle.badgeCls}
           badgeText={portfolioHealthGrade}
         />
-      </motion.div>
+      </div>
     </div>
   );
 };

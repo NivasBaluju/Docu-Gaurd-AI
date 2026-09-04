@@ -74,7 +74,7 @@ export const PortfolioAttentionQueue = () => {
       case 'UNASSIGNED_HIGH_RISK':
         return { label: 'UNASSIGNED', bg: 'rgba(59, 130, 246, 0.2)', color: '#60A5FA', border: 'rgba(59, 130, 246, 0.4)' };
       default:
-        return { label: reason, bg: 'rgba(255, 255, 255, 0.1)', color: '#FFF', border: 'rgba(255, 255, 255, 0.2)' };
+        return { label: reason, bg: 'var(--paper-dim)', color: 'var(--ink)', border: 'var(--rule)' };
     }
   };
 
@@ -85,7 +85,7 @@ export const PortfolioAttentionQueue = () => {
         <div>
           <div className="flex gap-8" style={{ alignItems: 'center' }}>
             <span className="dot dot-amber" />
-            <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 700, color: '#FFF' }}>
+            <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 700, color: 'var(--ink)' }}>
               Cross-Contract Attention Queue
             </h3>
             <span
@@ -269,7 +269,7 @@ export const PortfolioAttentionQueue = () => {
                   {/* Title & Metadata */}
                   <div style={{ minWidth: 0, flex: 1 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                      <span style={{ fontSize: '14px', fontWeight: 600, color: '#FFF' }}>
+                      <span style={{ fontSize: '14px', fontWeight: 600, color: 'var(--ink)' }}>
                         {item.title}
                       </span>
                       {/* Reason Pills */}
@@ -294,10 +294,10 @@ export const PortfolioAttentionQueue = () => {
                       })}
                     </div>
 
-                    <div className="flex gap-12 mt-4" style={{ fontSize: '12px', color: '#A1A1AA' }}>
-                      <span>📄 <strong style={{ color: '#E4E4E7' }}>{item.documentName}</strong></span>
+                    <div className="flex gap-12 mt-4" style={{ fontSize: '12px', color: 'var(--ink-soft)' }}>
+                      <span>📄 <strong style={{ color: 'var(--ink)' }}>{item.documentName}</strong></span>
                       <span>·</span>
-                      <span>Owner: <strong style={{ color: item.ownerName ? '#E4E4E7' : '#F59E0B' }}>{item.ownerName || 'Unassigned'}</strong></span>
+                      <span>Owner: <strong style={{ color: item.ownerName ? 'var(--ink)' : '#F59E0B' }}>{item.ownerName || 'Unassigned'}</strong></span>
                       {item.daysOverdue > 0 && (
                         <>
                           <span>·</span>

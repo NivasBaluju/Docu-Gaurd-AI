@@ -55,7 +55,7 @@ export const PortfolioHealthTable = () => {
         <div>
           <div className="flex gap-8" style={{ alignItems: 'center' }}>
             <span className="dot dot-cyan" />
-            <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 700, color: '#FFF' }}>
+            <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 700, color: 'var(--ink)' }}>
               Contract Governance Health Ranking
             </h3>
           </div>
@@ -80,7 +80,7 @@ export const PortfolioHealthTable = () => {
         <div style={{ overflowX: 'auto' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
             <thead>
-              <tr style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.08)', color: '#A1A1AA', textAlign: 'left' }}>
+              <tr style={{ borderBottom: '1px solid var(--rule)', color: 'var(--ink-soft)', textAlign: 'left' }}>
                 <th style={{ padding: '10px 12px', fontWeight: 600 }}>Contract Name</th>
                 <th style={{ padding: '10px 12px', fontWeight: 600, textAlign: 'center' }}>Health Score</th>
                 <th style={{ padding: '10px 12px', fontWeight: 600, textAlign: 'center' }}>Active Actions</th>
@@ -97,15 +97,15 @@ export const PortfolioHealthTable = () => {
                     key={c.documentId}
                     onClick={() => navigate(`/document/${c.documentId}/actions`)}
                     style={{
-                      borderBottom: '1px solid rgba(255, 255, 255, 0.04)',
+                      borderBottom: '1px solid var(--rule)',
                       cursor: 'pointer',
                       transition: 'background 0.15s ease'
                     }}
-                    onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.03)'}
+                    onMouseEnter={(e) => e.currentTarget.style.background = 'var(--paper-dim)'}
                     onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
                   >
                     <td style={{ padding: '12px', minWidth: '220px' }}>
-                      <div style={{ fontWeight: 600, color: '#FFF' }}>{c.documentName}</div>
+                      <div style={{ fontWeight: 600, color: 'var(--ink)' }}>{c.documentName}</div>
                       <div className="text-muted small" style={{ fontSize: '11px' }}>
                         Last activity {fmtDate(c.lastActivityAt)}
                       </div>
@@ -118,7 +118,7 @@ export const PortfolioHealthTable = () => {
                           alignItems: 'center',
                           gap: '6px',
                           padding: '4px 10px',
-                          borderRadius: '6px',
+                          borderRadius: '0px',
                           background: badge.bg,
                           color: badge.color,
                           border: `1px solid ${badge.border}`,
@@ -130,7 +130,7 @@ export const PortfolioHealthTable = () => {
                       </span>
                     </td>
 
-                    <td style={{ padding: '12px', textAlign: 'center', fontWeight: 600, color: '#E4E4E7' }}>
+                    <td style={{ padding: '12px', textAlign: 'center', fontWeight: 600, color: 'var(--ink)' }}>
                       {c.activeActions} <span className="text-muted small">/ {c.totalActions}</span>
                     </td>
 
@@ -161,10 +161,10 @@ export const PortfolioHealthTable = () => {
 
                     <td style={{ padding: '12px', textAlign: 'center' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'center' }}>
-                        <div style={{ width: '60px', height: '6px', background: 'rgba(255,255,255,0.06)', borderRadius: '3px', overflow: 'hidden' }}>
+                        <div style={{ width: '60px', height: '6px', background: 'var(--rule)', borderRadius: '3px', overflow: 'hidden' }}>
                           <div style={{ height: '100%', width: `${c.resolutionRate}%`, background: '#10B981' }} />
                         </div>
-                        <span style={{ fontSize: '12px', fontWeight: 600, color: '#A1A1AA' }}>
+                        <span style={{ fontSize: '12px', fontWeight: 600, color: 'var(--ink-soft)' }}>
                           {c.resolutionRate}%
                         </span>
                       </div>

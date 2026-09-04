@@ -44,7 +44,7 @@ export const PortfolioWorkload = () => {
         <div>
           <div className="flex gap-8" style={{ alignItems: 'center' }}>
             <span className="dot dot-indigo" />
-            <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 700, color: '#FFF' }}>
+            <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 700, color: 'var(--ink)' }}>
               Team Workload &amp; Capacity
             </h3>
           </div>
@@ -59,7 +59,7 @@ export const PortfolioWorkload = () => {
         <div
           style={{
             padding: '12px 16px',
-            borderRadius: '8px',
+            borderRadius: '0px',
             background: 'rgba(245, 158, 11, 0.08)',
             border: '1px solid rgba(245, 158, 11, 0.25)',
             display: 'flex',
@@ -97,9 +97,9 @@ export const PortfolioWorkload = () => {
               key={owner.ownerId}
               style={{
                 padding: '12px 16px',
-                borderRadius: '8px',
-                background: 'rgba(255, 255, 255, 0.02)',
-                border: '1px solid rgba(255, 255, 255, 0.06)',
+                borderRadius: '0px',
+                background: 'var(--paper-dim)',
+                border: '1px solid var(--rule)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'space-between',
@@ -108,7 +108,7 @@ export const PortfolioWorkload = () => {
               }}
             >
               <div>
-                <div style={{ fontWeight: 600, color: '#FFF', fontSize: '14px' }}>
+                <div style={{ fontWeight: 600, color: 'var(--ink)', fontSize: '14px' }}>
                   {owner.ownerName}
                 </div>
                 {owner.ownerEmail && (

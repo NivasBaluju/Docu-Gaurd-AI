@@ -46,7 +46,7 @@ export const PortfolioRiskDistribution = () => {
         <div>
           <div className="flex gap-8" style={{ alignItems: 'center' }}>
             <span className="dot dot-red" />
-            <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 700, color: '#FFF' }}>
+            <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 700, color: 'var(--ink)' }}>
               Portfolio Risk &amp; Priority Distribution
             </h3>
           </div>
@@ -55,9 +55,9 @@ export const PortfolioRiskDistribution = () => {
           </p>
         </div>
         <div style={{ textAlign: 'right' }}>
-          <div style={{ fontSize: '12px', color: '#A1A1AA' }}>Avg. Priority Score</div>
-          <div style={{ fontSize: '18px', fontWeight: 700, color: '#FFF' }}>
-            {averagePriorityScore} <span style={{ fontSize: '12px', color: '#71717A' }}>/ 100</span>
+          <div style={{ fontSize: '12px', color: 'var(--ink-soft)' }}>Avg. Priority Score</div>
+          <div style={{ fontSize: '18px', fontWeight: 700, color: 'var(--ink)' }}>
+            {averagePriorityScore} <span style={{ fontSize: '12px', color: 'var(--ink-soft)' }}>/ 100</span>
           </div>
         </div>
       </div>
@@ -68,11 +68,11 @@ export const PortfolioRiskDistribution = () => {
         <div>
           <div className="flex-between" style={{ fontSize: '12px', marginBottom: '4px' }}>
             <span style={{ color: '#EF4444', fontWeight: 700 }}>Critical (80–100)</span>
-            <span style={{ color: '#FFF', fontWeight: 700 }}>
+            <span style={{ color: 'var(--ink)', fontWeight: 700 }}>
               {critical} <span className="text-muted small" style={{ fontWeight: 400 }}>({pct(critical)}%)</span>
             </span>
           </div>
-          <div style={{ height: '8px', background: 'rgba(255,255,255,0.06)', borderRadius: '4px', overflow: 'hidden' }}>
+          <div style={{ height: '8px', background: 'var(--rule)', borderRadius: '4px', overflow: 'hidden' }}>
             <div style={{ height: '100%', width: `${pct(critical)}%`, background: '#EF4444' }} />
           </div>
         </div>
@@ -81,11 +81,11 @@ export const PortfolioRiskDistribution = () => {
         <div>
           <div className="flex-between" style={{ fontSize: '12px', marginBottom: '4px' }}>
             <span style={{ color: '#F59E0B', fontWeight: 700 }}>High (70–79)</span>
-            <span style={{ color: '#FFF', fontWeight: 700 }}>
+            <span style={{ color: 'var(--ink)', fontWeight: 700 }}>
               {high} <span className="text-muted small" style={{ fontWeight: 400 }}>({pct(high)}%)</span>
             </span>
           </div>
-          <div style={{ height: '8px', background: 'rgba(255,255,255,0.06)', borderRadius: '4px', overflow: 'hidden' }}>
+          <div style={{ height: '8px', background: 'var(--rule)', borderRadius: '4px', overflow: 'hidden' }}>
             <div style={{ height: '100%', width: `${pct(high)}%`, background: '#F59E0B' }} />
           </div>
         </div>
@@ -94,11 +94,11 @@ export const PortfolioRiskDistribution = () => {
         <div>
           <div className="flex-between" style={{ fontSize: '12px', marginBottom: '4px' }}>
             <span style={{ color: '#60A5FA', fontWeight: 700 }}>Medium (40–69)</span>
-            <span style={{ color: '#FFF', fontWeight: 700 }}>
+            <span style={{ color: 'var(--ink)', fontWeight: 700 }}>
               {medium} <span className="text-muted small" style={{ fontWeight: 400 }}>({pct(medium)}%)</span>
             </span>
           </div>
-          <div style={{ height: '8px', background: 'rgba(255,255,255,0.06)', borderRadius: '4px', overflow: 'hidden' }}>
+          <div style={{ height: '8px', background: 'var(--rule)', borderRadius: '4px', overflow: 'hidden' }}>
             <div style={{ height: '100%', width: `${pct(medium)}%`, background: '#3B82F6' }} />
           </div>
         </div>
@@ -106,12 +106,12 @@ export const PortfolioRiskDistribution = () => {
         {/* Low */}
         <div>
           <div className="flex-between" style={{ fontSize: '12px', marginBottom: '4px' }}>
-            <span style={{ color: '#A1A1AA', fontWeight: 700 }}>Low (0–39)</span>
-            <span style={{ color: '#FFF', fontWeight: 700 }}>
+            <span style={{ color: 'var(--ink-soft)', fontWeight: 700 }}>Low (0–39)</span>
+            <span style={{ color: 'var(--ink)', fontWeight: 700 }}>
               {low} <span className="text-muted small" style={{ fontWeight: 400 }}>({pct(low)}%)</span>
             </span>
           </div>
-          <div style={{ height: '8px', background: 'rgba(255,255,255,0.06)', borderRadius: '4px', overflow: 'hidden' }}>
+          <div style={{ height: '8px', background: 'var(--rule)', borderRadius: '4px', overflow: 'hidden' }}>
             <div style={{ height: '100%', width: `${pct(low)}%`, background: '#71717A' }} />
           </div>
         </div>

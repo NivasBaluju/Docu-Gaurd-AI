@@ -94,29 +94,25 @@ export const PendingApprovalsQueue = ({ onDecided }) => {
       {/* Header bar */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
         <div>
-          <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 700, color: '#fff', display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 700, color: 'var(--ink)', display: 'flex', alignItems: 'center', gap: '8px' }}>
             <span>🛡️</span> Governed Operations: Pending Approvals
             <span style={{
-              fontSize: '11px', padding: '2px 8px', borderRadius: '10px',
-              background: pendingBatches.length > 0 ? 'rgba(239,68,68,0.2)' : 'rgba(255,255,255,0.1)',
-              color: pendingBatches.length > 0 ? '#F87171' : 'rgba(255,255,255,0.6)',
+              fontSize: '11px', padding: '2px 8px', borderRadius: '0px',
+              background: pendingBatches.length > 0 ? 'var(--signal-soft)' : 'var(--paper-dim)',
+              color: pendingBatches.length > 0 ? 'var(--signal)' : 'var(--ink-soft)',
               fontWeight: 600,
             }}>
               {pagination.total} pending
             </span>
           </h3>
-          <p style={{ margin: '4px 0 0', fontSize: '12px', color: 'rgba(255,255,255,0.5)' }}>
+          <p style={{ margin: '4px 0 0', fontSize: '12px', color: 'var(--ink-soft)' }}>
             Four-eyes principle: Independent peer authorization required for high-consequence operations.
           </p>
         </div>
         <button
           onClick={fetchPending}
           disabled={loading}
-          style={{
-            padding: '8px 14px', borderRadius: '8px', fontSize: '12px', fontWeight: 600,
-            background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)',
-            color: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px',
-          }}
+          className="btn btn-outline btn-sm"
         >
           🔄 {loading ? 'Refreshing…' : 'Refresh Queue'}
         </button>
@@ -124,7 +120,7 @@ export const PendingApprovalsQueue = ({ onDecided }) => {
 
       {/* Loading state */}
       {loading && (
-        <div style={{ padding: '40px', textAlign: 'center', color: 'rgba(255,255,255,0.4)', fontSize: '13px' }}>
+        <div style={{ padding: '40px', textAlign: 'center', color: 'var(--ink-soft)', fontSize: '13px' }}>
           Loading pending approvals queue…
         </div>
       )}
@@ -132,14 +128,14 @@ export const PendingApprovalsQueue = ({ onDecided }) => {
       {/* Empty state */}
       {!loading && pendingBatches.length === 0 && (
         <div style={{
-          padding: '48px 24px', textAlign: 'center', borderRadius: '12px',
-          background: 'rgba(255,255,255,0.02)', border: '1px dashed rgba(255,255,255,0.1)',
+          padding: '48px 24px', textAlign: 'center', borderRadius: '0px',
+          background: 'var(--paper-dim)', border: '1px dashed var(--rule)',
         }}>
           <div style={{ fontSize: '32px', marginBottom: '12px' }}>✅</div>
-          <div style={{ fontSize: '15px', fontWeight: 600, color: '#fff', marginBottom: '4px' }}>
+          <div style={{ fontSize: '15px', fontWeight: 600, color: 'var(--ink)', marginBottom: '4px' }}>
             No Operations Awaiting Your Approval
           </div>
-          <div style={{ fontSize: '13px', color: 'rgba(255,255,255,0.45)', maxWidth: '400px', margin: '0 auto' }}>
+          <div style={{ fontSize: '13px', color: 'var(--ink-soft)', maxWidth: '400px', margin: '0 auto' }}>
             All high-impact bulk operations have either been decided or executed. New batches triggering Governance Policy v1.0 will appear here.
           </div>
         </div>
@@ -157,8 +153,8 @@ export const PendingApprovalsQueue = ({ onDecided }) => {
                 initial={{ opacity: 0, y: 6 }}
                 animate={{ opacity: 1, y: 0 }}
                 style={{
-                  padding: '18px 20px', borderRadius: '12px',
-                  background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)',
+                  padding: '18px 20px', borderRadius: '0px',
+                  background: 'var(--paper)', border: '1px solid var(--rule)',
                   display: 'flex', flexDirection: 'column', gap: '14px',
                 }}
               >
@@ -168,22 +164,22 @@ export const PendingApprovalsQueue = ({ onDecided }) => {
                     <span style={{ fontSize: '20px' }}>{OPERATION_ICONS[batch.operation_type] || '⚡'}</span>
                     <div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <strong style={{ fontSize: '14px', color: '#fff' }}>{batch.operation_type.replace('_', ' ')}</strong>
+                        <strong style={{ fontSize: '14px', color: 'var(--ink)' }}>{batch.operation_type.replace('_', ' ')}</strong>
                         <span style={{
-                          fontSize: '10px', padding: '1px 6px', borderRadius: '4px',
-                          background: 'rgba(99,102,241,0.15)', color: '#818CF8', fontWeight: 600,
+                          fontSize: '10px', padding: '1px 6px', borderRadius: '0px',
+                          background: 'rgba(99,102,241,0.15)', color: '#6366F1', fontWeight: 600,
                         }}>
                           MODE: {batch.mode}
                         </span>
                         <span style={{
-                          fontSize: '10px', padding: '1px 6px', borderRadius: '4px',
+                          fontSize: '10px', padding: '1px 6px', borderRadius: '0px',
                           background: 'rgba(245,158,11,0.15)', color: '#F59E0B', fontWeight: 600,
                         }}>
                           POLICY v{batch.policy_version || '1.0'}
                         </span>
                       </div>
-                      <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.5)', marginTop: '2px' }}>
-                        Requested by <strong style={{ color: 'rgba(255,255,255,0.8)' }}>{batch.requester_name || batch.requester_email || 'Peer User'}</strong> · {new Date(batch.created_at).toLocaleString()}
+                      <div style={{ fontSize: '12px', color: 'var(--ink-soft)', marginTop: '2px' }}>
+                        Requested by <strong style={{ color: 'var(--ink)' }}>{batch.requester_name || batch.requester_email || 'Peer User'}</strong> · {new Date(batch.created_at).toLocaleString()}
                       </div>
                     </div>
                   </div>
@@ -193,9 +189,9 @@ export const PendingApprovalsQueue = ({ onDecided }) => {
                     <button
                       onClick={() => handleOpenApprove(batch)}
                       style={{
-                        padding: '6px 14px', borderRadius: '6px', fontSize: '12px', fontWeight: 600,
-                        background: 'rgba(16,185,129,0.15)', border: '1px solid rgba(16,185,129,0.3)',
-                        color: '#34D399', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px',
+                        padding: '6px 14px', borderRadius: '0px', fontSize: '12px', fontWeight: 600,
+                        background: '#E8F5E9', border: '1px solid #C8E6C9',
+                        color: '#1B5E20', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px',
                       }}
                     >
                       ✓ Approve
@@ -203,9 +199,9 @@ export const PendingApprovalsQueue = ({ onDecided }) => {
                     <button
                       onClick={() => handleOpenReject(batch)}
                       style={{
-                        padding: '6px 14px', borderRadius: '6px', fontSize: '12px', fontWeight: 600,
-                        background: 'rgba(239,68,68,0.15)', border: '1px solid rgba(239,68,68,0.3)',
-                        color: '#F87171', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px',
+                        padding: '6px 14px', borderRadius: '0px', fontSize: '12px', fontWeight: 600,
+                        background: 'var(--signal-soft)', border: '1px solid #E0B4B0',
+                        color: 'var(--signal)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px',
                       }}
                     >
                       ✕ Reject
@@ -216,14 +212,14 @@ export const PendingApprovalsQueue = ({ onDecided }) => {
                 {/* Policy flags trigger tags */}
                 {flags.length > 0 && (
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', alignItems: 'center' }}>
-                    <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.4)', marginRight: '2px' }}>Triggers:</span>
+                    <span style={{ fontSize: '11px', color: 'var(--ink-soft)', marginRight: '2px' }}>Triggers:</span>
                     {flags.map((flagKey) => {
                       const cfg = POLICY_FLAG_LABELS[flagKey] || { label: flagKey, color: '#F59E0B', bg: 'rgba(245,158,11,0.1)' };
                       return (
                         <span
                           key={flagKey}
                           style={{
-                            padding: '2px 8px', borderRadius: '6px', fontSize: '11px', fontWeight: 600,
+                            padding: '2px 8px', borderRadius: '0px', fontSize: '11px', fontWeight: 600,
                             background: cfg.bg, color: cfg.color, border: `1px solid ${cfg.color}33`,
                           }}
                         >
@@ -236,15 +232,15 @@ export const PendingApprovalsQueue = ({ onDecided }) => {
 
                 {/* Metrics row */}
                 <div style={{
-                  padding: '10px 14px', borderRadius: '8px',
-                  background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)',
+                  padding: '10px 14px', borderRadius: '0px',
+                  background: 'var(--paper-dim)', border: '1px solid var(--rule)',
                   display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '12px',
-                  color: 'rgba(255,255,255,0.6)', flexWrap: 'wrap', gap: '10px',
+                  color: 'var(--ink-soft)', flexWrap: 'wrap', gap: '10px',
                 }}>
                   <div>
-                    Eligible Actions: <strong style={{ color: '#10B981' }}>{batch.eligible_count}</strong> · Blocked: <strong style={{ color: batch.blocked_count > 0 ? '#EF4444' : 'rgba(255,255,255,0.4)' }}>{batch.blocked_count}</strong>
+                    Eligible Actions: <strong style={{ color: '#10B981' }}>{batch.eligible_count}</strong> · Blocked: <strong style={{ color: batch.blocked_count > 0 ? 'var(--signal)' : 'var(--ink-soft)' }}>{batch.blocked_count}</strong>
                   </div>
-                  <div style={{ fontFamily: 'monospace', fontSize: '11px', color: 'rgba(255,255,255,0.4)' }}>
+                  <div style={{ fontFamily: 'monospace', fontSize: '11px', color: 'var(--ink-soft)' }}>
                     PREVIEW HASH: {batch.preview_hash?.slice(0, 16)}…
                   </div>
                 </div>
@@ -259,7 +255,7 @@ export const PendingApprovalsQueue = ({ onDecided }) => {
         {activeBatch && (
           <div style={{
             position: 'fixed', inset: 0, zIndex: 10000,
-            background: 'rgba(2, 6, 23, 0.85)', backdropFilter: 'blur(8px)',
+            background: 'rgba(10, 10, 10, 0.6)', backdropFilter: 'blur(4px)',
             display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px',
           }}>
             <motion.div
@@ -267,21 +263,21 @@ export const PendingApprovalsQueue = ({ onDecided }) => {
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
               style={{
-                background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.98) 0%, rgba(30, 41, 59, 0.98) 100%)',
-                border: '1px solid rgba(255, 255, 255, 0.1)', borderRadius: '16px',
-                width: '100%', maxWidth: '480px', padding: '24px', boxShadow: '0 25px 80px rgba(0,0,0,0.6)',
+                background: 'var(--paper)',
+                border: '1px solid var(--rule)', borderRadius: '0px',
+                width: '100%', maxWidth: '480px', padding: '24px',
               }}
             >
-              <h4 style={{ margin: '0 0 8px', fontSize: '17px', color: '#fff', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <h4 style={{ margin: '0 0 8px', fontSize: '17px', color: 'var(--ink)', display: 'flex', alignItems: 'center', gap: '8px' }}>
                 {dialogType === 'approve' ? '✅ Approve Governed Operation' : '🛑 Reject Governed Operation'}
               </h4>
-              <p style={{ margin: '0 0 16px', fontSize: '13px', color: 'rgba(255,255,255,0.6)', lineHeight: '1.5' }}>
+              <p style={{ margin: '0 0 16px', fontSize: '13px', color: 'var(--ink-soft)', lineHeight: '1.5' }}>
                 {dialogType === 'approve'
                   ? 'Your approval grants authorization for this batch to be executed atomically under row-level locking. Stale actions will be safely re-validated.'
                   : 'Rejection is strictly terminal. The requester cannot execute or re-open this batch and must generate a new preview.'}
               </p>
 
-              <label style={{ display: 'block', fontSize: '12px', color: 'rgba(255,255,255,0.7)', marginBottom: '6px' }}>
+              <label style={{ display: 'block', fontSize: '12px', color: 'var(--ink)', marginBottom: '6px' }}>
                 {dialogType === 'approve' ? 'Review Comments (Optional)' : 'Rejection Reason (Required, min 10 characters)'}
               </label>
               <textarea
@@ -290,8 +286,8 @@ export const PendingApprovalsQueue = ({ onDecided }) => {
                 placeholder={dialogType === 'approve' ? 'Add sign-off notes…' : 'Explain why this operation is rejected…'}
                 style={{
                   width: '100%', minHeight: '90px', padding: '10px 12px', boxSizing: 'border-box',
-                  background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)',
-                  borderRadius: '8px', color: '#fff', fontSize: '13px', outline: 'none', resize: 'vertical',
+                  background: 'var(--paper-dim)', border: '1px solid var(--rule)',
+                  borderRadius: '0px', color: 'var(--ink)', fontSize: '13px', outline: 'none', resize: 'vertical',
                 }}
               />
 
@@ -300,9 +296,9 @@ export const PendingApprovalsQueue = ({ onDecided }) => {
                   onClick={handleCloseDialog}
                   disabled={submitting}
                   style={{
-                    padding: '8px 16px', borderRadius: '8px', fontSize: '13px', fontWeight: 600,
-                    background: 'transparent', border: '1px solid rgba(255,255,255,0.15)',
-                    color: 'rgba(255,255,255,0.7)', cursor: 'pointer',
+                    padding: '8px 16px', borderRadius: '0px', fontSize: '13px', fontWeight: 600,
+                    background: 'transparent', border: '1px solid var(--rule)',
+                    color: 'var(--ink)', cursor: 'pointer',
                   }}
                 >
                   Cancel
@@ -311,12 +307,10 @@ export const PendingApprovalsQueue = ({ onDecided }) => {
                   onClick={handleSubmitDecision}
                   disabled={submitting || (dialogType === 'reject' && decisionComment.trim().length < 10)}
                   style={{
-                    padding: '8px 20px', borderRadius: '8px', fontSize: '13px', fontWeight: 600,
+                    padding: '8px 20px', borderRadius: '0px', fontSize: '13px', fontWeight: 600,
                     border: 'none', cursor: 'pointer',
-                    background: dialogType === 'approve'
-                      ? 'linear-gradient(135deg, #10B981 0%, #059669 100%)'
-                      : 'linear-gradient(135deg, #EF4444 0%, #DC2626 100%)',
-                    color: '#fff',
+                    background: dialogType === 'approve' ? 'var(--ink)' : 'var(--signal)',
+                    color: 'var(--paper)',
                     opacity: (dialogType === 'reject' && decisionComment.trim().length < 10) ? 0.5 : 1,
                   }}
                 >

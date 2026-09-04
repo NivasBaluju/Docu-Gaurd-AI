@@ -60,7 +60,7 @@ export const BulkOperationHistoryPanel = () => {
   if (loading) {
     return (
       <div className="card" style={{ padding: '24px' }}>
-        <div style={{ fontSize: '15px', fontWeight: 700, color: '#FFF', marginBottom: '16px' }}>
+        <div style={{ fontSize: '15px', fontWeight: 700, color: 'var(--ink)', marginBottom: '16px' }}>
           📋 Batch Operation History
         </div>
         <SkeletonLoader.Card count={3} height="56px" />
@@ -72,20 +72,16 @@ export const BulkOperationHistoryPanel = () => {
     <div className="card" style={{ padding: '24px' }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
         <div>
-          <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 700, color: '#FFF' }}>
+          <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 700, color: 'var(--ink)' }}>
             📋 Batch Operation History
           </h3>
-          <p style={{ margin: '4px 0 0', fontSize: '12px', color: 'rgba(255,255,255,0.4)' }}>
+          <p style={{ margin: '4px 0 0', fontSize: '12px', color: 'var(--ink-soft)' }}>
             Auditable execution receipts for all bulk operations
           </p>
         </div>
         <button
           onClick={() => fetchHistory(pagination.page)}
-          style={{
-            padding: '6px 12px', borderRadius: '6px', fontSize: '12px',
-            background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)',
-            color: 'rgba(255,255,255,0.6)', cursor: 'pointer',
-          }}
+          className="btn btn-outline btn-sm"
         >
           ↻ Refresh
         </button>
@@ -107,10 +103,10 @@ export const BulkOperationHistoryPanel = () => {
                 animate={{ opacity: 1, y: 0 }}
                 layout
                 style={{
-                  borderRadius: '10px',
-                  border: '1px solid rgba(255,255,255,0.07)',
+                  borderRadius: '0px',
+                  border: '1px solid var(--rule)',
                   overflow: 'hidden',
-                  background: 'rgba(255,255,255,0.02)',
+                  background: 'var(--paper-dim)',
                 }}
               >
                 {/* Batch row */}
@@ -124,10 +120,10 @@ export const BulkOperationHistoryPanel = () => {
                 >
                   <div style={{ display: 'flex', alignItems: 'center', gap: '12px', minWidth: 0, flex: 1 }}>
                     <div>
-                      <div style={{ fontSize: '13px', fontWeight: 600, color: '#E2E8F0', marginBottom: '2px' }}>
+                      <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--ink)', marginBottom: '2px' }}>
                         {OP_LABELS[batch.operation_type] || batch.operation_type}
                       </div>
-                      <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.4)' }}>
+                      <div style={{ fontSize: '11px', color: 'var(--ink-soft)' }}>
                         {new Date(batch.created_at).toLocaleString()} · Mode: {batch.mode}
                       </div>
                     </div>
@@ -136,10 +132,10 @@ export const BulkOperationHistoryPanel = () => {
                   <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flexShrink: 0 }}>
                     <div style={{ textAlign: 'right', fontSize: '12px' }}>
                       <span style={{ color: '#10B981', fontWeight: 700 }}>{batch.executed_count}</span>
-                      <span style={{ color: 'rgba(255,255,255,0.3)' }}> / {batch.requested_count} executed</span>
+                      <span style={{ color: 'var(--ink-soft)' }}> / {batch.requested_count} executed</span>
                     </div>
                     {statusChip(batch.status)}
-                    <span style={{ color: 'rgba(255,255,255,0.3)', fontSize: '12px' }}>
+                    <span style={{ color: 'var(--ink-soft)', fontSize: '12px' }}>
                       {expandedId === batch.id ? '▲' : '▼'}
                     </span>
                   </div>
@@ -157,7 +153,7 @@ export const BulkOperationHistoryPanel = () => {
                     >
                       <div style={{
                         padding: '12px 18px 16px',
-                        borderTop: '1px solid rgba(255,255,255,0.07)',
+                        borderTop: '1px solid var(--rule)',
                         display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px',
                       }}>
                         {[
@@ -171,8 +167,8 @@ export const BulkOperationHistoryPanel = () => {
                           ['Status',     batch.status],
                         ].map(([k, v]) => (
                           <div key={k} style={{ fontSize: '12px' }}>
-                            <span style={{ color: 'rgba(255,255,255,0.4)' }}>{k}: </span>
-                            <span style={{ color: '#E2E8F0', fontWeight: 600 }}>{String(v)}</span>
+                            <span style={{ color: 'var(--ink-soft)' }}>{k}: </span>
+                            <span style={{ color: 'var(--ink)', fontWeight: 600 }}>{String(v)}</span>
                           </div>
                         ))}
                         {batch.blocked_json?.length > 0 && (

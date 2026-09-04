@@ -55,14 +55,12 @@ export const PortfolioDashboard = () => {
 
       {/* 2. Navigation Mode Switcher */}
       <div
-        className="card"
+        className="card bg-paper-dim border border-rule"
         style={{
-          padding: '8px 12px',
+          padding: '6px 8px',
           display: 'flex',
           gap: '8px',
-          background: 'rgba(15, 23, 42, 0.6)',
-          border: '1px solid rgba(255, 255, 255, 0.08)',
-          borderRadius: '10px',
+          borderRadius: '0px',
           width: 'fit-content',
           flexWrap: 'wrap',
         }}
@@ -183,8 +181,8 @@ export const PortfolioDashboard = () => {
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '16px' }}>
               <span style={{ fontSize: '20px' }}>⚡</span>
               <div>
-                <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 700, color: '#FFF' }}>Bulk Operations</h3>
-                <p style={{ margin: '4px 0 0', fontSize: '13px', color: 'rgba(255,255,255,0.5)' }}>
+                <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 700, color: 'var(--ink)' }}>Bulk Operations</h3>
+                <p style={{ margin: '4px 0 0', fontSize: '13px', color: 'var(--ink-soft)' }}>
                   Select actions from the Attention Queue to run bulk assignment, deadline updates, or status transitions.
                 </p>
               </div>

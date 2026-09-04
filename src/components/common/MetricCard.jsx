@@ -41,8 +41,8 @@ export const MetricCard = ({ icon, iconCls = 'metric-icon-blue', value, label, b
       ref={ref}
       className="card"
       {...cardHoverMotion}
-      initial={{ opacity: 0, y: 8 }}
-      animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 8 }}
+      initial={{ opacity: 0, y: 6 }}
+      animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.28, ease: EASE_OUT }}
     >
       <div className="metric-row">
