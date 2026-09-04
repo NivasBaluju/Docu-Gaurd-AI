@@ -165,8 +165,8 @@ export function Upload() {
             onClick={() => fileInputRef.current?.click()}
             className={`bg-paper-dim border p-16 sm:p-24 text-center cursor-pointer transition-all duration-fast ${
               isDragging
-                ? 'border-ink bg-neutral-200'
-                : 'border-rule hover:border-ink hover:bg-neutral-100'
+                ? 'border-ink bg-white/10'
+                : 'border-rule hover:border-ink/80 hover:bg-white/[0.03]'
             }`}
           >
             <input

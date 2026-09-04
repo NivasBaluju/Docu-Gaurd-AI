@@ -70,14 +70,14 @@ export function Topbar() {
           </Link>
 
           {/* Desktop Navigation Links */}
-          <div className="hidden lg:flex items-center gap-8">
+          <div className="hidden lg:flex items-center gap-10 xl:gap-12">
             {links.map((link) => {
               const isActive = location.pathname === link.href || (link.href !== '/' && location.pathname.startsWith(link.href));
               return (
                 <Link
                   key={link.href}
                   to={link.href}
-                  className="font-body text-label text-ink relative py-1 no-underline group"
+                  className="font-body text-label text-ink relative px-2 py-1.5 no-underline group tracking-wide"
                 >
                   {link.label}
                   <span
@@ -91,33 +91,36 @@ export function Topbar() {
           </div>
 
           {/* Desktop Actions */}
-          <div className="hidden lg:flex items-center gap-4">
+          <div className="hidden lg:flex items-center gap-6 sm:gap-8">
             {user ? (
-              <div className="flex items-center gap-4">
-                <span className="font-body text-micro border border-ink px-2 py-1 select-none">
+              <div className="flex items-center gap-6 sm:gap-7">
+                <span className="font-body text-micro border border-ink/40 px-3 py-1.5 select-none tracking-wider">
                   ZT Score: {trust ?? 100}
                 </span>
-                <span className="font-body text-body-sm text-ink font-medium">
-                  {user.name || user.email}
-                </span>
-                {user.role === 'admin' && (
-                  <span className="font-body text-micro bg-ink text-paper px-1.5 py-0.5 font-semibold">
-                    ADMIN
+                <div className="flex items-center gap-2.5">
+                  <span className="font-body text-body-sm text-ink font-medium">
+                    {user.name || user.email}
                   </span>
-                )}
+                  {user.role === 'admin' && (
+                    <span className="font-body text-micro bg-ink text-paper px-2 py-0.5 font-semibold tracking-wider">
+                      ADMIN
+                    </span>
+                  )}
+                </div>
+                <div className="h-4 w-px bg-rule" aria-hidden="true" />
                 <button
                   type="button"
                   onClick={logout}
-                  className="font-body text-label text-ink-soft hover:text-ink transition-colors ml-2"
+                  className="font-body text-label text-ink-soft hover:text-ink hover:bg-white/5 transition-colors px-2 py-1"
                 >
                   Sign out
                 </button>
               </div>
             ) : (
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-6">
                 <Link
                   to="/login"
-                  className="font-body text-label text-ink hover:text-ink-soft relative py-1 no-underline group"
+                  className="font-body text-label text-ink hover:text-ink-soft relative px-2 py-1 no-underline group"
                 >
                   Client Portal
                   <span className="absolute left-0 -bottom-1 h-px w-full bg-ink scale-x-0 origin-left group-hover:scale-x-100 transition-transform duration-fast" />
