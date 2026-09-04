@@ -127,11 +127,11 @@ export const ObservatoryRadial = ({
         </defs>
 
         {/* 1. Background Geometry Rings (Scientific Instrument feel) */}
-        <circle cx={centerX} cy={centerY} r="260" fill="none" stroke="rgba(255,255,255,0.02)" strokeWidth="1" />
-        <circle cx={centerX} cy={centerY} r={activityRingRadius} fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="1" strokeDasharray="3 6" />
-        <circle cx={centerX} cy={centerY} r="200" fill="none" stroke="rgba(255,255,255,0.04)" strokeWidth="1" />
-        <circle cx={centerX} cy={centerY} r="140" fill="none" stroke="rgba(255,255,255,0.03)" strokeWidth="1" strokeDasharray="2 4" />
-        <circle cx={centerX} cy={centerY} r="100" fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="1" />
+        <circle cx={centerX} cy={centerY} r="260" fill="none" stroke="var(--rule)" strokeWidth="1" strokeOpacity="0.6" />
+        <circle cx={centerX} cy={centerY} r={activityRingRadius} fill="none" stroke="var(--rule)" strokeWidth="1" strokeDasharray="3 6" />
+        <circle cx={centerX} cy={centerY} r="200" fill="none" stroke="var(--rule)" strokeWidth="1" strokeOpacity="0.8" />
+        <circle cx={centerX} cy={centerY} r="140" fill="none" stroke="var(--rule)" strokeWidth="1" strokeDasharray="2 4" strokeOpacity="0.8" />
+        <circle cx={centerX} cy={centerY} r="100" fill="none" stroke="var(--rule)" strokeWidth="1" />
 
         {/* 2. Central Hub Glow & Pulsing Ring */}
         <circle cx={centerX} cy={centerY} r="110" fill="url(#centerGlow)" />
@@ -139,8 +139,8 @@ export const ObservatoryRadial = ({
           cx={centerX}
           cy={centerY}
           r={hubRadius}
-          fill="#09090B"
-          stroke="rgba(255,255,255,0.12)"
+          fill="var(--paper)"
+          stroke="var(--ink)"
           strokeWidth="1.5"
         />
         <circle
@@ -150,14 +150,14 @@ export const ObservatoryRadial = ({
           fill="none"
           stroke={scoreColor}
           strokeWidth="1"
-          strokeOpacity="0.35"
+          strokeOpacity="0.45"
         />
 
         {/* 3. Connecting Spoke Lines to 6 Nodes */}
         {nodes.map((n) => {
           const isSelected = selectedNode === n.id;
-          const strokeColor = isSelected ? '#10B981' : 'rgba(255,255,255,0.08)';
-          const strokeWidth = isSelected ? 1.8 : 1;
+          const strokeColor = isSelected ? 'var(--ink)' : 'var(--rule)';
+          const strokeWidth = isSelected ? 2 : 1;
           const strokeDash = isSelected ? 'none' : '3 3';
 
           return (
@@ -170,14 +170,14 @@ export const ObservatoryRadial = ({
                 stroke={strokeColor}
                 strokeWidth={strokeWidth}
                 strokeDasharray={strokeDash}
-                transition="all 0.3s ease"
+                style={{ transition: 'all 0.3s ease' }}
               />
               {isSelected && (
                 <circle
                   cx={(centerX + n.x) / 2}
                   cy={(centerY + n.y) / 2}
-                  r="2.5"
-                  fill="#10B981"
+                  r="3"
+                  fill="var(--ink)"
                 />
               )}
             </g>
@@ -204,8 +204,8 @@ export const ObservatoryRadial = ({
           const ly = centerY + labelR * Math.sin(toRad(midAngle));
 
           const isHovered = hoveredDay?.key === ad.key;
-          const arcStroke = isHovered ? '#10B981' : 'rgba(255,255,255,0.18)';
-          const arcWidth = isHovered ? 3.5 : 2;
+          const arcStroke = isHovered ? 'var(--ink)' : 'var(--rule)';
+          const arcWidth = isHovered ? 3.5 : 1.5;
 
           return (
             <g
@@ -222,17 +222,17 @@ export const ObservatoryRadial = ({
                 stroke={arcStroke}
                 strokeWidth={arcWidth}
                 strokeLinecap="round"
-                transition="all 0.2s ease"
+                style={{ transition: 'all 0.2s ease' }}
               />
               {/* Day Label */}
               <text
                 x={lx}
                 y={ly + 3}
-                fill={isHovered ? '#10B981' : 'rgba(255,255,255,0.45)'}
+                fill={isHovered ? 'var(--ink)' : 'var(--ink-soft)'}
                 fontSize="9"
-                fontFamily="ui-monospace, monospace"
+                fontFamily="var(--font-mono, monospace)"
                 textAnchor="middle"
-                fontWeight={isHovered ? '600' : '400'}
+                fontWeight={isHovered ? '700' : '500'}
               >
                 {ad.key}
               </text>
@@ -260,10 +260,10 @@ export const ObservatoryRadial = ({
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0 }}
         >
-          <strong style={{ color: '#FFFFFF', fontSize: '11px' }}>{hoveredDay.day}</strong>
+          <strong style={{ color: 'var(--ink)', fontSize: '11px' }}>{hoveredDay.day}</strong>
           <div style={{ display: 'flex', gap: '12px', marginTop: '4px', fontSize: '10px' }}>
-            <span style={{ color: '#60A5FA' }}>🔑 {hoveredDay.auth} Auth Events</span>
-            <span style={{ color: '#34D399' }}>📄 {hoveredDay.docs} Encrypted Docs</span>
+            <span style={{ color: '#2563EB' }}>🔑 {hoveredDay.auth} Auth Events</span>
+            <span style={{ color: '#059669' }}>📄 {hoveredDay.docs} Encrypted Docs</span>
           </div>
         </motion.div>
       )}

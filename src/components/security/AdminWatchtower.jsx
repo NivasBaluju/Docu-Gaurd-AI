@@ -78,7 +78,7 @@ export const AdminWatchtower = () => {
               </span>
               <span className="mono text-lo small">[GLOBAL_SECURITY_WATCHTOWER]</span>
             </div>
-            <h2 style={{ fontSize: '20px', fontWeight: '700', color: '#FFFFFF', margin: '6px 0 2px' }}>
+            <h2 style={{ fontSize: '20px', fontWeight: '700', color: 'var(--ink)', margin: '6px 0 2px' }}>
               Risky Users & Threat Radar
             </h2>
             <p className="text-lo small" style={{ margin: 0 }}>

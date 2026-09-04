@@ -360,7 +360,7 @@ export const ObservatoryDetailPanel = ({
                   <span className={`badge ${chainVerifyResult.valid ? 'badge-ok' : 'badge-danger'}`} style={{ marginRight: '8px' }}>
                     {chainVerifyResult.valid ? '✓ CHAIN 100% VALID' : '⚠ TAMPERING DETECTED'}
                   </span>
-                  <span style={{ fontSize: '12px', color: '#D4D4D8' }}>
+                  <span style={{ fontSize: '12px', color: 'var(--ink)' }}>
                     {chainVerifyResult.totalBlocks} consecutive blocks cryptographically validated.
                   </span>
                 </motion.div>
