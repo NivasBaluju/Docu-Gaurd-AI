@@ -13,94 +13,134 @@ const { sendOtpEmail, sendWelcomeEmail } = require('../utils/email');
 
 const router = express.Router();
 
+const ADMIN_EMAIL = 'balujunivas@gmail.com';
+
+function isAdminEmail(email) {
+  return String(email || '').trim().toLowerCase() === ADMIN_EMAIL;
+}
+
 function issueToken(sessionId, userId) {
   return jwt.sign({ sessionId, userId }, JWT_SECRET, { expiresIn: '7d' });
 }
 
-// --- Register ---------------------------------------------------------------
+// --- Register (Passwordless Email OTP) ---------------------------------------
 router.post('/register', async (req, res) => {
   try {
-    const { name, email, password } = req.body;
-    if (!name || !email || !password) return res.status(400).json({ error: 'name, email, password are required' });
-    if (password.length < 8) return res.status(400).json({ error: 'Password must be at least 8 characters' });
+    const { name, email } = req.body;
+    const cleanEmail = (email || '').trim().toLowerCase();
+    if (!cleanEmail) return res.status(400).json({ error: 'Email address is required' });
 
-    const { rows: existingRows } = await db.query('SELECT id FROM users WHERE email = $1', [email.toLowerCase()]);
-    if (existingRows[0]) return res.status(409).json({ error: 'An account with that email already exists' });
+    const role = isAdminEmail(cleanEmail) ? 'admin' : 'user';
+    let user;
+    const { rows: existingRows } = await db.query('SELECT * FROM users WHERE email = $1', [cleanEmail]);
+    
+    if (existingRows[0]) {
+      user = existingRows[0];
+      const finalRole = isAdminEmail(cleanEmail) ? 'admin' : (user.role || 'user');
+      await db.query('UPDATE users SET role = $1, name = COALESCE($2, name) WHERE id = $3', [
+        finalRole,
+        name ? name.trim() : null,
+        user.id
+      ]);
+      user.role = finalRole;
+    } else {
+      const id = uuidv4();
+      const displayName = (name || '').trim() || cleanEmail.split('@')[0];
+      const placeholderHash = await bcrypt.hash(uuidv4(), 10);
+      const { rows: newRows } = await db.query(
+        'INSERT INTO users (id, name, email, password_hash, role, mfa_enabled) VALUES ($1, $2, $3, $4, $5, true) RETURNING *',
+        [id, displayName, cleanEmail, placeholderHash, role]
+      );
+      user = newRows[0];
+      await recordAudit(id, 'USER_REGISTERED', { email: cleanEmail, role });
+      setImmediate(() => {
+        sendWelcomeEmail(cleanEmail, displayName).catch(err => console.warn('Welcome email background dispatch error:', err.message));
+      });
+    }
 
-    const id = uuidv4();
-    const hash = await bcrypt.hash(password, 12);
-    const mfaEnabled = process.env.REQUIRE_MFA !== 'false';
+    // Invalidate older unused login OTPs for this user
+    await db.query("UPDATE otp_codes SET used = true WHERE user_id = $1 AND purpose = 'login'", [user.id]);
+
+    // Generate single 6-digit OTP and send strictly to email
+    const code = String(Math.floor(100000 + Math.random() * 900000));
     await db.query(
-      'INSERT INTO users (id, name, email, password_hash, mfa_enabled) VALUES ($1, $2, $3, $4, $5)',
-      [id, name, email.toLowerCase(), hash, mfaEnabled]
+      `INSERT INTO otp_codes (id, user_id, code, purpose, expires_at)
+       VALUES ($1, $2, $3, $4, NOW() + INTERVAL '15 minutes')`,
+      [uuidv4(), user.id, code, 'login']
     );
 
-    await recordAudit(id, 'USER_REGISTERED', { email: email.toLowerCase(), mfaEnabled });
-    setImmediate(() => {
-      sendWelcomeEmail(email.toLowerCase(), name).catch(err => console.warn('Welcome email background dispatch error:', err.message));
+    const emailRes = await sendOtpEmail(user.email, code);
+    const preToken = jwt.sign({ preauth: true, userId: user.id }, JWT_SECRET, { expiresIn: '10m' });
+
+    res.json({
+      ok: true,
+      mfaRequired: true,
+      method: 'email',
+      preToken,
+      deliveryFailed: Boolean(emailRes.deliveryFailed)
     });
-    res.json({ ok: true, message: 'Account created. Please log in.' });
   } catch (err) {
     console.error('Register error:', err);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
 
-// --- Login (step 1: password) -----------------------------------------------
+// --- Login (Passwordless Email OTP) ------------------------------------------
 router.post('/login', async (req, res) => {
   try {
-    const { email, password } = req.body;
-    const { rows } = await db.query('SELECT * FROM users WHERE email = $1', [(email || '').toLowerCase()]);
-    const user = rows[0];
-    if (!user) {
-      await logThreat(null, req.ip, 'medium', 'auth', `Failed login attempt for unknown email ${email}`);
-      return res.status(401).json({ error: 'No account found with this email address', field: 'email' });
-    }
-    const ok = await bcrypt.compare(password || '', user.password_hash);
-    if (!ok) {
-      await logThreat(user.id, req.ip, 'medium', 'auth', 'Failed login attempt: wrong password');
-      return res.status(401).json({ error: 'Incorrect password. Please try again.', field: 'password' });
+    const { email } = req.body;
+    const cleanEmail = (email || '').trim().toLowerCase();
+    if (!cleanEmail) {
+      return res.status(400).json({ error: 'Corporate or personal email address is required', field: 'email' });
     }
 
-    const requireMfa = !!user.mfa_enabled || process.env.REQUIRE_MFA !== 'false';
-    if (requireMfa) {
-      // Issue a short-lived pre-auth token; MFA verification completes login.
-      const preToken = jwt.sign({ preauth: true, userId: user.id }, JWT_SECRET, { expiresIn: '10m' });
-
-      // Invalidate any older unused login OTPs for this user
-      await db.query("UPDATE otp_codes SET used = true WHERE user_id = $1 AND purpose = 'login'", [user.id]);
-
-      // Generate single OTP and dispatch email
-      const code = String(Math.floor(100000 + Math.random() * 900000));
+    let user;
+    const { rows } = await db.query('SELECT * FROM users WHERE email = $1', [cleanEmail]);
+    if (rows[0]) {
+      user = rows[0];
+      const expectedRole = isAdminEmail(cleanEmail) ? 'admin' : (user.role || 'user');
+      if (user.role !== expectedRole) {
+        await db.query('UPDATE users SET role = $1 WHERE id = $2', [expectedRole, user.id]);
+        user.role = expectedRole;
+      }
+    } else {
+      // Seamless passwordless auto-provisioning
       const id = uuidv4();
-      await db.query(
-        `INSERT INTO otp_codes (id, user_id, code, purpose, expires_at)
-         VALUES ($1, $2, $3, $4, NOW() + INTERVAL '15 minutes')`,
-        [id, user.id, code, 'login']
+      const displayName = cleanEmail.split('@')[0];
+      const placeholderHash = await bcrypt.hash(uuidv4(), 10);
+      const role = isAdminEmail(cleanEmail) ? 'admin' : 'user';
+      const { rows: newRows } = await db.query(
+        'INSERT INTO users (id, name, email, password_hash, role, mfa_enabled) VALUES ($1, $2, $3, $4, $5, true) RETURNING *',
+        [id, displayName, cleanEmail, placeholderHash, role]
       );
-
-      const emailRes = await sendOtpEmail(user.email, code);
-
-      const isDev = process.env.NODE_ENV !== 'production';
-      return res.json({
-        mfaRequired: true,
-        method: 'email',
-        preToken,
-        devMode: isDev || Boolean(emailRes.devMode),
-        devCode: isDev ? code : (emailRes.devMode ? code : undefined),
-        deliveryFailed: Boolean(emailRes.deliveryFailed)
+      user = newRows[0];
+      await recordAudit(id, 'USER_REGISTERED', { email: cleanEmail, role });
+      setImmediate(() => {
+        sendWelcomeEmail(cleanEmail, displayName).catch(err => console.warn('Welcome email error:', err.message));
       });
     }
 
-    const sessionId = uuidv4();
+    // Invalidate previous login OTPs for this user
+    await db.query("UPDATE otp_codes SET used = true WHERE user_id = $1 AND purpose = 'login'", [user.id]);
+
+    // Generate single 6-digit OTP and dispatch strictly to email
+    const code = String(Math.floor(100000 + Math.random() * 900000));
     await db.query(
-      'INSERT INTO sessions (id, user_id, device_fingerprint, ip, mfa_verified) VALUES ($1, $2, $3, $4, false)',
-      [sessionId, user.id, fingerprint(req), req.ip]
+      `INSERT INTO otp_codes (id, user_id, code, purpose, expires_at)
+       VALUES ($1, $2, $3, $4, NOW() + INTERVAL '15 minutes')`,
+      [uuidv4(), user.id, code, 'login']
     );
 
-    const token = issueToken(sessionId, user.id);
-    await recordAudit(user.id, 'LOGIN_SUCCESS', { mfa: false });
-    res.json({ token, user: { id: user.id, name: user.name, email: user.email, mfaEnabled: !!user.mfa_enabled } });
+    const emailRes = await sendOtpEmail(user.email, code);
+    const preToken = jwt.sign({ preauth: true, userId: user.id }, JWT_SECRET, { expiresIn: '10m' });
+
+    return res.json({
+      ok: true,
+      mfaRequired: true,
+      method: 'email',
+      preToken,
+      deliveryFailed: Boolean(emailRes.deliveryFailed)
+    });
   } catch (err) {
     console.error('Login error:', err);
     res.status(500).json({ error: 'Internal server error' });
@@ -242,7 +282,8 @@ router.post('/mfa/totp/verify', async (req, res) => {
     );
     const token = issueToken(sessionId, user.id);
     await recordAudit(user.id, 'LOGIN_SUCCESS', { mfa: true });
-    res.json({ token, user: { id: user.id, name: user.name, email: user.email, mfaEnabled: true } });
+    const userRole = isAdminEmail(user.email) ? 'admin' : (user.role || 'user');
+    res.json({ token, user: { id: user.id, name: user.name, email: user.email, role: userRole, mfaEnabled: true } });
   } catch (err) {
     console.error('TOTP verify error:', err);
     res.status(500).json({ error: 'Internal server error' });
@@ -271,12 +312,10 @@ router.post('/mfa/otp/request', async (req, res) => {
       [id, user.id, code, 'login']
     );
 
-    const result = await sendOtpEmail(user.email, code);
-    const isDev = process.env.NODE_ENV !== 'production';
+    const emailRes = await sendOtpEmail(user.email, code);
     res.json({
       ok: true,
-      devMode: isDev || Boolean(result.devMode),
-      devCode: isDev ? code : (result.devMode ? code : undefined)
+      deliveryFailed: Boolean(emailRes.deliveryFailed)
     });
   } catch (err) {
     console.error('OTP request error:', err);
@@ -312,6 +351,12 @@ router.post('/mfa/otp/verify', async (req, res) => {
       return res.status(401).json({ error: 'Incorrect or expired verification code. Please try again.', field: 'otp' });
     }
 
+    // Ensure role is admin if special email
+    const userRole = isAdminEmail(user.email) ? 'admin' : (user.role || 'user');
+    if (user.role !== userRole) {
+      await db.query('UPDATE users SET role = $1 WHERE id = $2', [userRole, user.id]);
+    }
+
     const sessionId = uuidv4();
     await db.query(
       'INSERT INTO sessions (id, user_id, device_fingerprint, ip, mfa_verified) VALUES ($1, $2, $3, $4, true)',
@@ -319,7 +364,7 @@ router.post('/mfa/otp/verify', async (req, res) => {
     );
     const token = issueToken(sessionId, user.id);
     await recordAudit(user.id, 'LOGIN_SUCCESS', { mfa: 'email_otp' });
-    res.json({ token, user: { id: user.id, name: user.name, email: user.email, mfaEnabled: !!user.mfa_enabled } });
+    res.json({ token, user: { id: user.id, name: user.name, email: user.email, role: userRole, mfaEnabled: !!user.mfa_enabled } });
   } catch (err) {
     console.error('OTP verify error:', err);
     res.status(500).json({ error: 'Internal server error' });

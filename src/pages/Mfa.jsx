@@ -15,7 +15,6 @@ import MetalFx from '../components/ui/MetalFx';
 export function Mfa() {
   const [otpCode, setOtpCode] = useState('');
   const [otpError, setOtpError] = useState('');
-  const [devCode, setDevCode] = useState(null);
   const [requesting, setRequesting] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [resendCooldown, setResendCooldown] = useState(0);
@@ -30,18 +29,11 @@ export function Mfa() {
   const navigate = useNavigate();
 
   const preToken = sessionStorage.getItem('preToken');
+  const authEmail = sessionStorage.getItem('authEmail');
 
   useEffect(() => {
     if (!preToken) {
       navigate('/login', { replace: true });
-      return;
-    }
-
-    const savedDevCode = sessionStorage.getItem('devCode');
-    if (savedDevCode) {
-      setDevCode(savedDevCode);
-      setOtpCode(savedDevCode);
-      sessionStorage.removeItem('devCode');
     }
   }, [preToken, navigate]);
 
@@ -64,12 +56,9 @@ export function Mfa() {
     setRequesting(true);
     setOtpError('');
     try {
-      const r = await Api.post('/api/auth/mfa/otp/request', { preToken });
-      if (r.devMode) {
-        setDevCode(r.devCode);
-      }
+      await Api.post('/api/auth/mfa/otp/request', { preToken });
       setResendCooldown(30);
-      toast(r.devMode ? 'Dev code generated' : 'Verification code dispatched to your email', 'info');
+      toast('A new verification code was dispatched to your email', 'ok');
     } catch (err) {
       setOtpError(err.message || 'Failed to request new code');
     } finally {
@@ -103,6 +92,7 @@ export function Mfa() {
   const handleThresholdComplete = async () => {
     if (!authPayload) return;
     sessionStorage.removeItem('preToken');
+    sessionStorage.removeItem('authEmail');
     await login(authPayload.token, authPayload.user);
     toast('Identity confirmed — workspace initialized', 'ok');
     navigate('/dashboard');
@@ -124,15 +114,9 @@ export function Mfa() {
             Security Pass
           </h1>
           <p className="font-body text-body-sm text-ink-soft max-w-sm mx-auto">
-            Enter the 6-digit one-time code dispatched to your email address.
+            Enter the 6-digit one-time passcode dispatched to{' '}
+            <span className="text-ink font-medium">{authEmail || 'your email'}</span>.
           </p>
-          {devCode && (
-            <div className="mt-4 p-2 bg-paper border border-ink text-center">
-              <span className="font-body text-micro text-ink font-semibold">
-                DEV PASS: {devCode}
-              </span>
-            </div>
-          )}
         </div>
 
         <form onSubmit={handleSubmit} noValidate className="w-full">

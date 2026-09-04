@@ -14,8 +14,7 @@ import MetalFx from '../components/ui/MetalFx';
 export function Register() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [fieldErrors, setFieldErrors] = useState({ name: '', email: '', password: '' });
+  const [fieldErrors, setFieldErrors] = useState({ name: '', email: '' });
   const [submitting, setSubmitting] = useState(false);
 
   const { toast } = useToast();
@@ -31,14 +30,9 @@ export function Register() {
     if (fieldErrors.email) setFieldErrors((prev) => ({ ...prev, email: '' }));
   };
 
-  const handlePasswordChange = (e) => {
-    setPassword(e.target.value);
-    if (fieldErrors.password) setFieldErrors((prev) => ({ ...prev, password: '' }));
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setFieldErrors({ name: '', email: '', password: '' });
+    setFieldErrors({ name: '', email: '' });
 
     let hasErr = false;
     if (!name.trim()) {
@@ -46,27 +40,22 @@ export function Register() {
       hasErr = true;
     }
     if (!email.trim()) {
-      setFieldErrors((prev) => ({ ...prev, email: 'Please enter your work email' }));
-      hasErr = true;
-    }
-    if (!password || password.length < 8) {
-      setFieldErrors((prev) => ({ ...prev, password: 'Password must be at least 8 characters' }));
+      setFieldErrors((prev) => ({ ...prev, email: 'Please enter your corporate email' }));
       hasErr = true;
     }
     if (hasErr) return;
 
     setSubmitting(true);
     try {
-      await Api.post('/api/auth/register', { name, email, password });
-      toast('Account created — please sign in', 'ok');
-      navigate('/login');
+      const cleanEmail = email.trim().toLowerCase();
+      const res = await Api.post('/api/auth/register', { name: name.trim(), email: cleanEmail });
+      sessionStorage.setItem('preToken', res.preToken);
+      sessionStorage.setItem('authEmail', cleanEmail);
+      toast('Verification pass dispatched to your email', 'ok');
+      navigate('/mfa');
     } catch (err) {
       const errMsg = err.message || 'Registration failed';
-      if (errMsg.toLowerCase().includes('already') || errMsg.toLowerCase().includes('exists')) {
-        setFieldErrors({ name: '', email: 'An account with this email already exists', password: '' });
-      } else {
-        setFieldErrors({ name: '', email: '', password: errMsg });
-      }
+      setFieldErrors({ name: '', email: errMsg });
     } finally {
       setSubmitting(false);
     }
@@ -95,6 +84,7 @@ export function Register() {
             id="name"
             label="Full Name & Title"
             required
+            autoFocus
             value={name}
             onChange={handleNameChange}
             error={fieldErrors.name}
@@ -105,24 +95,12 @@ export function Register() {
             id="email"
             label="Corporate Email"
             type="email"
-            autoComplete="username"
+            autoComplete="email"
             required
             value={email}
             onChange={handleEmailChange}
             error={fieldErrors.email}
             placeholder="counsel@enterprise.com"
-          />
-
-          <FormField
-            id="password"
-            label="Password (min. 8 characters)"
-            type="password"
-            autoComplete="new-password"
-            required
-            value={password}
-            onChange={handlePasswordChange}
-            error={fieldErrors.password}
-            placeholder="••••••••••••"
           />
 
           <div className="mt-8 mb-6">
@@ -134,7 +112,7 @@ export function Register() {
                 disabled={submitting}
                 className="w-full py-4 text-center font-medium"
               >
-                Register Account
+                Register &amp; Receive Passcode
               </Button>
             </MetalFx>
           </div>

@@ -14,59 +14,36 @@ import MetalFx from '../components/ui/MetalFx';
  */
 export function Login() {
   const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [fieldErrors, setFieldErrors] = useState({ email: '', password: '' });
+  const [fieldErrors, setFieldErrors] = useState({ email: '' });
   const [submitting, setSubmitting] = useState(false);
 
-  const { login } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
 
   const handleEmailChange = (e) => {
     setEmail(e.target.value);
-    if (fieldErrors.email) setFieldErrors((prev) => ({ ...prev, email: '' }));
-  };
-
-  const handlePasswordChange = (e) => {
-    setPassword(e.target.value);
-    if (fieldErrors.password) setFieldErrors((prev) => ({ ...prev, password: '' }));
+    if (fieldErrors.email) setFieldErrors({ email: '' });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setFieldErrors({ email: '', password: '' });
+    setFieldErrors({ email: '' });
 
-    if (!email) {
-      setFieldErrors((prev) => ({ ...prev, email: 'Please enter your corporate email address' }));
-      return;
-    }
-    if (!password) {
-      setFieldErrors((prev) => ({ ...prev, password: 'Please enter your password' }));
+    const cleanEmail = (email || '').trim().toLowerCase();
+    if (!cleanEmail) {
+      setFieldErrors({ email: 'Please enter your corporate email address' });
       return;
     }
 
     setSubmitting(true);
     try {
-      const result = await Api.post('/api/auth/login', { email, password });
-      if (result.mfaRequired) {
-        sessionStorage.setItem('preToken', result.preToken);
-        if (result.devCode) sessionStorage.setItem('devCode', result.devCode);
-        navigate('/mfa');
-        return;
-      }
-      await login(result.token, result.user);
-      toast('Signed in securely', 'ok');
-      navigate('/dashboard');
+      const result = await Api.post('/api/auth/login', { email: cleanEmail });
+      sessionStorage.setItem('preToken', result.preToken);
+      sessionStorage.setItem('authEmail', cleanEmail);
+      toast('Verification pass dispatched to your email', 'ok');
+      navigate('/mfa');
     } catch (err) {
-      const errMsg = err.message || 'Authentication failed';
-      const lower = errMsg.toLowerCase();
-      if (lower.includes('password') || lower.includes('credentials') || lower.includes('invalid email or password')) {
-        setFieldErrors({ email: '', password: 'Incorrect credentials. Please try again.' });
-      } else if (lower.includes('email') || lower.includes('account') || lower.includes('user not found')) {
-        setFieldErrors({ email: errMsg, password: '' });
-      } else {
-        setFieldErrors({ email: '', password: errMsg });
-      }
+      setFieldErrors({ email: err.message || 'Authentication request failed' });
     } finally {
       setSubmitting(false);
     }
@@ -86,29 +63,8 @@ export function Login() {
             Sign In
           </h1>
           <p className="font-body text-body-sm text-ink-soft max-w-sm mx-auto">
-            Enter your credentials to access the DocuGuard executive cockpit.
+            Enter your email address to receive your secure one-time verification pass.
           </p>
-        </div>
-
-        {/* Demo Fast-Login Helper */}
-        <div className="mb-6 p-4 bg-paper-dim border border-rule flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-left">
-          <div className="min-w-0 flex-1">
-            <span className="font-body text-micro text-ink font-semibold block">Demo Cockpit Access</span>
-            <span className="font-body text-micro text-ink-soft select-all block truncate sm:overflow-visible">
-              admin@docugaurd.ai / Password123!
-            </span>
-          </div>
-          <button
-            type="button"
-            onClick={() => {
-              setEmail('admin@docugaurd.ai');
-              setPassword('Password123!');
-              setFieldErrors({ email: '', password: '' });
-            }}
-            className="btn btn-ghost py-1 px-3 text-micro whitespace-nowrap self-start sm:self-auto"
-          >
-            Auto-fill
-          </button>
         </div>
 
         <form onSubmit={handleSubmit} noValidate className="w-full">
@@ -116,24 +72,13 @@ export function Login() {
             id="email"
             label="Corporate Email"
             type="email"
-            autoComplete="username"
+            autoComplete="email"
             required
+            autoFocus
             value={email}
             onChange={handleEmailChange}
             error={fieldErrors.email}
             placeholder="counsel@enterprise.com"
-          />
-
-          <FormField
-            id="password"
-            label="Password"
-            type="password"
-            autoComplete="current-password"
-            required
-            value={password}
-            onChange={handlePasswordChange}
-            error={fieldErrors.password}
-            placeholder="••••••••••••"
           />
 
           <div className="mt-8 mb-6">

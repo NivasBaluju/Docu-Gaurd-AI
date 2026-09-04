@@ -87,15 +87,6 @@ export function Dashboard() {
               Signed in as <span className="font-medium text-ink">{user?.name || user?.email}</span> • {totalContracts} Agreements Under Surveillance
             </p>
           </div>
-
-          <div className="flex flex-wrap items-center gap-4">
-            <Button href="/upload" variant="primary">
-              Deposit New Contract
-            </Button>
-            <Button href="/portfolio" variant="ghost">
-              Portfolio &amp; Governance Cockpit
-            </Button>
-          </div>
         </div>
 
         {/* Pending Approvals Callout (Phase 8.1 / 8.2 Invariant) */}
