@@ -9,6 +9,7 @@ const {
   detectPII, redactPII, diffDocuments
 } = require('../utils/aiEngine');
 const { askGeminiOrFallback } = require('../utils/gemini');
+const { recordAiTelemetry, getTelemetryMetrics } = require('../utils/aiTelemetry');
 
 const router = express.Router();
 
@@ -16,6 +17,16 @@ async function getOwnedDocument(id, userId) {
   const { rows } = await db.query('SELECT * FROM documents WHERE id = $1 AND user_id = $2', [id, userId]);
   return rows[0];
 }
+
+router.get('/telemetry', requireAuth, async (req, res) => {
+  try {
+    const hours = Number(req.query.hours) || 24;
+    const metrics = await getTelemetryMetrics({ timeWindowHours: hours });
+    res.json(metrics);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to retrieve telemetry metrics' });
+  }
+});
 
 router.get('/documents/:id/clauses', requireAuth, async (req, res) => {
   const doc = await getOwnedDocument(req.params.id, req.user.id);
@@ -30,20 +41,36 @@ router.get('/documents/:id/simplify', requireAuth, async (req, res) => {
 });
 
 router.post('/documents/:id/chat', requireAuth, async (req, res) => {
+  const startTime = Date.now();
   const doc = await getOwnedDocument(req.params.id, req.user.id);
   if (!doc) return res.status(404).json({ error: 'Document not found' });
   const { question } = req.body;
   if (!question) return res.status(400).json({ error: 'question is required' });
 
   const result = await askGeminiOrFallback(question, doc.extracted_text || '');
+  const durationMs = Date.now() - startTime;
+
+  recordAiTelemetry({
+    correlationId: req.correlationId,
+    userId: req.user.id,
+    documentId: doc.id,
+    operationType: 'CHAT_RAG',
+    provider: result.provider || 'local',
+    model: result.model || 'gemini-fallback',
+    durationMs,
+    status: 'SUCCESS',
+    groundedStatus: result.grounded !== false && result.groundingStatus !== 'INSUFFICIENT_EVIDENCE' ? 'GROUNDED' : 'INSUFFICIENT_EVIDENCE',
+    tokensUsed: result.tokensUsed || 0,
+    fallbackUsed: Boolean(result.fallbackUsed)
+  });
 
   await db.query(
     `INSERT INTO chat_messages (id, document_id, user_id, role, content) VALUES ($1, $2, $3, 'user', $4)`,
     [uuidv4(), doc.id, req.user.id, question]
   );
   await db.query(
-    `INSERT INTO chat_messages (id, document_id, user_id, role, content, confidence, source_ref) VALUES ($1, $2, $3, 'assistant', $4, $5, $6)`,
-    [uuidv4(), doc.id, req.user.id, result.answer, result.confidence, JSON.stringify(result.sources || [])]
+    `INSERT INTO chat_messages (id, document_id, user_id, role, content, confidence, source_ref, grounded) VALUES ($1, $2, $3, 'assistant', $4, $5, $6, $7)`,
+    [uuidv4(), doc.id, req.user.id, result.answer, result.confidence, JSON.stringify(result.sources || []), result.grounded !== false]
   );
 
   res.json(result);

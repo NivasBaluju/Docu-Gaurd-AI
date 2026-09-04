@@ -61,6 +61,40 @@ export const PortfolioAnalyticsApi = {
    */
   async getPortfolioEscalations() {
     return Api.get('/api/portfolio/escalations');
+  },
+
+  /**
+   * Phase 11 Continuous Monitoring & Lifecycle Control
+   */
+  async getMonitoringEvents(params = {}) {
+    const query = new URLSearchParams();
+    Object.entries(params).forEach(([k, v]) => {
+      if (v !== undefined && v !== null && v !== '' && v !== 'ALL') {
+        query.append(k, v);
+      }
+    });
+    const qs = query.toString() ? `?${query.toString()}` : '';
+    return Api.get(`/api/portfolio/monitoring${qs}`);
+  },
+
+  async getMonitoringAttention() {
+    return Api.get('/api/portfolio/attention');
+  },
+
+  async getPortfolioLifecycle() {
+    return Api.get('/api/portfolio/lifecycle');
+  },
+
+  async runMonitoringCycle() {
+    return Api.post('/api/portfolio/monitoring/run', {});
+  },
+
+  async getChangeIntelligence() {
+    return Api.get('/api/portfolio/change-intelligence');
+  },
+
+  async acknowledgeEvent(docId, eventId) {
+    return Api.post(`/api/documents/${docId}/monitoring/${eventId}/acknowledge`, {});
   }
 };
 

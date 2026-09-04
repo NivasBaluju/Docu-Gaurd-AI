@@ -19,12 +19,17 @@ const notificationRoutes = require('./routes/notifications');
 const portfolioRoutes = require('./routes/portfolioAnalytics');
 const portfolioOperationsRoutes = require('./routes/portfolioOperations');
 const complianceRoutes = require('./routes/complianceAudit');
+const { correlationMiddleware } = require('./middleware/correlation');
+const logger = require('./utils/logger');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
 // Trust reverse proxy hops (Vercel, Cloudflare, Nginx, ALB) for accurate client IP identification
 app.set('trust proxy', 1);
+
+// Mount request correlation tracking early
+app.use(correlationMiddleware);
 
 // --- CORS -------------------------------------------------------------------
 // Allow the Vercel-hosted frontend and local dev to reach the API.
@@ -40,7 +45,8 @@ app.use((req, res, next) => {
     res.setHeader('Access-Control-Allow-Origin', origin || '*');
   }
   res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Correlation-Id');
+  res.setHeader('Access-Control-Expose-Headers', 'X-Correlation-Id');
   res.setHeader('Access-Control-Allow-Credentials', 'true');
   if (req.method === 'OPTIONS') return res.sendStatus(204);
   next();
@@ -86,8 +92,88 @@ app.use('/api/security', securityRoutes);
 app.use('/api/share', shareRoutes);
 app.use('/api/admin', adminRoutes);
 
+// --- Health & Readiness Model ------------------------------------------------
+// 1. Process Liveness Probe (Fast process response check)
+app.get(['/api/health/live', '/api/health/liveness'], (req, res) => {
+  res.status(200).json({
+    status: 'live',
+    service: 'Docu-Gaurd AI Gateway',
+    timestamp: new Date().toISOString(),
+    uptime: Math.floor(process.uptime()),
+    correlationId: req.correlationId
+  });
+});
+
+// 2. Deep Readiness Probe (PostgreSQL pool + Flask microservice validation)
+app.get(['/api/health/ready', '/api/health/readiness'], async (req, res) => {
+  const health = {
+    status: 'ready',
+    service: 'Docu-Gaurd AI Gateway',
+    timestamp: new Date().toISOString(),
+    uptime: Math.floor(process.uptime()),
+    correlationId: req.correlationId,
+    dependencies: {
+      database: { status: 'unknown' },
+      ai_microservice: { status: 'unknown' }
+    }
+  };
+
+  let isReady = true;
+
+  // Database connectivity check
+  try {
+    const dbStart = Date.now();
+    await db.query('SELECT 1');
+    health.dependencies.database = {
+      status: 'healthy',
+      latencyMs: Date.now() - dbStart
+    };
+  } catch (dbErr) {
+    health.dependencies.database = {
+      status: 'unhealthy',
+      error: dbErr.message
+    };
+    isReady = false;
+  }
+
+  // AI Microservice check
+  try {
+    const flaskStart = Date.now();
+    const flaskRes = await fetch('http://127.0.0.1:5001/api/health', {
+      signal: AbortSignal.timeout(2000)
+    });
+    if (flaskRes.ok) {
+      const flaskData = await flaskRes.json();
+      health.dependencies.ai_microservice = {
+        status: 'healthy',
+        latencyMs: Date.now() - flaskStart,
+        connected: flaskData.postgres?.connected !== false
+      };
+    } else {
+      health.dependencies.ai_microservice = {
+        status: 'degraded',
+        httpStatus: flaskRes.status
+      };
+    }
+  } catch (flaskErr) {
+    health.dependencies.ai_microservice = {
+      status: 'unavailable',
+      error: 'Microservice unreachable; direct node fallback active'
+    };
+  }
+
+  health.status = isReady ? 'ready' : 'unhealthy';
+  res.status(isReady ? 200 : 503).json(health);
+});
+
+// 3. Backward-Compatible General Health Check
 app.get('/api/health', (req, res) => {
-  res.json({ status: 'ok', service: 'Docu-Gaurd AI', time: new Date().toISOString() });
+  res.json({
+    status: 'ok',
+    service: 'Docu-Gaurd AI',
+    time: new Date().toISOString(),
+    correlationId: req.correlationId
+  });
 });
 
 // Bootstrap genesis audit block on first run.

@@ -8,6 +8,7 @@ import PortfolioDeadlinesAndEscalations from './PortfolioDeadlinesAndEscalations
 import PortfolioCompliancePanel from '../compliance/PortfolioCompliancePanel';
 import BulkOperationHistoryPanel from './BulkOperationHistoryPanel';
 import PendingApprovalsQueue from './PendingApprovalsQueue';
+import PortfolioMonitoring from './PortfolioMonitoring';
 import SkeletonLoader from '../common/SkeletonLoader';
 import { PortfolioAnalyticsApi } from '../../services/portfolioAnalyticsApi';
 import { useToast } from '../../context/ToastContext';
@@ -15,7 +16,7 @@ import { useToast } from '../../context/ToastContext';
 export const PortfolioDashboard = () => {
   const [summary, setSummary] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState('OVERVIEW'); // 'OVERVIEW' | 'ATTENTION' | 'CONTRACTS' | 'WORKLOAD' | 'AUDIT' | 'BULK_OPS' | 'APPROVALS'
+  const [activeTab, setActiveTab] = useState('MONITORING'); // Default to MONITORING in Phase 11 or OVERVIEW
   const { toast } = useToast();
 
   const fetchSummary = async () => {
@@ -65,6 +66,13 @@ export const PortfolioDashboard = () => {
           flexWrap: 'wrap',
         }}
       >
+        <button
+          className={`btn btn-sm ${activeTab === 'MONITORING' ? 'btn-primary' : 'btn-ghost'}`}
+          onClick={() => setActiveTab('MONITORING')}
+          style={{ fontSize: '12.5px', padding: '6px 14px' }}
+        >
+          📡 Continuous Monitoring
+        </button>
         <button
           className={`btn btn-sm ${activeTab === 'OVERVIEW' ? 'btn-primary' : 'btn-ghost'}`}
           onClick={() => setActiveTab('OVERVIEW')}
@@ -131,6 +139,12 @@ export const PortfolioDashboard = () => {
       </div>
 
       {/* 3. Tab Contents */}
+      {activeTab === 'MONITORING' && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+          <PortfolioMonitoring />
+        </div>
+      )}
+
       {activeTab === 'OVERVIEW' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
           {/* Top Priority Attention Queue */}

@@ -348,6 +348,90 @@ const MIGRATIONS = [
       CREATE INDEX IF NOT EXISTS idx_activity_logs_user_id ON activity_logs(user_id);
       CREATE INDEX IF NOT EXISTS idx_activity_logs_action ON activity_logs(action);
     `
+  },
+  {
+    version: '20260904_007_phase9_enterprise_observability',
+    name: 'Enterprise AI telemetry logging, operational correlation tracking, and grounding observability',
+    sql: `
+      CREATE TABLE IF NOT EXISTS ai_telemetry_logs (
+        id VARCHAR(36) PRIMARY KEY,
+        correlation_id VARCHAR(64),
+        user_id VARCHAR(36) REFERENCES users(id) ON DELETE SET NULL,
+        document_id VARCHAR(36) REFERENCES documents(id) ON DELETE CASCADE,
+        operation_type VARCHAR(50) NOT NULL,
+        model_provider VARCHAR(50),
+        model_name VARCHAR(50),
+        duration_ms INTEGER,
+        status VARCHAR(20) NOT NULL DEFAULT 'SUCCESS',
+        grounded_status VARCHAR(30) DEFAULT 'GROUNDED',
+        tokens_used INTEGER DEFAULT 0,
+        fallback_used BOOLEAN NOT NULL DEFAULT FALSE,
+        error_category VARCHAR(50),
+        metadata JSONB NOT NULL DEFAULT '{}'::jsonb,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      );
+
+      CREATE INDEX IF NOT EXISTS idx_ai_telemetry_correlation ON ai_telemetry_logs(correlation_id);
+      CREATE INDEX IF NOT EXISTS idx_ai_telemetry_operation ON ai_telemetry_logs(operation_type, created_at DESC);
+      CREATE INDEX IF NOT EXISTS idx_ai_telemetry_document ON ai_telemetry_logs(document_id);
+    `
+  },
+  {
+    version: '20260904_008_phase10_decision_intelligence',
+    name: 'Phase 10 contract decision intelligence, deterministic exposure snapshot, and decision tracking',
+    sql: `
+      ALTER TABLE contract_intelligence ADD COLUMN IF NOT EXISTS decision_intelligence_json JSONB;
+      ALTER TABLE contract_intelligence ADD COLUMN IF NOT EXISTS exposure_score INTEGER;
+      ALTER TABLE contract_intelligence ADD COLUMN IF NOT EXISTS primary_driver TEXT;
+
+      CREATE INDEX IF NOT EXISTS idx_contract_intelligence_doc_created ON contract_intelligence(document_id, created_at DESC);
+    `
+  },
+  {
+    version: '20260904_009_phase11_portfolio_monitoring',
+    name: 'Phase 11 contract portfolio continuous monitoring, change detection, and lifecycle control',
+    sql: `
+      CREATE TABLE IF NOT EXISTS contract_monitoring_events (
+        id VARCHAR(36) PRIMARY KEY,
+        document_id VARCHAR(36) REFERENCES documents(id) ON DELETE CASCADE,
+        user_id VARCHAR(36) REFERENCES users(id) ON DELETE CASCADE,
+        event_type VARCHAR(50) NOT NULL,
+        severity VARCHAR(20) NOT NULL,
+        priority_score INTEGER NOT NULL CHECK (priority_score >= 0 AND priority_score <= 100),
+        title TEXT NOT NULL,
+        description TEXT NOT NULL,
+        evidence_reference TEXT,
+        previous_value TEXT,
+        current_value TEXT,
+        risk_delta INTEGER DEFAULT 0,
+        affected_dimension VARCHAR(50),
+        deduplication_key VARCHAR(255) NOT NULL,
+        status VARCHAR(20) NOT NULL DEFAULT 'OPEN',
+        detected_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+        acknowledged_at TIMESTAMP WITH TIME ZONE,
+        resolved_at TIMESTAMP WITH TIME ZONE,
+        metadata JSONB NOT NULL DEFAULT '{}'::jsonb,
+        CONSTRAINT contract_monitoring_events_dedup_unique UNIQUE (document_id, deduplication_key)
+      );
+
+      CREATE INDEX IF NOT EXISTS idx_monitoring_events_user_status ON contract_monitoring_events(user_id, status, priority_score DESC);
+      CREATE INDEX IF NOT EXISTS idx_monitoring_events_doc_detected ON contract_monitoring_events(document_id, detected_at DESC);
+
+      CREATE TABLE IF NOT EXISTS contract_lifecycle_states (
+        document_id VARCHAR(36) PRIMARY KEY REFERENCES documents(id) ON DELETE CASCADE,
+        user_id VARCHAR(36) REFERENCES users(id) ON DELETE CASCADE,
+        state VARCHAR(30) NOT NULL DEFAULT 'ACTIVE',
+        renewal_date TIMESTAMP WITH TIME ZONE,
+        notice_deadline TIMESTAMP WITH TIME ZONE,
+        cure_deadline TIMESTAMP WITH TIME ZONE,
+        expiration_date TIMESTAMP WITH TIME ZONE,
+        evidence_json JSONB NOT NULL DEFAULT '{}'::jsonb,
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      );
+
+      CREATE INDEX IF NOT EXISTS idx_lifecycle_states_user_state ON contract_lifecycle_states(user_id, state);
+      CREATE INDEX IF NOT EXISTS idx_lifecycle_states_notice_deadline ON contract_lifecycle_states(notice_deadline);
+    `
   }
 ];
 
@@ -416,5 +500,7 @@ pool.connect()
     await initDb();
   })
   .catch(err => console.error("❌ PostgreSQL Connection Error:", err));
+
+pool.initDb = initDb;
 
 module.exports = pool;

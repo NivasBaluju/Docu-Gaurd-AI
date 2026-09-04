@@ -1,6 +1,8 @@
 const express = require('express');
 const router = express.Router();
+const db = require('../db');
 const { requireAuth } = require('../middleware/auth');
+const { verifyChain } = require('../utils/audit');
 const complianceService = require('../services/complianceAuditService');
 const exportService = require('../services/evidenceExportService');
 const integrityService = require('../services/evidenceIntegrityService');
@@ -296,6 +298,193 @@ router.get('/portfolio/export/contracts.csv', requireAuth, async (req, res) => {
     const status = err.status || 500;
     return res.status(status).json({ error: err.message });
   }
+});
+
+// ============================================================================
+// 4. ENTERPRISE CRYPTOGRAPHIC AUDIT EXPLORER
+// ============================================================================
+
+/**
+ * GET /api/compliance/audit-trail
+ * Paginated, tamper-evident audit ledger explorer with cryptographic integrity status.
+ */
+router.get(['/audit-trail', '/audit-explorer'], requireAuth, async (req, res) => {
+  try {
+    const limit = Math.min(100, Math.max(1, parseInt(req.query.limit, 10) || 50));
+    const offset = Math.max(0, parseInt(req.query.offset, 10) || 0);
+    const actionFilter = req.query.action ? String(req.query.action).trim() : null;
+
+    let query = `
+      SELECT 
+        b.id,
+        b.block_index AS "blockIndex",
+        b.user_id AS "userId",
+        b.action,
+        b.details_json AS "detailsJson",
+        b.prev_hash AS "prevHash",
+        b.hash,
+        b.created_at AS "createdAt",
+        u.email AS "userEmail",
+        u.role AS "userRole"
+      FROM blockchain_audit b
+      LEFT JOIN users u ON u.id = b.user_id
+    `;
+    const params = [];
+    const conditions = [];
+
+    if (actionFilter) {
+      params.push(actionFilter);
+      conditions.push(`b.action = $${params.length}`);
+    }
+
+    if (conditions.length > 0) {
+      query += ` WHERE ${conditions.join(' AND ')}`;
+    }
+
+    query += ` ORDER BY b.block_index DESC LIMIT $${params.length + 1} OFFSET $${params.length + 2}`;
+    params.push(limit, offset);
+
+    const countQuery = actionFilter
+      ? 'SELECT COUNT(*) AS c FROM blockchain_audit WHERE action = $1'
+      : 'SELECT COUNT(*) AS c FROM blockchain_audit';
+    const countParams = actionFilter ? [actionFilter] : [];
+
+    const [rowsRes, countRes, chainStatus] = await Promise.all([
+      db.query(query, params),
+      db.query(countQuery, countParams),
+      verifyChain()
+    ]);
+
+    const formattedBlocks = rowsRes.rows.map(r => {
+      let parsedDetails = {};
+      try {
+        parsedDetails = typeof r.detailsJson === 'string' ? JSON.parse(r.detailsJson) : (r.detailsJson || {});
+      } catch {
+        parsedDetails = { raw: r.detailsJson };
+      }
+      return {
+        id: r.id,
+        blockIndex: Number(r.blockIndex),
+        action: r.action,
+        actor: r.userEmail ? r.userEmail.replace(/^(.{2})(.*)(@.*)$/, '$1***$3') : 'System / Anonymous',
+        actorRole: r.userRole || 'system',
+        details: parsedDetails,
+        prevHash: r.prevHash,
+        hash: r.hash,
+        createdAt: r.createdAt
+      };
+    });
+
+    res.json({
+      total: Number(countRes.rows[0].c),
+      limit,
+      offset,
+      chainIntegrity: {
+        valid: chainStatus.valid,
+        totalBlocks: chainStatus.totalBlocks,
+        verifiedAt: new Date().toISOString()
+      },
+      blocks: formattedBlocks
+    });
+  } catch (err) {
+    console.error('[Audit Trail Error]:', err);
+    res.status(500).json({ error: 'Failed to retrieve audit trail' });
+  }
+});
+
+/**
+ * GET /api/compliance/audit-trail/verify
+ * Direct mathematical verification of every SHA-256 hash across the blockchain ledger.
+ */
+router.get(['/audit-trail/verify', '/audit-chain/verify'], requireAuth, async (req, res) => {
+  try {
+    const chainStatus = await verifyChain();
+    res.json({
+      ...chainStatus,
+      algorithm: 'SHA-256',
+      verifiedAt: new Date().toISOString()
+    });
+  } catch (err) {
+    console.error('[Audit Chain Verification Error]:', err);
+    res.status(500).json({ error: 'Failed to verify cryptographic chain' });
+  }
+});
+
+/**
+ * GET /api/compliance/retention-policy
+ * Enterprise Data Retention & Privacy Governance Schedule.
+ * Transparently details the retention behavior across all storage layers.
+ */
+router.get(['/retention-policy', '/governance/retention'], (req, res) => {
+  res.json({
+    version: '2026.1-enterprise',
+    retentionSchedule: [
+      {
+        asset: 'documents',
+        retentionPeriod: 'Indefinite (User-Governed)',
+        storageType: 'AES-256 Encrypted on Disk / DB Metadata',
+        deletionMechanism: 'User-initiated hard delete with cryptographic ledger record (DOCUMENT_DELETED)',
+        piiClassification: 'Confidential'
+      },
+      {
+        asset: 'extracted_text',
+        retentionPeriod: 'Bound to Document Lifecycle',
+        storageType: 'PostgreSQL text column',
+        deletionMechanism: 'Cascading DELETE ON CASCADE from documents table',
+        piiClassification: 'Confidential'
+      },
+      {
+        asset: 'chat_messages',
+        retentionPeriod: 'Bound to Document Lifecycle',
+        storageType: 'PostgreSQL chat_messages table',
+        deletionMechanism: 'Cascading DELETE ON CASCADE from documents table',
+        piiClassification: 'Internal Operational'
+      },
+      {
+        asset: 'ai_telemetry_logs',
+        retentionPeriod: '90 Days',
+        storageType: 'PostgreSQL ai_telemetry_logs table',
+        deletionMechanism: 'Scheduled operational purge; contains zero raw contract text or prompts',
+        piiClassification: 'Non-Sensitive Telemetry'
+      },
+      {
+        asset: 'blockchain_audit',
+        retentionPeriod: 'Permanent (Immutable Ledger)',
+        storageType: 'PostgreSQL blockchain_audit table',
+        deletionMechanism: 'Append-only SHA-256 hash chain; non-deletable for legal audit integrity',
+        piiClassification: 'Cryptographic Proof'
+      },
+      {
+        asset: 'sessions',
+        retentionPeriod: '7 Days or Explicit Logout',
+        storageType: 'PostgreSQL sessions table',
+        deletionMechanism: 'Token expiration and zero-trust revocation flags',
+        piiClassification: 'Authentication Credential'
+      },
+      {
+        asset: 'otp_codes',
+        retentionPeriod: '10 Minutes',
+        storageType: 'PostgreSQL otp_codes table',
+        deletionMechanism: 'Single-use flag and expires_at threshold rejection',
+        piiClassification: 'Ephemeral Credential'
+      },
+      {
+        asset: 'share_links',
+        retentionPeriod: 'Configurable (Default 48h to 7d)',
+        storageType: 'PostgreSQL share_links table',
+        deletionMechanism: 'CSPRNG token expiration and download count limits',
+        piiClassification: 'Access Link'
+      },
+      {
+        asset: 'temporary_files',
+        retentionPeriod: '0 Seconds (Ephemeral In-Memory)',
+        storageType: 'RAM (Multer Memory Storage Buffer)',
+        deletionMechanism: 'Garbage collected immediately upon request completion',
+        piiClassification: 'Ephemeral'
+      }
+    ],
+    timestamp: new Date().toISOString()
+  });
 });
 
 module.exports = router;

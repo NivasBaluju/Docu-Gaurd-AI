@@ -10,24 +10,36 @@ import { buttonMotion, EASE_OUT } from '../../styles/motion';
 
 export const IntelligenceTab = ({ doc, refreshTrigger }) => {
   const [intelData, setIntelData] = useState(null);
+  const [decisionIntel, setDecisionIntel] = useState(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [activeSubTab, setActiveSubTab] = useState('BRIEF'); // 'BRIEF' | 'EXPOSURE' | 'DEPENDENCY' | 'SCENARIOS' | 'CONFLICTS' | 'ACTIONS'
+  const [applyingScenarioId, setApplyingScenarioId] = useState(null);
   const [filterCategory, setFilterCategory] = useState('ALL');
   const [searchQuery, setSearchQuery] = useState('');
-  const [expandedProvenanceId, setExpandedProvenanceId] = useState(null);
-  const [expandedEvidenceId, setExpandedEvidenceId] = useState(null);
+  const [expandedDim, setExpandedDim] = useState(null);
+  const [expandedConflictId, setExpandedConflictId] = useState(null);
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  const loadIntelligence = async (showToast = false) => {
+  const loadAllIntelligence = async (showToast = false) => {
     if (!doc?.id) return;
     if (showToast) setRefreshing(true);
     try {
-      const res = await Api.get(`/api/documents/${doc.id}/intelligence`);
-      setIntelData(res);
-      if (showToast) toast('Executive intelligence updated successfully', 'ok');
+      const [intelRes, decRes] = await Promise.allSettled([
+        Api.get(`/api/documents/${doc.id}/intelligence`),
+        Api.get(`/api/documents/${doc.id}/decision-intelligence`)
+      ]);
+
+      if (intelRes.status === 'fulfilled') {
+        setIntelData(intelRes.value);
+      }
+      if (decRes.status === 'fulfilled') {
+        setDecisionIntel(decRes.value);
+      }
+      if (showToast) toast('Contract Decision Intelligence updated successfully', 'ok');
     } catch (err) {
-      toast(err.message || 'Failed to load contract intelligence', 'error');
+      toast(err.message || 'Failed to load contract decision intelligence', 'error');
     } finally {
       setLoading(false);
       if (showToast) setRefreshing(false);
@@ -35,70 +47,91 @@ export const IntelligenceTab = ({ doc, refreshTrigger }) => {
   };
 
   useEffect(() => {
-    loadIntelligence(false);
+    loadAllIntelligence(false);
   }, [doc?.id, refreshTrigger]);
 
   const handleRefresh = async () => {
     setRefreshing(true);
     try {
-      const res = await Api.post(`/api/documents/${doc.id}/intelligence/refresh`, {});
-      setIntelData(res);
-      toast('Contract intelligence re-synthesized', 'ok');
+      await Api.post(`/api/documents/${doc.id}/intelligence/refresh`, {});
+      await loadAllIntelligence(false);
+      toast('Contract Decision Intelligence re-computed', 'ok');
     } catch (err) {
-      toast(err.message || 'Failed to refresh intelligence', 'error');
+      toast(err.message || 'Failed to refresh decision intelligence', 'error');
     } finally {
       setRefreshing(false);
     }
   };
 
+  const handleApplyScenarioAction = async (scenario) => {
+    setApplyingScenarioId(scenario.scenarioId);
+    try {
+      const res = await Api.post(`/api/documents/${doc.id}/decisions/act`, {
+        scenarioId: scenario.scenarioId,
+        notes: `Selected strategy: ${scenario.strategy}. Target delta: ${scenario.riskDelta} points.`
+      });
+      toast(`Decision applied to Action Center: ${scenario.title}`, 'ok');
+      // Navigate to Action Center after brief pause
+      setTimeout(() => {
+        navigate(`/document/${doc.id}/actions`);
+      }, 800);
+    } catch (err) {
+      toast(err.message || 'Failed to convert scenario into action item', 'error');
+    } finally {
+      setApplyingScenarioId(null);
+    }
+  };
+
   const handleExportBrief = () => {
-    if (!intelData) return;
+    const activeData = decisionIntel || intelData;
+    if (!activeData) return;
     const dateStr = new Date().toISOString().split('T')[0];
     const docName = doc.original_name || doc.filename || 'Contract';
-    
-    let briefMd = `# EXECUTIVE CONTRACT INTELLIGENCE BRIEF\n`;
+
+    let briefMd = `# EXECUTIVE CONTRACT DECISION INTELLIGENCE BRIEF\n`;
     briefMd += `**Document:** ${docName}\n`;
-    briefMd += `**Health Score:** ${intelData.healthScore}/100\n`;
+    briefMd += `**Overall Exposure Score:** ${activeData.exposureScore || 50}/100\n`;
+    briefMd += `**Primary Deterioration Driver:** ${activeData.primaryDeteriorationDriver || 'Liability'}\n`;
     briefMd += `**Date:** ${dateStr}\n\n`;
-    briefMd += `## Executive Summary\n${intelData.executiveSummary}\n\n`;
-    
-    if (intelData.conflicts && intelData.conflicts.length > 0) {
-      briefMd += `## Identified Contract Conflicts & Inconsistencies\n`;
-      intelData.conflicts.forEach((c, idx) => {
-        briefMd += `### ${idx + 1}. ${c.title}\n`;
-        briefMd += `- **Type:** ${c.conflictType}\n`;
-        briefMd += `- **Description:** ${c.description}\n`;
-        briefMd += `- **Recommendation:** ${c.recommendation}\n`;
-        briefMd += `- **Evidence:**\n`;
-        c.evidence.forEach(e => {
-          briefMd += `  * *${e.section}*: "${e.excerpt || e.identifiedValue}"\n`;
-        });
-        briefMd += `\n`;
+
+    if (decisionIntel?.executiveDecisionBrief) {
+      const b = decisionIntel.executiveDecisionBrief;
+      briefMd += `## 9-Question Executive Decision Brief\n`;
+      briefMd += `1. **Core Issue:** ${b.q1_core_issue}\n`;
+      briefMd += `2. **Why It Matters:** ${b.q2_why_matters}\n`;
+      briefMd += `3. **Quantifiable Exposure:** ${b.q3_quantifiable_exposure}\n`;
+      briefMd += `4. **Inaction Consequence:** ${b.q4_inaction_consequence}\n`;
+      briefMd += `5. **Strategic Options:** ${b.q5_strategic_options}\n`;
+      briefMd += `6. **Recommended Option:** ${b.q6_recommended_option}\n`;
+      briefMd += `7. **Required Action:** ${b.q7_required_action}\n`;
+      briefMd += `8. **Decision Owner:** ${b.q8_decision_owner}\n`;
+      briefMd += `9. **Target Deadline:** ${b.q9_target_deadline}\n\n`;
+    }
+
+    if (decisionIntel?.whatIfScenarios) {
+      briefMd += `## What-If Negotiation Scenarios\n`;
+      decisionIntel.whatIfScenarios.forEach((s) => {
+        briefMd += `### ${s.title} (${s.riskDelta >= 0 ? '+' : ''}${s.riskDelta} pts)\n`;
+        briefMd += `- **Strategy:** ${s.strategy}\n`;
+        briefMd += `- **Projected Exposure:** ${s.projectedExposureScore}/100\n`;
+        briefMd += `- **Financial Impact:** ${s.financialImpact.explanation}\n`;
+        briefMd += `- **Operational Impact:** ${s.operationalImpact}\n`;
+        briefMd += `- **Legal Position:** ${s.legalPosition}\n\n`;
       });
     }
 
-    briefMd += `## Prioritized Action Plan\n`;
-    intelData.actionPlan.forEach((act, idx) => {
-      briefMd += `### Priority ${idx + 1}: ${act.title} (${act.priorityScore}/100 - ${act.category})\n`;
-      briefMd += `- **Recommended Action:** ${act.intelligenceAssessment.recommendedAction}\n`;
-      briefMd += `- **Why It Matters:** ${act.intelligenceAssessment.whyItMatters}\n`;
-      briefMd += `- **Section:** ${act.documentEvidence.section}\n`;
-      briefMd += `- **Contract Excerpt:** "${act.documentEvidence.excerpt}"\n`;
-      briefMd += `- **Score Breakdown:** Clause (${act.priorityBreakdown.clauseSeverity}) + Negotiation (${act.priorityBreakdown.negotiationImbalance}) + Simulation (${act.priorityBreakdown.simulationExposure}) + Deadline (${act.priorityBreakdown.deadlineUrgency}) + Compliance (${act.priorityBreakdown.complianceHazard})\n\n`;
-    });
-
-    briefMd += `---\n*DocuGuard AI Executive Contract Intelligence Engine. ${intelData.disclaimer}*\n`;
+    briefMd += `---\n*DocuGuard AI Deterministic Decision Intelligence Engine. ${activeData.disclaimer}*\n`;
 
     const blob = new Blob([briefMd], { type: 'text/markdown;charset=utf-8' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = `DocuGuard_Intelligence_Brief_${docName.replace(/\.[^/.]+$/, '')}_${dateStr}.md`;
+    link.download = `DocuGuard_Decision_Brief_${docName.replace(/\.[^/.]+$/, '')}_${dateStr}.md`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
-    toast('Executive brief exported successfully', 'ok');
+    toast('Executive decision brief exported successfully', 'ok');
   };
 
   if (loading) {
@@ -115,68 +148,40 @@ export const IntelligenceTab = ({ doc, refreshTrigger }) => {
     );
   }
 
-  if (!intelData || !intelData.actionPlan) {
-    return (
-      <div className="card">
-        <EmptyState
-          icon={<Icon.brain width={40} height={40} />}
-          title="No Intelligence Data Available"
-          description="Analyze the document to generate unified contract risk prioritization and executive intelligence."
-          actionText="Compute Intelligence"
-          onAction={handleRefresh}
-        />
-      </div>
-    );
-  }
+  const primaryDriver = decisionIntel?.primaryDeteriorationDriver || 'Liability Exposure';
+  const exposureScore = decisionIntel?.exposureScore ?? (100 - (intelData?.healthScore || 50));
+  const healthScore = decisionIntel?.healthScoreBreakdown?.overallHealthScore ?? (intelData?.healthScore || 50);
 
-  const { healthScore, metrics, executiveSummary, conflicts, actionPlan } = intelData;
-
-  // Filter actions based on active category & search query
-  const filteredActions = actionPlan.filter((item) => {
-    if (filterCategory === 'CRITICAL' && item.category !== 'CRITICAL') return false;
-    if (filterCategory === 'IMPORTANT' && item.category !== 'IMPORTANT') return false;
-    if (filterCategory === 'MONITORING' && item.category !== 'MONITORING') return false;
-    if (filterCategory === 'HEALTHY' && item.category !== 'HEALTHY') return false;
-    if (searchQuery.trim()) {
-      const q = searchQuery.toLowerCase();
-      const matchTitle = item.title.toLowerCase().includes(q);
-      const matchAction = item.intelligenceAssessment.recommendedAction.toLowerCase().includes(q);
-      const matchSec = item.documentEvidence.section.toLowerCase().includes(q);
-      const matchExcerpt = item.documentEvidence.excerpt.toLowerCase().includes(q);
-      if (!matchTitle && !matchAction && !matchSec && !matchExcerpt) return false;
-    }
-    return true;
-  });
-
-  const getHealthBadge = (score) => {
-    if (score >= 80) return { label: 'Strong Contract Health', class: 'badge-ok', color: 'var(--green)' };
-    if (score >= 60) return { label: 'Moderate Exposure', class: 'badge-warn', color: 'var(--amber)' };
-    return { label: 'Critical Risk Exposure', class: 'badge-danger', color: 'var(--red)' };
+  const getSeverityBadge = (score) => {
+    if (score >= 80) return { label: 'CRITICAL', class: 'badge-danger', color: 'var(--red)' };
+    if (score >= 60) return { label: 'ELEVATED', class: 'badge-warn', color: 'var(--amber)' };
+    if (score >= 40) return { label: 'MODERATE', class: 'badge-neutral', color: 'var(--text-lo)' };
+    return { label: 'HEALTHY', class: 'badge-ok', color: 'var(--green)' };
   };
 
-  const healthBadge = getHealthBadge(healthScore);
+  const exposureBadge = getSeverityBadge(exposureScore);
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-      {/* 1. Executive Intelligence Header & Overview Card */}
+      {/* 1. Executive Summary & Header Banner */}
       <div className="card" style={{ position: 'relative', overflow: 'hidden' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '16px' }}>
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
               <span className="dot dot-gold" />
               <h2 className="card-title" style={{ margin: 0, fontSize: '18px' }}>
-                Executive Contract Intelligence &amp; Action Center
+                Contract Decision Intelligence Layer
               </h2>
-              <span className="badge badge-neutral" style={{ fontSize: '11px' }}>
-                Phase 6.4 Synthesis
+              <span className="badge badge-neutral" style={{ fontSize: '11px', letterSpacing: '0.5px' }}>
+                Phase 10 Core Engine
               </span>
             </div>
             <p className="text-lo mt-4" style={{ fontSize: '13px', maxWidth: '720px', marginBottom: 0 }}>
-              Cross-system synthesis combining clause findings, risk factors, deadlines, negotiation imbalance, and simulation contingency results into a unified, prioritized executive action plan.
+              Evidence-derived forward risk, deterministic 9-dimension scoring, linear dependency propagation, and audited decision support.
             </p>
           </div>
 
-          <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+          <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
             <motion.button
               className="btn btn-royal btn-sm"
               onClick={() => navigate(`/document/${doc.id}/actions`)}
@@ -190,7 +195,7 @@ export const IntelligenceTab = ({ doc, refreshTrigger }) => {
               className="btn btn-outline btn-sm"
               onClick={handleRefresh}
               disabled={refreshing}
-              title="Re-compute intelligence assessment"
+              title="Re-compute decision intelligence"
               {...buttonMotion}
             >
               <Icon.trending width={14} height={14} /> {refreshing ? 'Evaluating…' : 'Re-Evaluate'}
@@ -199,7 +204,7 @@ export const IntelligenceTab = ({ doc, refreshTrigger }) => {
             <motion.button
               className="btn btn-primary btn-sm"
               onClick={handleExportBrief}
-              title="Download executive brief report"
+              title="Download executive decision brief report"
               {...buttonMotion}
             >
               <Icon.download width={14} height={14} /> Export Brief
@@ -207,14 +212,14 @@ export const IntelligenceTab = ({ doc, refreshTrigger }) => {
           </div>
         </div>
 
-        {/* Health Score & Metrics Grid */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', marginTop: '20px' }}>
-          {/* Health Score Meter */}
+        {/* Health Score & Primary Deterioration Driver Row */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px', marginTop: '20px' }}>
+          {/* Exposure Score Card */}
           <div
             style={{
               padding: '16px 20px',
               borderRadius: '8px',
-              background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0.07) 100%)',
+              background: 'var(--bg-elevated)',
               border: '1px solid var(--border-color)',
               display: 'flex',
               alignItems: 'center',
@@ -223,614 +228,682 @@ export const IntelligenceTab = ({ doc, refreshTrigger }) => {
           >
             <div
               style={{
-                width: '56px',
-                height: '56px',
+                width: '54px',
+                height: '54px',
                 borderRadius: '50%',
-                border: `3px solid ${healthBadge.color}`,
+                border: `3px solid ${exposureBadge.color}`,
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                flexDirection: 'column',
-                boxShadow: `0 0 16px ${healthBadge.color}33`
+                flexDirection: 'column'
               }}
             >
-              <span style={{ fontSize: '18px', fontWeight: 800, color: 'var(--text-hi)' }}>{healthScore}</span>
+              <span style={{ fontSize: '18px', fontWeight: 800, color: 'var(--text-hi)' }}>{exposureScore}</span>
               <span style={{ fontSize: '9px', color: 'var(--text-lo)', marginTop: '-3px' }}>/100</span>
             </div>
             <div>
               <div style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.6px', color: 'var(--text-lo)' }}>
-                Contract Health
+                Exposure Index
               </div>
-              <span className={`badge ${healthBadge.class} mt-4`} style={{ fontSize: '11px' }}>
-                {healthBadge.label}
+              <span className={`badge ${exposureBadge.class} mt-4`} style={{ fontSize: '11px' }}>
+                {exposureBadge.label} EXPOSURE
               </span>
             </div>
           </div>
 
-          {/* Critical Items */}
+          {/* Primary Driver Card */}
           <div
             style={{
               padding: '16px 20px',
               borderRadius: '8px',
-              background: 'rgba(239, 68, 68, 0.05)',
-              border: '1px solid rgba(239, 68, 68, 0.2)',
-              cursor: 'pointer'
+              background: 'var(--bg-elevated)',
+              border: '1px solid var(--border-color)',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'center'
             }}
-            onClick={() => setFilterCategory('CRITICAL')}
           >
-            <div style={{ fontSize: '11px', color: 'var(--red)', textTransform: 'uppercase', letterSpacing: '0.6px', fontWeight: 600 }}>
-              🔴 Critical Actions
+            <div style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.6px', color: 'var(--text-lo)' }}>
+              Primary Deterioration Driver
             </div>
-            <div style={{ fontSize: '24px', fontWeight: 800, color: 'var(--text-hi)', marginTop: '4px' }}>
-              {metrics.criticalCount}
+            <div style={{ fontSize: '15px', fontWeight: 700, color: 'var(--text-hi)', marginTop: '4px' }}>
+              {primaryDriver}
             </div>
-            <div style={{ fontSize: '11.5px', color: 'var(--text-lo)', marginTop: '2px' }}>
-              Requires immediate legal review / renegotiation
+            <div style={{ fontSize: '12px', color: 'var(--text-lo)', marginTop: '2px' }}>
+              Largest contributing factor to overall contract risk
             </div>
           </div>
 
-          {/* Important Items */}
+          {/* Contract Health Metric */}
           <div
             style={{
               padding: '16px 20px',
               borderRadius: '8px',
-              background: 'rgba(245, 158, 11, 0.05)',
-              border: '1px solid rgba(245, 158, 11, 0.2)',
-              cursor: 'pointer'
+              background: 'var(--bg-elevated)',
+              border: '1px solid var(--border-color)',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'center'
             }}
-            onClick={() => setFilterCategory('IMPORTANT')}
           >
-            <div style={{ fontSize: '11px', color: 'var(--amber)', textTransform: 'uppercase', letterSpacing: '0.6px', fontWeight: 600 }}>
-              🟠 Important Obligations
+            <div style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.6px', color: 'var(--text-lo)' }}>
+              Overall Contract Health
             </div>
-            <div style={{ fontSize: '24px', fontWeight: 800, color: 'var(--text-hi)', marginTop: '4px' }}>
-              {metrics.importantCount}
+            <div style={{ fontSize: '20px', fontWeight: 800, color: healthScore >= 70 ? 'var(--green)' : (healthScore >= 50 ? 'var(--amber)' : 'var(--red)'), marginTop: '2px' }}>
+              {healthScore} <span style={{ fontSize: '12px', color: 'var(--text-lo)', fontWeight: 400 }}>/ 100</span>
             </div>
-            <div style={{ fontSize: '11.5px', color: 'var(--text-lo)', marginTop: '2px' }}>
-              Moderate risk or upcoming schedule commitments
-            </div>
-          </div>
-
-          {/* Monitoring Items */}
-          <div
-            style={{
-              padding: '16px 20px',
-              borderRadius: '8px',
-              background: 'rgba(59, 130, 246, 0.05)',
-              border: '1px solid rgba(59, 130, 246, 0.2)',
-              cursor: 'pointer'
-            }}
-            onClick={() => setFilterCategory('MONITORING')}
-          >
-            <div style={{ fontSize: '11px', color: '#60A5FA', textTransform: 'uppercase', letterSpacing: '0.6px', fontWeight: 600 }}>
-              🟡 Monitoring Items
-            </div>
-            <div style={{ fontSize: '24px', fontWeight: 800, color: 'var(--text-hi)', marginTop: '4px' }}>
-              {metrics.monitoringCount}
-            </div>
-            <div style={{ fontSize: '11.5px', color: 'var(--text-lo)', marginTop: '2px' }}>
-              Standard operational tracking points
+            <div style={{ fontSize: '12px', color: 'var(--text-lo)', marginTop: '2px' }}>
+              {decisionIntel?.healthScoreBreakdown?.dimensions?.length || 8} underlying dimensions assessed
             </div>
           </div>
         </div>
 
-        {/* Executive Summary Narrative */}
+        {/* Sub-Navigation Tabs */}
         <div
           style={{
+            display: 'flex',
+            gap: '8px',
             marginTop: '20px',
-            padding: '14px 18px',
-            borderRadius: '8px',
-            background: 'rgba(255, 255, 255, 0.02)',
-            borderLeft: '4px solid var(--gold)',
             borderTop: '1px solid var(--border-color)',
-            borderRight: '1px solid var(--border-color)',
-            borderBottom: '1px solid var(--border-color)'
+            paddingTop: '16px',
+            overflowX: 'auto'
           }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
-            <span style={{ fontSize: '14px' }}>📑</span>
-            <strong style={{ fontSize: '13px', color: 'var(--gold)' }}>Executive Contract Narrative</strong>
-          </div>
-          <p style={{ fontSize: '13.5px', color: 'var(--text-mid)', lineHeight: '1.6', margin: 0 }}>
-            {executiveSummary}
-          </p>
+          {[
+            { id: 'BRIEF', label: 'Decision Brief (9 Questions)', icon: <Icon.document width={14} height={14} /> },
+            { id: 'SCENARIOS', label: 'What-If Scenarios', icon: <Icon.zap width={14} height={14} /> },
+            { id: 'DEPENDENCY', label: 'Primary Dependency Chain', icon: <Icon.trending width={14} height={14} /> },
+            { id: 'EXPOSURE', label: '9-Dimension Exposure', icon: <Icon.shield width={14} height={14} /> },
+            { id: 'CONFLICTS', label: `Conflicts (${decisionIntel?.crossClauseConflicts?.length || intelData?.conflicts?.length || 0})`, icon: <Icon.alertTriangle width={14} height={14} /> },
+            { id: 'ACTIONS', label: `Action Center (${intelData?.actionPlan?.length || 0})`, icon: <Icon.checkCircle width={14} height={14} /> }
+          ].map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveSubTab(tab.id)}
+              className={`btn btn-sm ${activeSubTab === tab.id ? 'btn-primary' : 'btn-outline'}`}
+              style={{
+                fontSize: '12px',
+                whiteSpace: 'nowrap',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px'
+              }}
+            >
+              {tab.icon} {tab.label}
+            </button>
+          ))}
         </div>
       </div>
 
-      {/* 2. Potential Contract Conflicts & Inconsistencies Callout */}
-      {conflicts && conflicts.length > 0 && (
-        <div
-          className="card"
-          style={{
-            background: 'rgba(245, 158, 11, 0.04)',
-            borderColor: 'rgba(245, 158, 11, 0.3)',
-            padding: '18px 20px'
-          }}
-        >
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px', flexWrap: 'wrap', gap: '8px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <span style={{ fontSize: '16px' }}>⚠️</span>
-              <strong style={{ fontSize: '14px', color: 'var(--amber)' }}>
-                Potential Contract Inconsistencies &amp; Contradictions Detected ({conflicts.length})
-              </strong>
-            </div>
-            <span className="badge badge-neutral" style={{ fontSize: '10.5px' }}>
-              Automated Analysis Notice
-            </span>
+      {/* 2. TAB: 9-Question Executive Decision Brief */}
+      {activeSubTab === 'BRIEF' && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          <div className="card">
+            <h3 style={{ fontSize: '15px', margin: '0 0 16px 0', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span className="dot dot-gold" /> Executive Decision Brief (9 Critical Questions)
+            </h3>
+
+            {decisionIntel?.executiveDecisionBrief ? (
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '14px' }}>
+                {[
+                  { q: '1. What is the core contractual issue?', a: decisionIntel.executiveDecisionBrief.q1_core_issue, badge: 'Core Issue' },
+                  { q: '2. Why does it matter to the business?', a: decisionIntel.executiveDecisionBrief.q2_why_matters, badge: 'Business Rationale' },
+                  { q: '3. What is the quantifiable exposure?', a: decisionIntel.executiveDecisionBrief.q3_quantifiable_exposure, badge: 'Quantified Exposure' },
+                  { q: '4. What happens if no action is taken?', a: decisionIntel.executiveDecisionBrief.q4_inaction_consequence, badge: 'Inaction Risk' },
+                  { q: '5. What strategic options exist?', a: decisionIntel.executiveDecisionBrief.q5_strategic_options, badge: 'Strategic Options' },
+                  { q: '6. Which option is recommended?', a: decisionIntel.executiveDecisionBrief.q6_recommended_option, badge: 'Recommendation', highlight: true },
+                  { q: '7. What specific action is required?', a: decisionIntel.executiveDecisionBrief.q7_required_action, badge: 'Action Required' },
+                  { q: '8. Who should own this decision?', a: decisionIntel.executiveDecisionBrief.q8_decision_owner, badge: 'Owner' },
+                  { q: '9. What is the target completion deadline?', a: decisionIntel.executiveDecisionBrief.q9_target_deadline, badge: 'Timeline' }
+                ].map((item, idx) => (
+                  <div
+                    key={idx}
+                    style={{
+                      padding: '14px 16px',
+                      borderRadius: '6px',
+                      background: item.highlight ? 'rgba(37, 99, 235, 0.04)' : 'var(--bg-elevated)',
+                      border: `1px solid ${item.highlight ? 'rgba(37, 99, 235, 0.3)' : 'var(--border-color)'}`
+                    }}
+                  >
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                      <span style={{ fontSize: '11px', fontWeight: 600, color: 'var(--text-lo)' }}>
+                        {item.badge}
+                      </span>
+                      <span className="badge badge-neutral" style={{ fontSize: '10px' }}>Q{idx + 1}</span>
+                    </div>
+                    <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-hi)', marginBottom: '6px' }}>
+                      {item.q}
+                    </div>
+                    <div style={{ fontSize: '12px', color: 'var(--text-hi)', lineHeight: 1.5 }}>
+                      {item.a}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-lo" style={{ fontSize: '13px' }}>
+                Executive Decision Brief not generated yet. Click "Re-Evaluate" to synthesize.
+              </p>
+            )}
           </div>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-            {conflicts.map((conf) => (
-              <div
-                key={conf.id}
-                style={{
-                  padding: '12px 16px',
-                  borderRadius: '6px',
-                  background: 'rgba(0, 0, 0, 0.25)',
-                  border: '1px solid rgba(245, 158, 11, 0.2)'
-                }}
-              >
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
-                  <span style={{ fontWeight: 600, fontSize: '13px', color: 'var(--text-hi)' }}>{conf.title}</span>
-                  <span className="badge badge-warn" style={{ fontSize: '10px' }}>{conf.conflictType}</span>
+          {/* Two-Tier Forward Risk Status */}
+          <div className="card">
+            <h3 style={{ fontSize: '15px', margin: '0 0 14px 0', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span className="dot dot-blue" /> Forward-Looking Risk Intelligence (Two-Tier Model)
+            </h3>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '16px' }}>
+              {/* Tier 1: Deterministic Forward Risk */}
+              <div style={{ padding: '14px', borderRadius: '6px', background: 'var(--bg-elevated)', border: '1px solid var(--border-color)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
+                  <span className="badge badge-ok" style={{ fontSize: '10px' }}>TIER 1</span>
+                  <strong style={{ fontSize: '13px' }}>Evidence-Derived Forward Risk (Deterministic)</strong>
                 </div>
-                <p style={{ fontSize: '12.5px', color: 'var(--text-mid)', marginBottom: '10px' }}>
-                  {conf.description}
+                <p className="text-lo" style={{ fontSize: '12px', marginBottom: '12px' }}>
+                  Forward exposure deterministically inferred from verified contract terms without hypothetical claims.
                 </p>
 
-                {/* Evidence side-by-side comparison */}
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '10px', marginBottom: '10px' }}>
-                  {conf.evidence.map((ev, eIdx) => (
-                    <div
-                      key={eIdx}
-                      style={{
-                        padding: '8px 12px',
-                        borderRadius: '4px',
-                        background: 'rgba(255, 255, 255, 0.03)',
-                        border: '1px dashed rgba(255, 255, 255, 0.15)',
-                        fontSize: '12px'
-                      }}
-                    >
-                      <strong style={{ color: 'var(--text-hi)', display: 'block', marginBottom: '3px' }}>
-                        {ev.section}
-                      </strong>
-                      <span className="text-lo" style={{ fontStyle: 'italic' }}>
-                        "{ev.excerpt || ev.identifiedValue}"
-                      </span>
-                    </div>
-                  ))}
-                </div>
+                {decisionIntel?.forwardRisk?.tier1_evidence_forward_risk?.length > 0 ? (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    {decisionIntel.forwardRisk.tier1_evidence_forward_risk.map((sig, idx) => (
+                      <div key={idx} style={{ padding: '10px', borderRadius: '4px', background: 'var(--bg-card)', border: '1px solid var(--border-color)', fontSize: '12px' }}>
+                        <div style={{ fontWeight: 600, color: 'var(--text-hi)' }}>{sig.signal}</div>
+                        <div style={{ color: 'var(--text-lo)', marginTop: '2px' }}>{sig.evidence}</div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '6px', fontSize: '11px', color: 'var(--text-lo)' }}>
+                          <span><strong>Horizon:</strong> {sig.horizon}</span>
+                          <span className="badge badge-neutral" style={{ fontSize: '9px' }}>DETERMINISTIC</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div style={{ fontSize: '12px', color: 'var(--text-lo)' }}>
+                    No acute forward renewal or forfeiture hazards detected in current provisions.
+                  </div>
+                )}
+              </div>
 
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', color: 'var(--amber)' }}>
-                  <strong>Recommendation:</strong> {conf.recommendation}
+              {/* Tier 2: Statistical / ML Prediction */}
+              <div style={{ padding: '14px', borderRadius: '6px', background: 'var(--bg-elevated)', border: '1px solid var(--border-color)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
+                  <span className="badge badge-neutral" style={{ fontSize: '10px' }}>TIER 2</span>
+                  <strong style={{ fontSize: '13px' }}>Statistical / ML Prediction Status</strong>
+                </div>
+                <p className="text-lo" style={{ fontSize: '12px', marginBottom: '12px' }}>
+                  Strict No-Fabrication Rule: Statistical models require verified empirical historical dispute datasets.
+                </p>
+
+                <div style={{ padding: '12px', borderRadius: '4px', background: 'rgba(234, 179, 8, 0.05)', border: '1px solid rgba(234, 179, 8, 0.2)' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
+                    <span style={{ fontSize: '11px' }}>⚖️</span>
+                    <span className="badge badge-warn" style={{ fontSize: '10px' }}>INSUFFICIENT_HISTORICAL_DATA</span>
+                  </div>
+                  <div style={{ fontSize: '12px', color: 'var(--text-hi)', lineHeight: 1.4 }}>
+                    {decisionIntel?.forwardRisk?.tier2_statistical_prediction?.message ||
+                      'Empirical dispute probability modeling requires a verified dataset of historical contract outcomes. Currently operating under deterministic forward risk.'}
+                  </div>
                 </div>
               </div>
-            ))}
-          </div>
-
-          <div style={{ fontSize: '11px', color: 'var(--text-lo)', fontStyle: 'italic', marginTop: '10px' }}>
-            * {AUTOMATED_ANALYSIS_DISCLAIMER_TEXT}
+            </div>
           </div>
         </div>
       )}
 
-      {/* 3. Prioritized Action Center */}
-      <div className="card">
-        {/* Filter and Search Bar */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px', marginBottom: '20px' }}>
-          <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
-            {[
-              { id: 'ALL', label: `All Actions (${actionPlan.length})` },
-              { id: 'CRITICAL', label: `Critical (${metrics.criticalCount})`, color: 'var(--red)' },
-              { id: 'IMPORTANT', label: `Important (${metrics.importantCount})`, color: 'var(--amber)' },
-              { id: 'MONITORING', label: `Monitoring (${metrics.monitoringCount})`, color: '#60A5FA' },
-              { id: 'HEALTHY', label: `Healthy (${metrics.healthyCount})`, color: 'var(--green)' }
-            ].map((cat) => {
-              const isActive = filterCategory === cat.id;
-              return (
-                <button
-                  key={cat.id}
-                  className={`btn btn-sm ${isActive ? 'btn-primary' : 'btn-outline'}`}
-                  style={{
-                    fontSize: '12px',
-                    padding: '4px 12px',
-                    borderColor: isActive ? undefined : 'var(--border-color)'
-                  }}
-                  onClick={() => setFilterCategory(cat.id)}
-                >
-                  {cat.label}
-                </button>
-              );
-            })}
-          </div>
-
-          {/* Search Input */}
-          <div style={{ position: 'relative', width: '240px' }}>
-            <input
-              type="text"
-              placeholder="Search actions or clauses…"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              style={{
-                width: '100%',
-                padding: '6px 12px 6px 30px',
-                fontSize: '12px',
-                borderRadius: '6px',
-                background: 'rgba(255, 255, 255, 0.05)',
-                border: '1px solid var(--border-color)',
-                color: 'var(--text-hi)'
-              }}
-            />
-            <span style={{ position: 'absolute', left: '10px', top: '7px', opacity: 0.5, fontSize: '12px' }}>
-              🔍
+      {/* 3. TAB: What-If Negotiation Scenarios */}
+      {activeSubTab === 'SCENARIOS' && (
+        <div className="card">
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '10px' }}>
+            <div>
+              <h3 style={{ fontSize: '15px', margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span className="dot dot-gold" /> What-If Multi-Scenario Negotiation Comparison
+              </h3>
+              <p className="text-lo mt-4" style={{ fontSize: '12px', margin: '4px 0 0 0' }}>
+                Side-by-side impact simulation. Convert preferred scenario directly into tracked action items.
+              </p>
+            </div>
+            <span className="badge badge-neutral" style={{ fontSize: '11px' }}>
+              No-Fabrication Financial Quantification
             </span>
           </div>
-        </div>
 
-        {/* Action Items List */}
-        {filteredActions.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '32px 16px' }}>
-            <p className="text-lo small">No prioritized action items matching current filter criteria.</p>
-          </div>
-        ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-            {filteredActions.map((action, idx) => {
-              const isCrit = action.category === 'CRITICAL';
-              const isImp = action.category === 'IMPORTANT';
-              const isProvExpanded = expandedProvenanceId === action.actionId;
-              const isEvidenceExpanded = expandedEvidenceId === action.actionId;
-
-              const borderAccent = isCrit
-                ? 'rgba(239, 68, 68, 0.4)'
-                : isImp
-                ? 'rgba(245, 158, 11, 0.3)'
-                : 'var(--border-color)';
-
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '16px' }}>
+            {(decisionIntel?.whatIfScenarios || []).map((scenario) => {
+              const isRec = scenario.recommended;
               return (
-                <motion.div
-                  key={action.actionId}
-                  layout
-                  initial={{ opacity: 0, y: 6 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.2, ease: EASE_OUT }}
+                <div
+                  key={scenario.scenarioId}
                   style={{
+                    padding: '18px',
                     borderRadius: '8px',
-                    border: `1px solid ${borderAccent}`,
-                    background: isCrit
-                      ? 'linear-gradient(180deg, rgba(239, 68, 68, 0.03) 0%, rgba(0, 0, 0, 0.2) 100%)'
-                      : 'rgba(255, 255, 255, 0.02)',
-                    padding: '18px 20px',
-                    position: 'relative'
+                    background: isRec ? 'rgba(37, 99, 235, 0.04)' : 'var(--bg-elevated)',
+                    border: `1.5px solid ${isRec ? 'var(--primary)' : 'var(--border-color)'}`,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'space-between'
                   }}
                 >
-                  {/* Action Item Header */}
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '12px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                      <span
-                        style={{
-                          width: '24px',
-                          height: '24px',
-                          borderRadius: '50%',
-                          background: isCrit ? 'var(--red)' : isImp ? 'var(--amber)' : 'var(--blue)',
-                          color: '#fff',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          fontSize: '11px',
-                          fontWeight: 700
-                        }}
-                      >
-                        {idx + 1}
-                      </span>
-                      <div>
-                        <h3 style={{ margin: 0, fontSize: '15px', color: 'var(--text-hi)', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                          {action.title}
-                          <span
-                            className={`badge ${
-                              isCrit ? 'badge-danger' : isImp ? 'badge-warn' : 'badge-neutral'
-                            }`}
-                            style={{ fontSize: '10px' }}
-                          >
-                            {action.category}
-                          </span>
-                          <span className="badge badge-neutral" style={{ fontSize: '10px', textTransform: 'uppercase' }}>
-                            {action.intelligenceAssessment.actionCategory}
-                          </span>
-                        </h3>
-                        <div style={{ fontSize: '12px', color: 'var(--text-lo)', marginTop: '2px' }}>
-                          Target: <strong>{action.documentEvidence.section}</strong> ({action.documentEvidence.clauseType})
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Priority Score & Provenance Trigger */}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                      <div
-                        style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '6px',
-                          padding: '4px 10px',
-                          borderRadius: '6px',
-                          background: isCrit ? 'rgba(239, 68, 68, 0.15)' : 'rgba(255, 255, 255, 0.05)',
-                          border: `1px solid ${isCrit ? 'rgba(239, 68, 68, 0.3)' : 'var(--border-color)'}`
-                        }}
-                      >
-                        <span style={{ fontSize: '11px', color: 'var(--text-lo)' }}>Priority:</span>
-                        <strong style={{ fontSize: '14px', color: isCrit ? 'var(--red)' : 'var(--text-hi)' }}>
-                          {action.priorityScore}/100
-                        </strong>
-                      </div>
-
-                      <button
-                        className="btn btn-outline btn-sm"
-                        style={{ fontSize: '11px', padding: '4px 8px' }}
-                        onClick={() => setExpandedProvenanceId(isProvExpanded ? null : action.actionId)}
-                        title="View deterministic calculation and provenance trail"
-                      >
-                        <Icon.target width={12} height={12} /> {isProvExpanded ? 'Hide Score Logic' : 'Why is this Priority ' + action.priorityScore + '?'}
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Provenance Calculation Breakdown (Expandable) */}
-                  <AnimatePresence>
-                    {isProvExpanded && (
-                      <motion.div
-                        initial={{ opacity: 0, height: 0 }}
-                        animate={{ opacity: 1, height: 'auto' }}
-                        exit={{ opacity: 0, height: 0 }}
-                        style={{
-                          overflow: 'hidden',
-                          marginTop: '12px',
-                          padding: '12px 16px',
-                          borderRadius: '6px',
-                          background: 'rgba(0, 0, 0, 0.4)',
-                          border: '1px solid var(--border-color)'
-                        }}
-                      >
-                        <div style={{ fontSize: '12px', fontWeight: 600, color: 'var(--gold)', marginBottom: '8px' }}>
-                          🧬 Deterministic Score Formulation &amp; Audit Trail
-                        </div>
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '10px', fontSize: '12px' }}>
-                          <div>
-                            <span className="text-lo">Clause Severity:</span>{' '}
-                            <strong>+{action.priorityBreakdown.clauseSeverity} pts</strong>
-                          </div>
-                          <div>
-                            <span className="text-lo">Negotiation Imbalance:</span>{' '}
-                            <strong>+{action.priorityBreakdown.negotiationImbalance} pts</strong>
-                          </div>
-                          <div>
-                            <span className="text-lo">Simulation Exposure:</span>{' '}
-                            <strong>+{action.priorityBreakdown.simulationExposure} pts</strong>
-                          </div>
-                          <div>
-                            <span className="text-lo">Deadline Urgency:</span>{' '}
-                            <strong>+{action.priorityBreakdown.deadlineUrgency} pts</strong>
-                          </div>
-                          <div>
-                            <span className="text-lo">Compliance Hazard:</span>{' '}
-                            <strong>+{action.priorityBreakdown.complianceHazard} pts</strong>
-                          </div>
-                        </div>
-
-                        {/* Provenance Record IDs */}
-                        <div style={{ marginTop: '10px', paddingTop: '8px', borderTop: '1px dashed rgba(255, 255, 255, 0.1)', fontSize: '11px', color: 'var(--text-lo)' }}>
-                          <div>
-                            <strong>Provenance Trail:</strong> Clause IDs: [
-                            {action.provenance.clauseIds.length ? action.provenance.clauseIds.join(', ') : 'None'}
-                            ] · Risk Factor IDs: [
-                            {action.provenance.riskFactorIds.length ? action.provenance.riskFactorIds.join(', ') : 'None'}
-                            ] · Simulation IDs: [
-                            {action.provenance.simulationIds.length ? action.provenance.simulationIds.join(', ') : 'None'}
-                            ] · Deadline IDs: [
-                            {action.provenance.deadlineIds.length ? action.provenance.deadlineIds.join(', ') : 'None'}
-                            ]
-                          </div>
-                        </div>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-
-                  {/* Cross-Feature Intelligence Badges */}
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginTop: '12px' }}>
-                    <span
-                      style={{
-                        fontSize: '11px',
-                        padding: '2px 8px',
-                        borderRadius: '4px',
-                        background: 'rgba(59, 130, 246, 0.1)',
-                        border: '1px solid rgba(59, 130, 246, 0.25)',
-                        color: '#93C5FD'
-                      }}
-                    >
-                      Clause: {action.intelligenceAssessment.crossFeatureInsights.clauseFinding}
-                    </span>
-
-                    <span
-                      style={{
-                        fontSize: '11px',
-                        padding: '2px 8px',
-                        borderRadius: '4px',
-                        background: 'rgba(168, 85, 247, 0.1)',
-                        border: '1px solid rgba(168, 85, 247, 0.25)',
-                        color: '#D8B4FE'
-                      }}
-                    >
-                      Negotiation: {action.intelligenceAssessment.crossFeatureInsights.negotiationPosture}
-                    </span>
-
-                    <span
-                      style={{
-                        fontSize: '11px',
-                        padding: '2px 8px',
-                        borderRadius: '4px',
-                        background: 'rgba(239, 68, 68, 0.1)',
-                        border: '1px solid rgba(239, 68, 68, 0.25)',
-                        color: '#FCA5A5'
-                      }}
-                    >
-                      Simulation: {action.intelligenceAssessment.crossFeatureInsights.simulationImpact}
-                    </span>
-
-                    <span
-                      style={{
-                        fontSize: '11px',
-                        padding: '2px 8px',
-                        borderRadius: '4px',
-                        background: 'rgba(245, 158, 11, 0.1)',
-                        border: '1px solid rgba(245, 158, 11, 0.25)',
-                        color: '#FCD34D'
-                      }}
-                    >
-                      Timing: {action.intelligenceAssessment.crossFeatureInsights.deadlineImpact}
-                    </span>
-                  </div>
-
-                  {/* Recommendation & Why it Matters Box */}
-                  <div style={{ marginTop: '14px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                    <div style={{ display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
-                      <span style={{ color: isCrit ? 'var(--red)' : 'var(--gold)', fontSize: '14px', marginTop: '1px' }}>👉</span>
-                      <div>
-                        <strong style={{ fontSize: '13px', color: 'var(--text-hi)' }}>Recommended Action:</strong>{' '}
-                        <span style={{ fontSize: '13px', color: 'var(--text-hi)' }}>
-                          {action.intelligenceAssessment.recommendedAction}
+                  <div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                      <h4 style={{ margin: 0, fontSize: '15px', fontWeight: 700, color: 'var(--text-hi)' }}>
+                        {scenario.title}
+                      </h4>
+                      {isRec && (
+                        <span className="badge badge-ok" style={{ fontSize: '10px' }}>
+                          RECOMMENDED
                         </span>
-                      </div>
-                    </div>
-
-                    <div style={{ display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
-                      <span style={{ color: 'var(--text-lo)', fontSize: '14px', marginTop: '1px' }}>💡</span>
-                      <div>
-                        <strong style={{ fontSize: '12.5px', color: 'var(--text-lo)' }}>Why It Matters:</strong>{' '}
-                        <span style={{ fontSize: '12.5px', color: 'var(--text-mid)' }}>
-                          {action.intelligenceAssessment.whyItMatters}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Fact vs. AI Separation Section (Toggle) */}
-                  <div style={{ marginTop: '14px', paddingTop: '12px', borderTop: '1px solid rgba(255, 255, 255, 0.06)' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
-                      <button
-                        className="btn btn-outline btn-sm"
-                        style={{ fontSize: '11.5px', padding: '3px 10px' }}
-                        onClick={() => setExpandedEvidenceId(isEvidenceExpanded ? null : action.actionId)}
-                      >
-                        📄 {isEvidenceExpanded ? 'Hide Contract Text Evidence' : 'Inspect Contract Text Evidence'}
-                      </button>
-
-                      {/* Fast Navigation Quick Links */}
-                      <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
-                        <button
-                          className="btn btn-outline btn-sm"
-                          style={{ fontSize: '11px', padding: '3px 8px' }}
-                          onClick={() => navigate(`/document/${doc.id}/negotiation`)}
-                          title="Open in AI Negotiation Redliner"
-                        >
-                          <Icon.pen width={11} height={11} /> Redline
-                        </button>
-                        <button
-                          className="btn btn-outline btn-sm"
-                          style={{ fontSize: '11px', padding: '3px 8px' }}
-                          onClick={() => navigate(`/document/${doc.id}/simulation`)}
-                          title="Test What-If Scenario in Simulation"
-                        >
-                          <Icon.trending width={11} height={11} /> Simulate
-                        </button>
-                        <button
-                          className="btn btn-outline btn-sm"
-                          style={{ fontSize: '11px', padding: '3px 8px' }}
-                          onClick={() => navigate(`/document/${doc.id}/clauses`)}
-                          title="View in Clauses Breakdown"
-                        >
-                          <Icon.scales width={11} height={11} /> Clause
-                        </button>
-                      </div>
-                    </div>
-
-                    {/* Expandable Document Evidence Box */}
-                    <AnimatePresence>
-                      {isEvidenceExpanded && (
-                        <motion.div
-                          initial={{ opacity: 0, height: 0 }}
-                          animate={{ opacity: 1, height: 'auto' }}
-                          exit={{ opacity: 0, height: 0 }}
-                          style={{
-                            overflow: 'hidden',
-                            marginTop: '10px',
-                            display: 'grid',
-                            gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-                            gap: '12px'
-                          }}
-                        >
-                          {/* Sub-card 1: Immutable Document Facts */}
-                          <div
-                            style={{
-                              padding: '12px 14px',
-                              borderRadius: '6px',
-                              background: 'rgba(0, 0, 0, 0.3)',
-                              border: '1px solid rgba(255, 255, 255, 0.1)'
-                            }}
-                          >
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '6px' }}>
-                              <span style={{ fontSize: '12px' }}>🔒</span>
-                              <strong style={{ fontSize: '12px', color: 'var(--text-hi)' }}>
-                                Immutable Document Evidence (Fact)
-                              </strong>
-                            </div>
-                            <div style={{ fontSize: '11px', color: 'var(--gold)', marginBottom: '4px' }}>
-                              {action.documentEvidence.section}
-                            </div>
-                            <div style={{ fontSize: '12px', color: 'var(--text-mid)', fontStyle: 'italic', lineHeight: '1.5' }}>
-                              "{action.documentEvidence.excerpt}"
-                            </div>
-                            {action.documentEvidence.risks && action.documentEvidence.risks.length > 0 && (
-                              <div style={{ marginTop: '8px', fontSize: '11px', color: 'var(--red)' }}>
-                                <strong>Detected Risk:</strong> {action.documentEvidence.risks[0]}
-                              </div>
-                            )}
-                          </div>
-
-                          {/* Sub-card 2: DocuGuard AI Assessment */}
-                          <div
-                            style={{
-                              padding: '12px 14px',
-                              borderRadius: '6px',
-                              background: 'rgba(37, 99, 235, 0.05)',
-                              border: '1px solid rgba(37, 99, 235, 0.2)'
-                            }}
-                          >
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '6px' }}>
-                              <span style={{ fontSize: '12px' }}>🧠</span>
-                              <strong style={{ fontSize: '12px', color: '#60A5FA' }}>
-                                DocuGuard AI Assessment (Strategy)
-                              </strong>
-                            </div>
-                            <div style={{ fontSize: '12px', color: 'var(--text-hi)', marginBottom: '6px' }}>
-                              {action.intelligenceAssessment.recommendedAction}
-                            </div>
-                            <div style={{ fontSize: '11px', color: 'var(--text-lo)' }}>
-                              * {action.intelligenceAssessment.disclaimer}
-                            </div>
-                          </div>
-                        </motion.div>
                       )}
-                    </AnimatePresence>
+                    </div>
+
+                    <p style={{ fontSize: '12px', color: 'var(--text-lo)', lineHeight: 1.4, marginBottom: '14px' }}>
+                      {scenario.strategy}
+                    </p>
+
+                    {/* Exposure Score & Delta Pill */}
+                    <div
+                      style={{
+                        padding: '10px 12px',
+                        borderRadius: '6px',
+                        background: 'var(--bg-card)',
+                        border: '1px solid var(--border-color)',
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        marginBottom: '12px'
+                      }}
+                    >
+                      <div>
+                        <div style={{ fontSize: '10px', textTransform: 'uppercase', color: 'var(--text-lo)' }}>
+                          Projected Exposure
+                        </div>
+                        <div style={{ fontSize: '16px', fontWeight: 800, color: 'var(--text-hi)' }}>
+                          {scenario.projectedExposureScore} / 100
+                        </div>
+                      </div>
+                      <span
+                        className={`badge ${scenario.riskDelta < 0 ? 'badge-ok' : 'badge-neutral'}`}
+                        style={{ fontSize: '12px', fontWeight: 700 }}
+                      >
+                        {scenario.riskDelta > 0 ? `+${scenario.riskDelta}` : scenario.riskDelta} pts
+                      </span>
+                    </div>
+
+                    {/* Financial Impact */}
+                    <div style={{ marginBottom: '12px', fontSize: '12px' }}>
+                      <div style={{ fontWeight: 600, color: 'var(--text-hi)', marginBottom: '2px' }}>
+                        Financial Quantification
+                      </div>
+                      <div style={{ color: scenario.financialImpact.status === 'CALCULATED' ? 'var(--green)' : 'var(--text-lo)' }}>
+                        {scenario.financialImpact.status === 'CALCULATED' ? (
+                          <>
+                            <strong>{scenario.financialImpact.formattedDelta}</strong>
+                            <div style={{ fontSize: '11px', color: 'var(--text-lo)', marginTop: '2px' }}>
+                              {scenario.financialImpact.explanation}
+                            </div>
+                          </>
+                        ) : (
+                          <span style={{ fontStyle: 'italic' }}>
+                            {scenario.financialImpact.explanation}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Operational Impact */}
+                    <div style={{ marginBottom: '12px', fontSize: '12px' }}>
+                      <div style={{ fontWeight: 600, color: 'var(--text-hi)', marginBottom: '2px' }}>
+                        Operational Impact
+                      </div>
+                      <div style={{ color: 'var(--text-lo)' }}>
+                        {scenario.operationalImpact}
+                      </div>
+                    </div>
+
+                    {/* Legal Position */}
+                    <div style={{ marginBottom: '16px', fontSize: '12px' }}>
+                      <div style={{ fontWeight: 600, color: 'var(--text-hi)', marginBottom: '2px' }}>
+                        Legal Posture
+                      </div>
+                      <div style={{ color: 'var(--text-lo)' }}>
+                        {scenario.legalPosition}
+                      </div>
+                    </div>
                   </div>
-                </motion.div>
+
+                  <motion.button
+                    className={`btn btn-sm ${isRec ? 'btn-primary' : 'btn-outline'}`}
+                    style={{ width: '100%', justifyContent: 'center' }}
+                    onClick={() => handleApplyScenarioAction(scenario)}
+                    disabled={applyingScenarioId === scenario.scenarioId}
+                    {...buttonMotion}
+                  >
+                    <Icon.checkCircle width={14} height={14} />
+                    {applyingScenarioId === scenario.scenarioId ? 'Applying…' : 'Apply to Action Center'}
+                  </motion.button>
+                </div>
               );
             })}
           </div>
-        )}
-      </div>
+        </div>
+      )}
+
+      {/* 4. TAB: Primary Dependency Chain */}
+      {activeSubTab === 'DEPENDENCY' && (
+        <div className="card">
+          <div style={{ marginBottom: '16px' }}>
+            <h3 style={{ fontSize: '15px', margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span className="dot dot-blue" /> Primary Linear Dependency Chain
+            </h3>
+            <p className="text-lo mt-4" style={{ fontSize: '12px', margin: '4px 0 0 0' }}>
+              Clean sequential risk propagation: Clause &rarr; Notice Window &rarr; Deadline &rarr; Operational Impact &rarr; Escalation.
+            </p>
+          </div>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', position: 'relative' }}>
+            {(decisionIntel?.primaryDependencyChain || []).map((node, idx) => (
+              <div
+                key={idx}
+                style={{
+                  padding: '16px',
+                  borderRadius: '6px',
+                  background: 'var(--bg-elevated)',
+                  border: '1px solid var(--border-color)',
+                  display: 'grid',
+                  gridTemplateColumns: '40px 1fr',
+                  gap: '16px',
+                  alignItems: 'start'
+                }}
+              >
+                <div
+                  style={{
+                    width: '36px',
+                    height: '36px',
+                    borderRadius: '50%',
+                    background: 'var(--bg-card)',
+                    border: '1.5px solid var(--border-color)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontWeight: 800,
+                    fontSize: '13px',
+                    color: 'var(--text-hi)'
+                  }}
+                >
+                  {node.step}
+                </div>
+                <div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                    <span className="badge badge-neutral" style={{ fontSize: '10px' }}>
+                      {node.nodeType}
+                    </span>
+                    <strong style={{ fontSize: '14px', color: 'var(--text-hi)' }}>
+                      {node.title}
+                    </strong>
+                  </div>
+                  <div style={{ fontSize: '12px', color: 'var(--text-lo)', marginBottom: '8px' }}>
+                    {node.description}
+                  </div>
+                  <div style={{ padding: '8px 12px', borderRadius: '4px', background: 'var(--bg-card)', border: '1px solid var(--border-color)', fontSize: '12px', marginBottom: '8px' }}>
+                    <span style={{ fontWeight: 600, color: 'var(--text-hi)' }}>Contract Evidence: </span>
+                    <span style={{ fontStyle: 'italic', color: 'var(--text-lo)' }}>"{node.evidence}"</span>
+                  </div>
+                  <div style={{ fontSize: '11px', color: 'var(--amber)', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    <Icon.alertTriangle width={12} height={12} />
+                    <strong>Risk Propagation: </strong> {node.riskPropagation}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* 5. TAB: 9-Dimension Deterministic Exposure Model */}
+      {activeSubTab === 'EXPOSURE' && (
+        <div className="card">
+          <div style={{ marginBottom: '16px' }}>
+            <h3 style={{ fontSize: '15px', margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span className="dot dot-gold" /> Deterministic 9-Dimension Exposure Model
+            </h3>
+            <p className="text-lo mt-4" style={{ fontSize: '12px', margin: '4px 0 0 0' }}>
+              Traceable mathematical calculation where every score is computed from explicit contributing signals and deductions.
+            </p>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '14px' }}>
+            {decisionIntel?.exposureModel ? (
+              Object.entries(decisionIntel.exposureModel).map(([dimKey, dimData]) => {
+                const badge = getSeverityBadge(dimData.score);
+                const isExp = expandedDim === dimKey;
+                return (
+                  <div
+                    key={dimKey}
+                    style={{
+                      padding: '14px 16px',
+                      borderRadius: '6px',
+                      background: 'var(--bg-elevated)',
+                      border: '1px solid var(--border-color)',
+                      cursor: 'pointer'
+                    }}
+                    onClick={() => setExpandedDim(isExp ? null : dimKey)}
+                  >
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                      <span style={{ fontSize: '14px', fontWeight: 700, color: 'var(--text-hi)', textTransform: 'capitalize' }}>
+                        {dimKey}
+                      </span>
+                      <span className={`badge ${badge.class}`} style={{ fontSize: '10px' }}>
+                        {dimData.score} / 100
+                      </span>
+                    </div>
+
+                    {/* Mini Score Bar */}
+                    <div style={{ width: '100%', height: '6px', background: 'var(--bg-card)', borderRadius: '3px', overflow: 'hidden', marginBottom: '10px' }}>
+                      <div style={{ width: `${dimData.score}%`, height: '100%', background: badge.color }} />
+                    </div>
+
+                    <div style={{ fontSize: '11px', color: 'var(--text-lo)', marginBottom: '8px' }}>
+                      <strong>Formula: </strong> {dimData.calculation}
+                    </div>
+
+                    <div style={{ fontSize: '11px', color: 'var(--primary)', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                      <span>{isExp ? '▲ Hide contributors' : '▼ View contributing signals'}</span>
+                    </div>
+
+                    {/* Contributors breakdown */}
+                    {isExp && (
+                      <div style={{ marginTop: '12px', borderTop: '1px solid var(--border-color)', paddingTop: '10px' }}>
+                        <div style={{ fontSize: '11px', fontWeight: 600, color: 'var(--text-hi)', marginBottom: '6px' }}>
+                          Contributing Signals:
+                        </div>
+                        {dimData.contributors.map((c, i) => (
+                          <div key={i} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', marginBottom: '4px' }}>
+                            <span style={{ color: 'var(--text-lo)' }}>&bull; {c.factor}</span>
+                            <strong style={{ color: c.weight > 0 ? 'var(--red)' : 'var(--green)' }}>
+                              {c.weight > 0 ? `+${c.weight}` : c.weight}
+                            </strong>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                );
+              })
+            ) : (
+              <p className="text-lo" style={{ fontSize: '13px' }}>Exposure model loading...</p>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* 6. TAB: Cross-Clause Conflicts */}
+      {activeSubTab === 'CONFLICTS' && (
+        <div className="card">
+          <div style={{ marginBottom: '16px' }}>
+            <h3 style={{ fontSize: '15px', margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span className="dot dot-amber" /> Cross-Clause Conflict &amp; Contradiction Detection
+            </h3>
+            <p className="text-lo mt-4" style={{ fontSize: '12px', margin: '4px 0 0 0' }}>
+              Side-by-side reconciliation of diverging provisions. Requires human legal review.
+            </p>
+          </div>
+
+          {(decisionIntel?.crossClauseConflicts || intelData?.conflicts || []).length > 0 ? (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+              {(decisionIntel?.crossClauseConflicts || intelData?.conflicts || []).map((conflict, idx) => (
+                <div
+                  key={conflict.id || idx}
+                  style={{
+                    padding: '16px',
+                    borderRadius: '6px',
+                    background: 'var(--bg-elevated)',
+                    border: '1px solid var(--border-color)'
+                  }}
+                >
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                    <strong style={{ fontSize: '14px', color: 'var(--text-hi)' }}>
+                      {conflict.title}
+                    </strong>
+                    <span className="badge badge-warn" style={{ fontSize: '10px' }}>
+                      {conflict.conflictType}
+                    </span>
+                  </div>
+
+                  <p style={{ fontSize: '12px', color: 'var(--text-lo)', marginBottom: '12px' }}>
+                    {conflict.description}
+                  </p>
+
+                  {/* Dual Evidence Side-by-Side Excerpts */}
+                  {conflict.evidenceA && conflict.evidenceB ? (
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '12px' }}>
+                      <div style={{ padding: '10px', borderRadius: '4px', background: 'var(--bg-card)', border: '1px solid var(--border-color)' }}>
+                        <div style={{ fontSize: '11px', fontWeight: 600, color: 'var(--text-hi)', marginBottom: '4px' }}>
+                          Evidence A ({conflict.evidenceA.section})
+                        </div>
+                        <div style={{ fontSize: '11px', color: 'var(--amber)', marginBottom: '4px', fontWeight: 600 }}>
+                          Stated: {conflict.evidenceA.identifiedValue}
+                        </div>
+                        <div style={{ fontSize: '11px', color: 'var(--text-lo)', fontStyle: 'italic' }}>
+                          "{conflict.evidenceA.excerpt}"
+                        </div>
+                      </div>
+
+                      <div style={{ padding: '10px', borderRadius: '4px', background: 'var(--bg-card)', border: '1px solid var(--border-color)' }}>
+                        <div style={{ fontSize: '11px', fontWeight: 600, color: 'var(--text-hi)', marginBottom: '4px' }}>
+                          Evidence B ({conflict.evidenceB.section})
+                        </div>
+                        <div style={{ fontSize: '11px', color: 'var(--amber)', marginBottom: '4px', fontWeight: 600 }}>
+                          Stated: {conflict.evidenceB.identifiedValue}
+                        </div>
+                        <div style={{ fontSize: '11px', color: 'var(--text-lo)', fontStyle: 'italic' }}>
+                          "{conflict.evidenceB.excerpt}"
+                        </div>
+                      </div>
+                    </div>
+                  ) : null}
+
+                  {conflict.potentialImpact && (
+                    <div style={{ fontSize: '12px', color: 'var(--text-hi)', marginBottom: '8px' }}>
+                      <strong>Potential Impact: </strong> {conflict.potentialImpact}
+                    </div>
+                  )}
+
+                  <div style={{ fontSize: '12px', color: 'var(--primary)', marginBottom: '8px' }}>
+                    <strong>Recommendation: </strong> {conflict.recommendation}
+                  </div>
+
+                  <div style={{ fontSize: '11px', color: 'var(--text-lo)', fontStyle: 'italic' }}>
+                    * {conflict.disclaimer || 'Potential conflict requiring review — not an absolute legal conclusion.'}
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-lo" style={{ fontSize: '13px' }}>
+              No contractual inconsistencies or contradictory timeline clauses identified.
+            </p>
+          )}
+        </div>
+      )}
+
+      {/* 7. TAB: Prioritized Action Center List */}
+      {activeSubTab === 'ACTIONS' && intelData?.actionPlan && (
+        <div className="card">
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '10px' }}>
+            <div>
+              <h3 style={{ fontSize: '15px', margin: 0 }}>
+                Prioritized Action Items ({intelData.actionPlan.length})
+              </h3>
+              <p className="text-lo mt-4" style={{ fontSize: '12px', margin: '4px 0 0 0' }}>
+                Ranked by deterministic multi-factor priority score.
+              </p>
+            </div>
+
+            {/* Category Filter Pills */}
+            <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+              {['ALL', 'CRITICAL', 'IMPORTANT', 'MONITORING'].map((cat) => (
+                <button
+                  key={cat}
+                  onClick={() => setFilterCategory(cat)}
+                  className={`btn btn-sm ${filterCategory === cat ? 'btn-primary' : 'btn-outline'}`}
+                  style={{ fontSize: '11px', padding: '4px 10px' }}
+                >
+                  {cat}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            {intelData.actionPlan
+              .filter((item) => filterCategory === 'ALL' || item.category === filterCategory)
+              .map((action, idx) => {
+                const isCrit = action.category === 'CRITICAL';
+                return (
+                  <div
+                    key={action.actionId || idx}
+                    style={{
+                      padding: '14px 16px',
+                      borderRadius: '6px',
+                      background: 'var(--bg-elevated)',
+                      border: `1px solid ${isCrit ? 'rgba(239, 68, 68, 0.3)' : 'var(--border-color)'}`,
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'flex-start',
+                      gap: '16px'
+                    }}
+                  >
+                    <div style={{ flex: 1 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                        <span className={`badge ${isCrit ? 'badge-danger' : (action.category === 'IMPORTANT' ? 'badge-warn' : 'badge-neutral')}`} style={{ fontSize: '10px' }}>
+                          {action.category} ({action.priorityScore}/100)
+                        </span>
+                        <strong style={{ fontSize: '14px', color: 'var(--text-hi)' }}>
+                          {action.title}
+                        </strong>
+                      </div>
+                      <div style={{ fontSize: '12px', color: 'var(--text-hi)', marginBottom: '6px' }}>
+                        {action.intelligenceAssessment?.recommendedAction}
+                      </div>
+                      <div style={{ fontSize: '11px', color: 'var(--text-lo)' }}>
+                        <strong>Why it matters: </strong> {action.intelligenceAssessment?.whyItMatters}
+                      </div>
+                    </div>
+
+                    <motion.button
+                      className="btn btn-outline btn-sm"
+                      onClick={() => navigate(`/document/${doc.id}/actions`)}
+                      {...buttonMotion}
+                    >
+                      View in Action Center
+                    </motion.button>
+                  </div>
+                );
+              })}
+          </div>
+        </div>
+      )}
     </div>
   );
 };
-
-const AUTOMATED_ANALYSIS_DISCLAIMER_TEXT =
-  'Potential inconsistency detected by automated analysis — not a legal conclusion.';
 
 export default IntelligenceTab;

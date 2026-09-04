@@ -15,8 +15,17 @@ const {
   getPortfolioPriorityDistribution,
   getPortfolioWorkload,
   getPortfolioDeadlineAnalytics,
-  getPortfolioEscalationAnalytics
+  getPortfolioEscalationAnalytics,
+  getPortfolioConcentrationAnalytics,
+  getPortfolioAnomalyAnalytics,
+  getPortfolioChangeIntelligence
 } = require('../services/portfolioAnalyticsService');
+const {
+  runPortfolioMonitoring,
+  getPortfolioMonitoringEvents,
+  getPortfolioAttentionQueue: getMonitoringAttentionQueue,
+  getPortfolioLifecycleCalendar
+} = require('../services/contractMonitoringService');
 
 /**
  * GET /api/portfolio/summary
@@ -104,6 +113,110 @@ router.get('/escalations', requireAuth, async (req, res, next) => {
   try {
     const escalations = await getPortfolioEscalationAnalytics(req.user);
     res.json(escalations);
+  } catch (err) {
+    next(err);
+  }
+});
+
+/**
+ * GET /api/portfolio/concentration (Phase 10)
+ * Evaluates empirical concentration across governing law, liability caps, vendors, and renewals.
+ */
+router.get('/concentration', requireAuth, async (req, res, next) => {
+  try {
+    const concentration = await getPortfolioConcentrationAnalytics(req.user);
+    res.json(concentration);
+  } catch (err) {
+    next(err);
+  }
+});
+
+/**
+ * GET /api/portfolio/anomalies (Phase 10)
+ * Evaluates baseline-grounded anomalies across the user's contract portfolio.
+ * Returns INSUFFICIENT_HISTORICAL_DATA when user has < 2 contracts.
+ */
+router.get('/anomalies', requireAuth, async (req, res, next) => {
+  try {
+    const anomalies = await getPortfolioAnomalyAnalytics(req.user);
+    res.json(anomalies);
+  } catch (err) {
+    next(err);
+  }
+});
+
+/**
+ * GET /api/portfolio/monitoring
+ * Returns recent material contract monitoring events across the portfolio.
+ */
+router.get('/monitoring', requireAuth, async (req, res, next) => {
+  try {
+    const events = await getPortfolioMonitoringEvents(req.user, req.query);
+    res.json({
+      success: true,
+      events,
+      count: events.length
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
+/**
+ * GET /api/portfolio/attention
+ * Returns prioritized contracts requiring immediate action.
+ */
+router.get('/attention', requireAuth, async (req, res, next) => {
+  try {
+    const attentionQueue = await getMonitoringAttentionQueue(req.user);
+    res.json({
+      success: true,
+      attentionQueue,
+      count: attentionQueue.length
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
+/**
+ * GET /api/portfolio/lifecycle
+ * Returns upcoming contract lifecycle events, renewal windows, and deadlines.
+ */
+router.get('/lifecycle', requireAuth, async (req, res, next) => {
+  try {
+    const calendar = await getPortfolioLifecycleCalendar(req.user);
+    res.json({
+      success: true,
+      ...calendar
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
+/**
+ * POST /api/portfolio/monitoring/run
+ * Executes an idempotent continuous monitoring cycle across the portfolio.
+ */
+router.post('/monitoring/run', requireAuth, async (req, res, next) => {
+  try {
+    const correlationId = req.headers['x-correlation-id'];
+    const result = await runPortfolioMonitoring(req.user, correlationId);
+    res.json(result);
+  } catch (err) {
+    next(err);
+  }
+});
+
+/**
+ * GET /api/portfolio/change-intelligence
+ * Answers: "What materially changed across the portfolio?"
+ */
+router.get('/change-intelligence', requireAuth, async (req, res, next) => {
+  try {
+    const intel = await getPortfolioChangeIntelligence(req.user);
+    res.json(intel);
   } catch (err) {
     next(err);
   }

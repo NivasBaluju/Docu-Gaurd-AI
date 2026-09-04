@@ -42,15 +42,22 @@ def create_app():
         internal_key = raw_internal_key
 
     # In production, internal service key requirement cannot be disabled
+    import uuid
+    from flask import g
+
     if env == "production":
         require_internal_key = True
     else:
         require_internal_key = os.getenv("REQUIRE_INTERNAL_KEY", "true").lower() == "true"
 
     @app.before_request
-    def verify_internal_service_key():
-        # Public operational health endpoints
-        if request.path in ['/api/health', '/']:
+    def handle_request_preliminaries():
+        # 1. Track Request Correlation ID
+        incoming_cid = request.headers.get('x-correlation-id') or request.headers.get('x-request-id')
+        g.correlation_id = incoming_cid if incoming_cid else str(uuid.uuid4())
+
+        # 2. Public operational health endpoints
+        if request.path in ['/api/health', '/api/health/live', '/api/health/ready', '/']:
             return None
 
         if require_internal_key:
@@ -62,6 +69,12 @@ def create_app():
                 }), 403
         return None
 
+    @app.after_request
+    def attach_correlation_header(response):
+        if hasattr(g, 'correlation_id'):
+            response.headers['X-Correlation-Id'] = g.correlation_id
+        return response
+
     # Register routes
     app.register_blueprint(documents_bp)
     app.register_blueprint(chat_bp)
@@ -69,12 +82,22 @@ def create_app():
     app.register_blueprint(simulation_bp)
     app.register_blueprint(intelligence_bp)
 
+    @app.route('/api/health/live', methods=['GET'])
+    def health_live():
+        return jsonify({
+            "status": "live",
+            "service": "DocuGuard Flask Backend",
+            "correlationId": getattr(g, 'correlation_id', None)
+        }), 200
+
     @app.route('/api/health', methods=['GET'])
+    @app.route('/api/health/ready', methods=['GET'])
     def health_check():
         db_ok, db_msg = test_connection()
         return jsonify({
-            "status": "online",
+            "status": "online" if db_ok else "degraded",
             "service": "DocuGuard Flask Backend",
+            "correlationId": getattr(g, 'correlation_id', None),
             "postgres": {
                 "connected": db_ok,
                 "message": db_msg

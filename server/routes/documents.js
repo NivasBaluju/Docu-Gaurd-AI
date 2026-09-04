@@ -11,17 +11,41 @@ const { recordAudit } = require('../utils/audit');
 const { riskScore } = require('../utils/aiEngine');
 const { getDocumentActions, syncDocumentActions } = require('./contractActions');
 const { aiLimiter } = require('../middleware/rateLimiter');
+const {
+  getDocumentDecisionIntelligence,
+  applyDecisionAction
+} = require('../services/contractDecisionService');
+const {
+  evaluateContractMonitoring,
+  getDocumentChanges,
+  acknowledgeMonitoringEvent
+} = require('../services/contractMonitoringService');
 
 const router = express.Router();
 const uploadsDir = path.join(__dirname, '..', '..', 'data', 'uploads');
 
+const { recordAiTelemetry } = require('../utils/aiTelemetry');
+const logger = require('../utils/logger');
+
 const INTERNAL_SERVICE_KEY = process.env.INTERNAL_SERVICE_KEY || 'docuguard-internal-service-secret-key-default';
 
-function getInternalHeaders(extraHeaders = {}) {
-  return {
+function getInternalHeaders(reqOrExtra = {}, extraHeaders = {}) {
+  let req = null;
+  let extras = {};
+  if (reqOrExtra && (reqOrExtra.headers || reqOrExtra.correlationId)) {
+    req = reqOrExtra;
+    extras = extraHeaders;
+  } else {
+    extras = reqOrExtra;
+  }
+  const headers = {
     'x-internal-service-key': INTERNAL_SERVICE_KEY,
-    ...extraHeaders
+    ...extras
   };
+  if (req && req.correlationId) {
+    headers['x-correlation-id'] = req.correlationId;
+  }
+  return headers;
 }
 
 async function authorizeDocument(id, user) {
@@ -88,7 +112,7 @@ router.post('/upload', requireAuth, upload.single('file'), async (req, res) => {
 
       const flaskRes = await fetch('http://127.0.0.1:5001/api/documents/upload', {
         method: 'POST',
-        headers: getInternalHeaders(),
+        headers: getInternalHeaders(req),
         body: form,
         signal: AbortSignal.timeout(6000)
       });
@@ -244,7 +268,7 @@ router.get('/:id/analysis', requireAuth, async (req, res) => {
       return res.status(authCheck.errorStatus).json({ error: authCheck.errorMessage });
     }
     const response = await fetch(`http://127.0.0.1:5001/api/documents/${req.params.id}/analysis`, {
-      headers: getInternalHeaders()
+      headers: getInternalHeaders(req)
     });
     const data = await response.json();
     res.status(response.status).json(data);
@@ -261,7 +285,7 @@ router.get('/:id/clauses', requireAuth, async (req, res) => {
       return res.status(authCheck.errorStatus).json({ error: authCheck.errorMessage });
     }
     const response = await fetch(`http://127.0.0.1:5001/api/documents/${req.params.id}/clauses`, {
-      headers: getInternalHeaders()
+      headers: getInternalHeaders(req)
     });
     const data = await response.json();
     res.status(response.status).json(data);
@@ -278,7 +302,7 @@ router.get('/:id/deadlines', requireAuth, async (req, res) => {
       return res.status(authCheck.errorStatus).json({ error: authCheck.errorMessage });
     }
     const response = await fetch(`http://127.0.0.1:5001/api/documents/${req.params.id}/deadlines`, {
-      headers: getInternalHeaders()
+      headers: getInternalHeaders(req)
     });
     const data = await response.json();
     res.status(response.status).json(data);
@@ -295,7 +319,7 @@ router.get('/:id/risks', requireAuth, async (req, res) => {
       return res.status(authCheck.errorStatus).json({ error: authCheck.errorMessage });
     }
     const response = await fetch(`http://127.0.0.1:5001/api/documents/${req.params.id}/risks`, {
-      headers: getInternalHeaders()
+      headers: getInternalHeaders(req)
     });
     const data = await response.json();
     res.status(response.status).json(data);
@@ -306,6 +330,7 @@ router.get('/:id/risks', requireAuth, async (req, res) => {
 });
 
 router.post('/:id/analyze', requireAuth, aiLimiter, async (req, res) => {
+  const startTime = Date.now();
   try {
     const authCheck = await authorizeDocument(req.params.id, req.user);
     if (authCheck.errorStatus) {
@@ -313,18 +338,42 @@ router.post('/:id/analyze', requireAuth, aiLimiter, async (req, res) => {
     }
     const response = await fetch(`http://127.0.0.1:5001/api/documents/${req.params.id}/analyze`, {
       method: 'POST',
-      headers: getInternalHeaders()
+      headers: getInternalHeaders(req)
     });
     const data = await response.json();
+    const durationMs = Date.now() - startTime;
+
+    recordAiTelemetry({
+      correlationId: req.correlationId,
+      userId: req.user.id,
+      documentId: req.params.id,
+      operationType: 'ANALYSIS',
+      provider: 'flask-nlp',
+      model: 'docuguard-analyzer',
+      durationMs,
+      status: response.ok ? 'SUCCESS' : 'FAILED',
+      groundedStatus: 'GROUNDED'
+    });
+
     res.status(response.status).json(data);
   } catch (err) {
     console.error('Analyze trigger error:', err);
+    recordAiTelemetry({
+      correlationId: req.correlationId,
+      userId: req.user?.id,
+      documentId: req.params.id,
+      operationType: 'ANALYSIS',
+      durationMs: Date.now() - startTime,
+      status: 'FAILED',
+      errorCategory: err.message
+    });
     res.status(500).json({ error: 'AI Analyze service unavailable' });
   }
 });
 
 // --- Phase 6.1: Document AI Chat with RAG --------------------------------
 router.post('/:id/chat', requireAuth, aiLimiter, async (req, res) => {
+  const startTime = Date.now();
   try {
     const { id } = req.params;
 
@@ -342,14 +391,42 @@ router.post('/:id/chat', requireAuth, aiLimiter, async (req, res) => {
     // Forward request to Flask RAG Engine
     const flaskRes = await fetch(`http://127.0.0.1:5001/api/documents/${id}/chat`, {
       method: 'POST',
-      headers: getInternalHeaders({ 'Content-Type': 'application/json' }),
+      headers: getInternalHeaders(req, { 'Content-Type': 'application/json' }),
       body: JSON.stringify({ question: String(question).trim() })
     });
 
     const ragData = await flaskRes.json();
+    const durationMs = Date.now() - startTime;
+
     if (!flaskRes.ok) {
+      recordAiTelemetry({
+        correlationId: req.correlationId,
+        userId: req.user.id,
+        documentId: id,
+        operationType: 'CHAT_RAG',
+        durationMs,
+        status: 'FAILED',
+        errorCategory: `HTTP_${flaskRes.status}`
+      });
       return res.status(flaskRes.status).json(ragData);
     }
+
+    const isGrounded = ragData.grounded !== false && ragData.groundingStatus !== 'INSUFFICIENT_EVIDENCE';
+    const groundedStatus = isGrounded ? (ragData.confidence < 0.6 ? 'PARTIAL' : 'GROUNDED') : 'INSUFFICIENT_EVIDENCE';
+
+    recordAiTelemetry({
+      correlationId: req.correlationId,
+      userId: req.user.id,
+      documentId: id,
+      operationType: 'CHAT_RAG',
+      provider: ragData.provider || 'local',
+      model: ragData.model || 'docuguard-rag',
+      durationMs,
+      status: 'SUCCESS',
+      groundedStatus,
+      tokensUsed: ragData.tokensUsed || 0,
+      fallbackUsed: Boolean(ragData.fallbackUsed)
+    });
 
     // Persist conversation messages
     const userMsgId = uuidv4();
@@ -378,6 +455,15 @@ router.post('/:id/chat', requireAuth, aiLimiter, async (req, res) => {
     res.json(ragData);
   } catch (err) {
     console.error('Document chat proxy error:', err);
+    recordAiTelemetry({
+      correlationId: req.correlationId,
+      userId: req.user?.id,
+      documentId: req.params.id,
+      operationType: 'CHAT_RAG',
+      durationMs: Date.now() - startTime,
+      status: 'FAILED',
+      errorCategory: err.message
+    });
     res.status(500).json({ error: 'AI Chat service unavailable' });
   }
 });
@@ -414,6 +500,7 @@ router.get('/:id/chat', requireAuth, async (req, res) => {
 
 // --- Phase 6.2: AI Contract Negotiation & Intelligent Redlining -----------
 router.post('/:id/negotiate', requireAuth, aiLimiter, async (req, res) => {
+  const startTime = Date.now();
   try {
     const { id } = req.params;
 
@@ -435,14 +522,38 @@ router.post('/:id/negotiate', requireAuth, aiLimiter, async (req, res) => {
     // Forward to Flask Negotiation AI Engine
     const flaskRes = await fetch(`http://127.0.0.1:5001/api/documents/${id}/negotiate`, {
       method: 'POST',
-      headers: getInternalHeaders({ 'Content-Type': 'application/json' }),
+      headers: getInternalHeaders(req, { 'Content-Type': 'application/json' }),
       body: JSON.stringify({ clauseId, clauseType, mode })
     });
 
     const negData = await flaskRes.json();
+    const durationMs = Date.now() - startTime;
+
+    recordAiTelemetry({
+      correlationId: req.correlationId,
+      userId: req.user.id,
+      documentId: id,
+      operationType: 'NEGOTIATION',
+      provider: 'flask-nlp',
+      model: 'docuguard-redliner',
+      durationMs,
+      status: flaskRes.ok ? 'SUCCESS' : 'FAILED',
+      groundedStatus: 'GROUNDED',
+      metadata: { mode }
+    });
+
     res.status(flaskRes.status).json(negData);
   } catch (err) {
     console.error('Document negotiation proxy error:', err);
+    recordAiTelemetry({
+      correlationId: req.correlationId,
+      userId: req.user?.id,
+      documentId: req.params.id,
+      operationType: 'NEGOTIATION',
+      durationMs: Date.now() - startTime,
+      status: 'FAILED',
+      errorCategory: err.message
+    });
     res.status(500).json({ error: 'AI Negotiation service unavailable' });
   }
 });
@@ -458,7 +569,7 @@ router.get('/:id/negotiation-suggestions', requireAuth, async (req, res) => {
     }
 
     const flaskRes = await fetch(`http://127.0.0.1:5001/api/documents/${id}/negotiation-suggestions`, {
-      headers: getInternalHeaders()
+      headers: getInternalHeaders(req)
     });
     const oppData = await flaskRes.json();
     res.status(flaskRes.status).json(oppData);
@@ -470,6 +581,7 @@ router.get('/:id/negotiation-suggestions', requireAuth, async (req, res) => {
 
 // --- Phase 6.3: AI Contract Risk Simulation & What-If Analysis -----------
 router.post('/:id/simulate', requireAuth, aiLimiter, async (req, res) => {
+  const startTime = Date.now();
   try {
     const { id } = req.params;
 
@@ -487,11 +599,12 @@ router.post('/:id/simulate', requireAuth, aiLimiter, async (req, res) => {
     // Forward to Flask Simulation Engine
     const flaskRes = await fetch(`http://127.0.0.1:5001/api/documents/${id}/simulate`, {
       method: 'POST',
-      headers: getInternalHeaders({ 'Content-Type': 'application/json' }),
+      headers: getInternalHeaders(req, { 'Content-Type': 'application/json' }),
       body: JSON.stringify({ scenario: scenario.trim() })
     });
 
     const simData = await flaskRes.json();
+    const durationMs = Date.now() - startTime;
 
     // If simulation processed successfully, persist to contract_simulations in PostgreSQL
     if (flaskRes.status === 200) {
@@ -518,9 +631,31 @@ router.post('/:id/simulate', requireAuth, aiLimiter, async (req, res) => {
       }
     }
 
+    recordAiTelemetry({
+      correlationId: req.correlationId,
+      userId: req.user.id,
+      documentId: id,
+      operationType: 'SIMULATION',
+      provider: 'flask-nlp',
+      model: 'docuguard-simulator',
+      durationMs,
+      status: flaskRes.ok ? 'SUCCESS' : 'FAILED',
+      groundedStatus: simData.grounded !== false ? 'GROUNDED' : 'PARTIAL',
+      metadata: { riskLevel: simData.simulationAnalysis?.riskLevel }
+    });
+
     res.status(flaskRes.status).json(simData);
   } catch (err) {
     console.error('Document simulation proxy error:', err);
+    recordAiTelemetry({
+      correlationId: req.correlationId,
+      userId: req.user?.id,
+      documentId: req.params.id,
+      operationType: 'SIMULATION',
+      durationMs: Date.now() - startTime,
+      status: 'FAILED',
+      errorCategory: err.message
+    });
     res.status(500).json({ error: 'AI Simulation service unavailable' });
   }
 });
@@ -570,14 +705,27 @@ router.get('/:id/intelligence', requireAuth, async (req, res) => {
     }
 
     // Call Flask Intelligence Engine (pure computation boundary)
+    const intelStart = Date.now();
     const flaskRes = await fetch(`http://127.0.0.1:5001/api/documents/${id}/intelligence`, {
-      headers: getInternalHeaders()
+      headers: getInternalHeaders(req)
     });
     const intelData = await flaskRes.json();
 
     if (!flaskRes.ok) {
       return res.status(flaskRes.status).json(intelData);
     }
+
+    recordAiTelemetry({
+      correlationId: req.correlationId,
+      userId: req.user.id,
+      documentId: id,
+      operationType: 'INTELLIGENCE',
+      provider: 'flask-nlp',
+      model: 'docuguard-intelligence',
+      durationMs: Date.now() - intelStart,
+      status: 'SUCCESS',
+      groundedStatus: 'GROUNDED'
+    });
 
     // Gateway Single Persistence Boundary: Persist intelligence snapshot to PostgreSQL
     try {
@@ -627,7 +775,7 @@ router.post('/:id/intelligence/refresh', requireAuth, async (req, res) => {
     // Call Flask Intelligence Engine refresh endpoint
     const flaskRes = await fetch(`http://127.0.0.1:5001/api/documents/${id}/intelligence/refresh`, {
       method: 'POST',
-      headers: getInternalHeaders()
+      headers: getInternalHeaders(req)
     });
     const intelData = await flaskRes.json();
 
@@ -673,6 +821,132 @@ router.post('/:id/intelligence/refresh', requireAuth, async (req, res) => {
 // --- Phase 7.2: Contract Actions Listing and Synchronization --------------
 router.get('/:id/actions', requireAuth, getDocumentActions);
 router.post('/:id/actions/sync', requireAuth, syncDocumentActions);
+
+// --- Phase 10: Contract Decision Intelligence, What-If Scenarios & Decision Actions ---
+router.get('/:id/decision-intelligence', requireAuth, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const authCheck = await authorizeDocument(id, req.user);
+    if (authCheck.errorStatus) {
+      return res.status(authCheck.errorStatus).json({ error: authCheck.errorMessage });
+    }
+
+    const data = await getDocumentDecisionIntelligence(id, req.user, req.correlationId);
+    res.json(data);
+  } catch (err) {
+    console.error('Decision Intelligence error:', err);
+    res.status(err.status || 500).json({ error: err.message || 'Decision Intelligence service unavailable' });
+  }
+});
+
+router.post('/:id/decisions/scenarios', requireAuth, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const authCheck = await authorizeDocument(id, req.user);
+    if (authCheck.errorStatus) {
+      return res.status(authCheck.errorStatus).json({ error: authCheck.errorMessage });
+    }
+
+    const data = await getDocumentDecisionIntelligence(id, req.user, req.correlationId);
+    res.json({
+      documentId: id,
+      exposureScore: data.exposureScore,
+      whatIfScenarios: data.whatIfScenarios || [],
+      disclaimer: data.disclaimer
+    });
+  } catch (err) {
+    console.error('Decision Scenarios error:', err);
+    res.status(err.status || 500).json({ error: err.message || 'Decision scenarios service unavailable' });
+  }
+});
+
+router.post('/:id/decisions/act', requireAuth, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const authCheck = await authorizeDocument(id, req.user);
+    if (authCheck.errorStatus) {
+      return res.status(authCheck.errorStatus).json({ error: authCheck.errorMessage });
+    }
+
+    const result = await applyDecisionAction(id, req.user, req.body);
+    res.status(201).json(result);
+  } catch (err) {
+    console.error('Apply Decision Action error:', err);
+    res.status(err.status || 500).json({ error: err.message || 'Failed to apply decision action' });
+  }
+});
+
+// --- Phase 11: Enterprise Portfolio Intelligence & Continuous Monitoring Routes ---
+router.get('/:id/monitoring', requireAuth, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const authCheck = await authorizeDocument(id, req.user);
+    if (authCheck.errorStatus) {
+      return res.status(authCheck.errorStatus).json({ error: authCheck.errorMessage });
+    }
+
+    const data = await evaluateContractMonitoring(id, req.correlationId);
+    res.json(data);
+  } catch (err) {
+    console.error('Document monitoring error:', err);
+    res.status(err.status || 500).json({ error: err.message || 'Contract monitoring service unavailable' });
+  }
+});
+
+router.get('/:id/lifecycle', requireAuth, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const authCheck = await authorizeDocument(id, req.user);
+    if (authCheck.errorStatus) {
+      return res.status(authCheck.errorStatus).json({ error: authCheck.errorMessage });
+    }
+
+    const { rows } = await db.query(
+      `SELECT * FROM contract_lifecycle_states WHERE document_id = $1`,
+      [id]
+    );
+    if (!rows.length) {
+      const evalData = await evaluateContractMonitoring(id, req.correlationId);
+      return res.json({ success: true, lifecycle: evalData.lifecycle });
+    }
+    res.json({ success: true, lifecycle: rows[0] });
+  } catch (err) {
+    console.error('Document lifecycle error:', err);
+    res.status(err.status || 500).json({ error: err.message || 'Contract lifecycle service unavailable' });
+  }
+});
+
+router.get('/:id/changes', requireAuth, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const authCheck = await authorizeDocument(id, req.user);
+    if (authCheck.errorStatus) {
+      return res.status(authCheck.errorStatus).json({ error: authCheck.errorMessage });
+    }
+
+    const data = await getDocumentChanges(id, req.user);
+    res.json(data);
+  } catch (err) {
+    console.error('Document changes error:', err);
+    res.status(err.status || 500).json({ error: err.message || 'Contract changes service unavailable' });
+  }
+});
+
+router.post('/:id/monitoring/:eventId/acknowledge', requireAuth, async (req, res) => {
+  try {
+    const { id, eventId } = req.params;
+    const authCheck = await authorizeDocument(id, req.user);
+    if (authCheck.errorStatus) {
+      return res.status(authCheck.errorStatus).json({ error: authCheck.errorMessage });
+    }
+
+    const updated = await acknowledgeMonitoringEvent(id, eventId, req.user);
+    res.json({ success: true, event: updated });
+  } catch (err) {
+    console.error('Acknowledge monitoring event error:', err);
+    res.status(err.status || 500).json({ error: err.message || 'Failed to acknowledge monitoring event' });
+  }
+});
 
 // --- Phase 7.7: Workflow Analytics, Attention Queue, and Escalation Evaluation ---
 const workflowAnalyticsRouter = require('./workflowAnalytics');

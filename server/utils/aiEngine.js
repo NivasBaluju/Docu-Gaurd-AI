@@ -124,6 +124,8 @@ function ragAnswer(question, docText) {
     return {
       answer: "Hello! I am Docu-Gaurd AI, your intelligent legal copilot. I have analyzed this document and am ready to answer your questions. You can ask me about the contracting parties, payment terms, termination clauses, governing law, risks, or any specific provision!",
       confidence: 1.0,
+      grounded: true,
+      groundingStatus: 'CONVERSATIONAL',
       sources: [{ text: "Docu-Gaurd Assistant", pageRef: "General" }]
     };
   }
@@ -132,6 +134,8 @@ function ragAnswer(question, docText) {
     return {
       answer: "I am Docu-Gaurd AI, an enterprise-grade AI legal copilot. I analyze contracts, extract key clauses, identify risk exposure, evaluate compliance, and answer natural language questions about your legal documents.",
       confidence: 1.0,
+      grounded: true,
+      groundingStatus: 'CONVERSATIONAL',
       sources: [{ text: "Docu-Gaurd Assistant", pageRef: "General" }]
     };
   }
@@ -140,6 +144,8 @@ function ragAnswer(question, docText) {
     return {
       answer: "This document appears to have no extractable text. Please ensure you have uploaded a valid PDF, DOCX, or text file.",
       confidence: 0,
+      grounded: false,
+      groundingStatus: 'NO_DOCUMENT_TEXT',
       sources: []
     };
   }
@@ -158,6 +164,8 @@ function ragAnswer(question, docText) {
       return {
         answer: `According to the document, the contracting parties and preamble details are:\n\n"${excerpt}"`,
         confidence: 0.92,
+        grounded: true,
+        groundingStatus: 'GROUNDED',
         sources: partyMatches.slice(0, 2).map((s, idx) => ({ text: s.slice(0, 60) + '…', pageRef: `¶${idx + 1}` }))
       };
     }
@@ -173,6 +181,8 @@ function ragAnswer(question, docText) {
       return {
         answer: `The payment terms and financial provisions stated in the document are:\n\n"${excerpt}"`,
         confidence: 0.90,
+        grounded: true,
+        groundingStatus: 'GROUNDED',
         sources: paymentMatches.slice(0, 2).map((s, idx) => ({ text: s.slice(0, 60) + '…', pageRef: `¶${idx + 1}` }))
       };
     }
@@ -188,6 +198,8 @@ function ragAnswer(question, docText) {
       return {
         answer: `The termination and contract duration provisions are:\n\n"${excerpt}"`,
         confidence: 0.90,
+        grounded: true,
+        groundingStatus: 'GROUNDED',
         sources: termMatches.slice(0, 2).map((s, idx) => ({ text: s.slice(0, 60) + '…', pageRef: `¶${idx + 1}` }))
       };
     }
@@ -203,6 +215,8 @@ function ragAnswer(question, docText) {
       return {
         answer: `The governing law and jurisdiction clause specifies:\n\n"${excerpt}"`,
         confidence: 0.92,
+        grounded: true,
+        groundingStatus: 'GROUNDED',
         sources: lawMatches.slice(0, 2).map((s, idx) => ({ text: s.slice(0, 60) + '…', pageRef: `¶${idx + 1}` }))
       };
     }
@@ -226,6 +240,8 @@ function ragAnswer(question, docText) {
     return {
       answer: responseText,
       confidence: 0.94,
+      grounded: true,
+      groundingStatus: 'GROUNDED',
       sources: [{ text: `Risk Assessment (${riskData.overall}% score)`, pageRef: 'Risk Module' }]
     };
   }
@@ -238,6 +254,8 @@ function ragAnswer(question, docText) {
       return {
         answer: `Important dates and deadlines detected in this document:\n\n${list}`,
         confidence: 0.92,
+        grounded: true,
+        groundingStatus: 'GROUNDED',
         sources: deadlines.map(d => ({ text: d.text.slice(0, 60), pageRef: 'Deadlines' }))
       };
     }
@@ -251,6 +269,8 @@ function ragAnswer(question, docText) {
       return {
         answer: `Negotiation Recommendations for this document:\n\n${text}`,
         confidence: 0.93,
+        grounded: true,
+        groundingStatus: 'GROUNDED',
         sources: [{ text: "Negotiation Engine", pageRef: "Analysis" }]
       };
     }
@@ -263,6 +283,8 @@ function ragAnswer(question, docText) {
     return {
       answer: `Compliance Assessment against legal frameworks:\n\n${items}`,
       confidence: 0.91,
+      grounded: true,
+      groundingStatus: 'GROUNDED',
       sources: [{ text: "Compliance Checker", pageRef: "Audit" }]
     };
   }
@@ -275,12 +297,16 @@ function ragAnswer(question, docText) {
       return {
         answer: `Detected PII and sensitive data items in this document:\n\n${summary}`,
         confidence: 0.95,
+        grounded: true,
+        groundingStatus: 'GROUNDED',
         sources: [{ text: `${piiItems.length} PII items detected`, pageRef: "Privacy Engine" }]
       };
     } else {
       return {
         answer: "No obvious PII (Personally Identifiable Information) like SSNs, emails, or credit card numbers were detected in this document text.",
         confidence: 0.90,
+        grounded: true,
+        groundingStatus: 'GROUNDED',
         sources: [{ text: "PII Scanner", pageRef: "Privacy Engine" }]
       };
     }
@@ -292,6 +318,8 @@ function ragAnswer(question, docText) {
     return {
       answer: `Here is a summary of the document based on its initial sections:\n\n"${firstFew}"\n\nFor deeper analysis, ask about specific areas such as parties, payment terms, risk evaluation, or termination clauses.`,
       confidence: 0.88,
+      grounded: true,
+      groundingStatus: 'GROUNDED',
       sources: [{ text: "Document Summary", pageRef: "Preamble" }]
     };
   }
@@ -316,17 +344,20 @@ function ragAnswer(question, docText) {
       return {
         answer: `Based on your query, here is the relevant provision found in the document:\n\n"${answer}"`,
         confidence: Number(confidence.toFixed(2)),
+        grounded: true,
+        groundingStatus: 'GROUNDED',
         sources: top.map(t => ({ text: t.text.slice(0, 60) + '…', sentenceIndex: t.index, pageRef: `¶${Math.floor(t.index / 4) + 1}` }))
       };
     }
   }
 
-  // 4. Helpful Smart Fallback (when no specific keyword matches)
-  const preview = sentences.slice(0, 2).join(' ');
+  // 4. Grounded Refusal when no supporting context exists
   return {
-    answer: `I reviewed the document for "${question}". While an exact clause matching your wording wasn't located, here is the opening section of the document for context:\n\n"${preview}"\n\nTry asking specifically about parties, payment terms, termination, confidentiality, or governing law.`,
-    confidence: 0.55,
-    sources: [{ text: "Document Preamble", pageRef: "¶1" }]
+    answer: `Insufficient grounded evidence: The document does not contain provisions or clauses addressing "${question}". No supporting text was located to ground a contractual assertion.`,
+    confidence: 0.0,
+    grounded: false,
+    groundingStatus: 'INSUFFICIENT_EVIDENCE',
+    sources: []
   };
 }
 
@@ -356,7 +387,15 @@ function riskScore(text) {
   }
 
   const overall = Math.round((total / maxTotal) * 100);
-  return { overall, breakdown };
+  return {
+    overall,
+    breakdown,
+    traceability: {
+      method: 'DETERMINISTIC_SIGNAL_ANALYSIS',
+      categoriesEvaluated: Object.keys(RISK_SIGNALS),
+      timestamp: new Date().toISOString()
+    }
+  };
 }
 
 // ---------------------------------------------------------------------------
@@ -426,7 +465,12 @@ function negotiationSuggestions(text) {
           issue: rule.issue,
           risk: rule.risk,
           recommendation: rule.recommendation,
-          suggestedText: rule.suggestedText
+          suggestedText: rule.suggestedText,
+          traceability: {
+            deterministicRule: rule.issue,
+            patternMatched: rule.test.toString(),
+            timestamp: new Date().toISOString()
+          }
         });
         break; // one hit per rule is enough
       }

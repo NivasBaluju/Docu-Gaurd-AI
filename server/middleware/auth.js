@@ -108,4 +108,22 @@ async function requireAdmin(req, res, next) {
   });
 }
 
-module.exports = { requireAuth, requireAdmin, fingerprint, trustScore, JWT_SECRET };
+/**
+ * Enforces role-based access control (RBAC) across specified roles.
+ * Administrators are automatically granted access.
+ */
+function requireRole(allowedRoles = []) {
+  return (req, res, next) => {
+    requireAuth(req, res, () => {
+      const userRole = req.user?.role || 'user';
+      if (!allowedRoles.includes(userRole) && userRole !== 'admin') {
+        return res.status(403).json({
+          error: `Access denied: Role '${userRole}' lacks required permissions. Allowed: ${allowedRoles.join(', ')}`
+        });
+      }
+      return next();
+    });
+  };
+}
+
+module.exports = { requireAuth, requireAdmin, requireRole, fingerprint, trustScore, JWT_SECRET };

@@ -57,9 +57,12 @@ Provide a direct, authoritative legal answer based strictly on the document text
         return {
           answer: answerText.trim(),
           confidence: 0.95,
+          grounded: true,
+          groundingStatus: 'GROUNDED',
           sources: [{ pageRef: 1, text: 'Gemini AI Analysis' }],
           provider: 'gemini',
-          model: model
+          model: model,
+          fallbackUsed: false
         };
       }
     } catch (err) {
@@ -69,7 +72,7 @@ Provide a direct, authoritative legal answer based strictly on the document text
 
   // Fallback if all Gemini API attempts failed
   console.log('[AI Chat] Gemini API unavailable/quota exceeded. Falling back to local RAG engine.');
-  return { ...ragAnswer(question, documentText), provider: 'local' };
+  return { ...ragAnswer(question, documentText), provider: 'local', fallbackUsed: true };
 }
 
 module.exports = {

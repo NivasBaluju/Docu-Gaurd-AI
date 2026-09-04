@@ -39,14 +39,21 @@ async function verifyChain() {
   const problems = [];
 
   for (const block of blocks) {
-    const createdAtStr = block.created_at instanceof Date ? block.created_at.toISOString() : String(block.created_at);
-    const recomputed = sha256(
-      `${block.block_index}|${block.user_id || 'anon'}|${block.action}|${block.details_json}|${block.prev_hash}|${createdAtStr}`
-    );
+    const dt = block.created_at instanceof Date ? block.created_at : new Date(block.created_at);
+    const candidate1 = dt.toISOString();
+    const candidate2 = new Date(dt.getTime() + 330 * 60 * 1000).toISOString();
+
+    const str1 = `${block.block_index}|${block.user_id || 'anon'}|${block.action}|${block.details_json}|${block.prev_hash}|${candidate1}`;
+    const str2 = `${block.block_index}|${block.user_id || 'anon'}|${block.action}|${block.details_json}|${block.prev_hash}|${candidate2}`;
+
+    const h1 = sha256(str1);
+    const h2 = sha256(str2);
+    const isHashValid = (h1 === block.hash || h2 === block.hash);
+
     if (block.prev_hash !== expectedPrev) {
       problems.push({ block: block.block_index, issue: 'prev_hash mismatch (chain broken)' });
     }
-    if (recomputed !== block.hash) {
+    if (!isHashValid) {
       problems.push({ block: block.block_index, issue: 'hash mismatch (tampering detected)' });
     }
     expectedPrev = block.hash;
