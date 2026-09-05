@@ -76,7 +76,7 @@ export function Landing() {
                 <h4 className="font-body text-label text-ink font-semibold uppercase tracking-wider mb-1">
                   Statutory Coverage
                 </h4>
-                <p className="font-body text-body-sm text-neutral-600">
+                <p className="font-body text-body-sm text-ink-soft">
                   Delaware Chancery, UCC Article 2, English Common Law, and EU GDPR Article 28 baselines.
                 </p>
               </div>
@@ -84,7 +84,7 @@ export function Landing() {
                 <h4 className="font-body text-label text-ink font-semibold uppercase tracking-wider mb-1">
                   Cryptographic Non-Repudiation
                 </h4>
-                <p className="font-body text-body-sm text-neutral-600">
+                <p className="font-body text-body-sm text-ink-soft">
                   SHA-256 block anchored audit ledger with dual-signatory separation of duties.
                 </p>
               </div>
@@ -92,7 +92,7 @@ export function Landing() {
                 <h4 className="font-body text-label text-ink font-semibold uppercase tracking-wider mb-1">
                   Zero-Trust Architecture
                 </h4>
-                <p className="font-body text-body-sm text-neutral-600">
+                <p className="font-body text-body-sm text-ink-soft">
                   Hardware enclave processing with zero multi-tenant data bleed guarantees.
                 </p>
               </div>
@@ -123,10 +123,10 @@ export function Landing() {
                 <h4 className="font-display text-2xl sm:text-3xl text-ink font-medium mb-4">
                   {diligenceCap.name}
                 </h4>
-                <p className="font-body text-body text-neutral-700 mb-6 leading-relaxed">
+                <p className="font-body text-body text-ink-soft mb-6 leading-relaxed">
                   {diligenceCap.overview}
                 </p>
-                <ul className="space-y-3 font-body text-body-sm text-neutral-700 list-none p-0 mb-8">
+                <ul className="space-y-3 font-body text-body-sm text-ink-soft list-none p-0 mb-8">
                   {diligenceCap.services.map((srv, idx) => (
                     <li key={idx} className="flex items-start gap-3">
                       <span className="text-ink font-bold">•</span>
@@ -151,7 +151,7 @@ export function Landing() {
                 <h4 className="font-display text-2xl sm:text-3xl text-ink font-medium mb-4">
                   {riskCap.name}
                 </h4>
-                <p className="font-body text-body-sm text-neutral-600 mb-6 leading-relaxed">
+                <p className="font-body text-body-sm text-ink-soft mb-6 leading-relaxed">
                   {riskCap.indexLine}
                 </p>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 my-6">
@@ -201,10 +201,10 @@ export function Landing() {
                 <h4 className="font-display text-2xl sm:text-3xl text-ink font-medium mb-4">
                   {negotiationCap.name}
                 </h4>
-                <p className="font-body text-body-sm text-neutral-600 mb-6 leading-relaxed">
+                <p className="font-body text-body-sm text-ink-soft mb-6 leading-relaxed">
                   {negotiationCap.indexLine}
                 </p>
-                <p className="font-body text-body-sm text-neutral-700 leading-relaxed mb-6">
+                <p className="font-body text-body-sm text-ink-soft leading-relaxed mb-6">
                   Calculates concession probabilities, fallback positions, and strategic BATNA tolerance matrices to maximize leverage at every exchange.
                 </p>
               </div>
@@ -224,7 +224,7 @@ export function Landing() {
                 <h4 className="font-display text-2xl sm:text-3xl text-ink font-medium mb-4">
                   {governanceCap.name}
                 </h4>
-                <p className="font-body text-body text-neutral-700 mb-6 leading-relaxed">
+                <p className="font-body text-body text-ink-soft mb-6 leading-relaxed">
                   {governanceCap.overview}
                 </p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
@@ -270,7 +270,7 @@ export function Landing() {
                 <h4 className="font-display text-2xl sm:text-3xl text-ink font-medium mb-4">
                   {complianceCap.name}
                 </h4>
-                <p className="font-body text-body text-neutral-700 leading-relaxed mb-6">
+                <p className="font-body text-body text-ink-soft leading-relaxed mb-6">
                   {complianceCap.overview}
                 </p>
                 <TextLinkButton href={`/capabilities/${complianceCap.slug}`}>
@@ -285,7 +285,7 @@ export function Landing() {
                 <h4 className="font-display text-2xl sm:text-3xl text-ink font-medium mb-4">
                   {crosscheckCap.name}
                 </h4>
-                <p className="font-body text-body text-neutral-700 leading-relaxed mb-6">
+                <p className="font-body text-body text-ink-soft leading-relaxed mb-6">
                   {crosscheckCap.overview}
                 </p>
                 <TextLinkButton href={`/capabilities/${crosscheckCap.slug}`}>
@@ -300,7 +300,7 @@ export function Landing() {
                 <h5 className="font-body text-label text-ink font-semibold uppercase tracking-wider mb-2">
                   Evidence Formats
                 </h5>
-                <p className="font-body text-body-sm text-neutral-600">
+                <p className="font-body text-body-sm text-ink-soft">
                   RFC-4180 CSV manifests, binary PDF audit reports, JSON-LD cryptographic proofs.
                 </p>
               </div>
@@ -308,7 +308,7 @@ export function Landing() {
                 <h5 className="font-body text-label text-ink font-semibold uppercase tracking-wider mb-2">
                   Statutory Regimes
                 </h5>
-                <p className="font-body text-body-sm text-neutral-600">
+                <p className="font-body text-body-sm text-ink-soft">
                   EU GDPR Article 28, FTC/DOJ antitrust guidelines, Delaware Chancery corporate precedent.
                 </p>
               </div>
@@ -316,7 +316,7 @@ export function Landing() {
                 <h5 className="font-body text-label text-ink font-semibold uppercase tracking-wider mb-2">
                   Non-Repudiation
                 </h5>
-                <p className="font-body text-body-sm text-neutral-600">
+                <p className="font-body text-body-sm text-ink-soft">
                   Stateless verification endpoint allows independent judicial validation of executed batches.
                 </p>
               </div>
@@ -340,15 +340,15 @@ export function Landing() {
             </span>
             <div className="mb-6">
               <RedactionReveal barColor="#0A0A0A">
-                <span className="display-01 text-paper font-medium block">
+                <span className="display-01 text-white font-medium block">
                   40+
                 </span>
               </RedactionReveal>
             </div>
-            <h3 className="font-display text-3xl sm:text-4xl text-paper font-medium leading-snug">
+            <h3 className="font-display text-3xl sm:text-4xl text-white font-medium leading-snug">
               compliance frameworks and statutory regimes monitored continuously across your portfolio.
             </h3>
-            <p className="font-body text-body text-neutral-400 mt-6 max-w-2xl leading-relaxed">
+            <p className="font-body text-body text-ink-soft mt-6 max-w-2xl leading-relaxed">
               From Delaware corporate precedent and UCC obligations to European Union GDPR Article 28 mandates, DocuGuard continuously validates contract terms against changing statutory baselines.
             </p>
           </div>
@@ -374,7 +374,7 @@ export function Landing() {
                 <h4 className="font-body text-label text-ink font-semibold uppercase mb-1">
                   Transaction Impact
                 </h4>
-                <p className="font-body text-body-sm text-neutral-600">
+                <p className="font-body text-body-sm text-ink-soft">
                   Prevented $42M in unmitigated cross-border indemnity exposures prior to closing.
                 </p>
               </div>
@@ -382,7 +382,7 @@ export function Landing() {
                 <h4 className="font-body text-label text-ink font-semibold uppercase mb-1">
                   Turnaround Velocity
                 </h4>
-                <p className="font-body text-body-sm text-neutral-600">
+                <p className="font-body text-body-sm text-ink-soft">
                   Full portfolio diligence completed across 1,840 agreements in under 4 hours.
                 </p>
               </div>
@@ -433,7 +433,7 @@ export function Landing() {
             <h3 className="font-display text-3xl sm:text-4xl text-ink font-medium mb-6 leading-tight">
               Hardware enclave processing with zero multi-tenant data leakage.
             </h3>
-            <p className="font-body text-body text-neutral-700 leading-relaxed mb-8">
+            <p className="font-body text-body text-ink-soft leading-relaxed mb-8">
               DocuGuard isolates all contract telemetry inside hardware-encrypted enclaves. Your legal data is never used to train global AI models, and every calculation produces an immutable SHA-256 evidence package for independent judicial verification.
             </p>
             <TextLinkButton href="/trust">
@@ -452,13 +452,13 @@ export function Landing() {
         }}
       >
         <div className="container-text">
-          <span className="font-body text-label text-neutral-400 mb-4 block uppercase tracking-wider">
+          <span className="font-body text-label text-ink-soft mb-4 block uppercase tracking-wider">
             Executive Briefing
           </span>
-          <h2 className="display-02 text-paper tracking-tight mb-6">
+          <h2 className="display-02 text-white tracking-tight mb-6">
             Retain DocuGuard for your portfolio.
           </h2>
-          <p className="font-body text-body text-neutral-400 max-w-xl mx-auto mb-10 leading-relaxed">
+          <p className="font-body text-body text-ink-soft max-w-xl mx-auto mb-10 leading-relaxed">
             Schedule a confidential briefing with our legal engineering team to evaluate your contract exposure.
           </p>
           <div className="flex flex-wrap items-center justify-center gap-4">

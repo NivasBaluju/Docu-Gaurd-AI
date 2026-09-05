@@ -64,12 +64,12 @@ export function CapabilityDetail() {
         </div>
 
         {/* Closing Action Block */}
-        <div className="mt-24 p-12 sm:p-16 bg-ink text-paper flex flex-col sm:flex-row sm:items-center justify-between gap-8">
+        <div className="mt-24 p-12 sm:p-16 border border-neutral-800 bg-neutral-900/50 flex flex-col sm:flex-row sm:items-center justify-between gap-8">
           <div>
-            <h3 className="display-03 text-paper mb-2">
+            <h3 className="display-03 text-white mb-2">
               Deploy {cap.name}.
             </h3>
-            <p className="font-body text-body text-neutral-400 max-w-lg">
+            <p className="font-body text-body text-neutral-300 max-w-lg">
               Integrate this capability directly into your corporate contract repository or schedule a private diligence demonstration.
             </p>
           </div>

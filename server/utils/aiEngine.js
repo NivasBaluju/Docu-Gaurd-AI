@@ -398,6 +398,104 @@ function riskScore(text) {
   };
 }
 
+/**
+ * Canonical Calibrated Document Risk (100% Cross-Runtime Parity with Python risk_scoring.py)
+ * Formula Version: 2.0.0
+ */
+const CANONICAL_HAZARD_PATTERNS = [
+  {
+    pattern: /(unlimited\s+liability|no\s+cap\s+on\s+liability)/i,
+    type: 'CONFIRMED_HAZARD_UNLIMITED_LIABILITY',
+    severity: 'HIGH',
+    points: 20,
+    reason: 'Explicit unlimited liability exposure detected without standard indemnification caps.'
+  },
+  {
+    pattern: /(automatic(?:ally)?\s+renew(?:s|al)?(?!\s+upon\s+notice)|\bin\s+perpetuity\b)/i,
+    type: 'CONFIRMED_HAZARD_PERPETUAL_BINDING',
+    severity: 'MEDIUM',
+    points: 12,
+    reason: 'Perpetual duration or automatic renewal lock-in without mandatory prior notice.'
+  },
+  {
+    pattern: /(sole\s+and\s+absolute\s+discretion|unilateral(?:ly)?\s+modify)/i,
+    type: 'CONFIRMED_HAZARD_UNILATERAL_DISCRETION',
+    severity: 'HIGH',
+    points: 15,
+    reason: 'Unilateral modification rights granting one party unchecked discretion.'
+  },
+  {
+    pattern: /(non-refundable|waives?\s+all\s+(?:rights|claims|warranties))/i,
+    type: 'CONFIRMED_HAZARD_RIGHTS_WAIVER',
+    severity: 'MEDIUM',
+    points: 10,
+    reason: 'Broad waiver of claims or statutory warranty protections.'
+  },
+  {
+    pattern: /(immediate\s+termination\s+without\s+(?:cause|notice))/i,
+    type: 'CONFIRMED_HAZARD_ARBITRARY_TERMINATION',
+    severity: 'HIGH',
+    points: 15,
+    reason: 'Immediate termination without cure period or required default notice.'
+  }
+];
+
+function calculateCalibratedDocumentRisk(fullText, missingClauses = []) {
+  const riskFactors = [];
+  let hazardPoints = 0;
+  let omissionPoints = 0;
+
+  const lowerText = (fullText || '').toLowerCase();
+  for (const hazard of CANONICAL_HAZARD_PATTERNS) {
+    if (hazard.pattern.test(lowerText)) {
+      riskFactors.push({
+        riskType: hazard.type,
+        category: 'CONFIRMED_HAZARD',
+        severity: hazard.severity,
+        reason: hazard.reason,
+        riskPoints: hazard.points
+      });
+      hazardPoints += hazard.points;
+    }
+  }
+
+  for (const missing of missingClauses) {
+    const pts = missing.riskPoints || (missing.severity === 'HIGH' ? 15 : missing.severity === 'MEDIUM' ? 10 : 5);
+    riskFactors.push({
+      riskType: `OMISSION_${missing.type}`,
+      category: 'POTENTIAL_OMISSION',
+      severity: missing.severity || 'MEDIUM',
+      reason: missing.reason || 'Omitted standard protective covenant.',
+      riskPoints: pts
+    });
+    omissionPoints += pts;
+  }
+
+  const moderatedOmissions = Math.min(35, omissionPoints);
+  const totalRawPoints = hazardPoints + moderatedOmissions;
+  const normalizedScore = Math.min(100, Math.max(5, totalRawPoints));
+
+  let level = 'LOW';
+  if (normalizedScore <= 25) {
+    level = 'LOW';
+  } else if (normalizedScore <= 55) {
+    level = 'MEDIUM';
+  } else {
+    level = 'HIGH';
+  }
+
+  return {
+    score: normalizedScore,
+    level,
+    totalRiskPoints: totalRawPoints,
+    hazardPoints,
+    omissionPoints,
+    factors: riskFactors,
+    formula_version: '2.0.0',
+    summary: `${level} Risk (${normalizedScore}/100) identified: ${riskFactors.filter(f => f.category === 'CONFIRMED_HAZARD').length} confirmed hazards, ${riskFactors.filter(f => f.category === 'POTENTIAL_OMISSION').length} potential omissions.`
+  };
+}
+
 // ---------------------------------------------------------------------------
 // 5. NEGOTIATION ASSISTANT
 // ---------------------------------------------------------------------------
@@ -661,6 +759,7 @@ module.exports = {
   simplifyText,
   ragAnswer,
   riskScore,
+  calculateCalibratedDocumentRisk,
   negotiationSuggestions,
   complianceCheck,
   extractDeadlines,

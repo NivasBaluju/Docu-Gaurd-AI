@@ -11,7 +11,7 @@ import Breadcrumb from '../components/ui/Breadcrumb';
 export function Insights() {
   const [selectedCategory, setSelectedCategory] = useState('All');
 
-  const categories = ['All', 'Regulatory Clearance', 'Contract Diligence', 'Security & Governance'];
+  const categories = ['All', 'Security & Governance', 'Contract Diligence', 'Decision Intelligence'];
 
   const filtered = selectedCategory === 'All'
     ? insightsData
@@ -28,7 +28,7 @@ export function Insights() {
             Intelligence
           </h1>
           <p className="font-body text-body-lg text-ink-soft leading-relaxed">
-            Analysis from the legal engineers and counsel building DocuGuard — on regulatory shifts, dispute precedents, and the mechanics of automated contract governance.
+            Technical research and architectural specifications from the DocuGuard AI systems engineering team — covering zero-trust cryptography, continuous risk quantification, and autonomous negotiation mechanics.
           </p>
         </div>
 

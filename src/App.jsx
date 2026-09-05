@@ -8,6 +8,7 @@ import Footer from './components/layout/Footer';
 import ProtectedRoute from './components/layout/ProtectedRoute';
 import ThinkingLoader from './components/common/ThinkingLoader';
 import LenisProvider from './components/motion/LenisProvider';
+import AiDegradedModeBanner from './components/common/AiDegradedModeBanner';
 
 // Lazy-loaded Public Pages
 const Landing = lazy(() => import('./pages/Landing'));
@@ -36,6 +37,8 @@ const Contracts = lazy(() => import('./pages/Contracts'));
 const Security = lazy(() => import('./pages/Security'));
 const Portfolio = lazy(() => import('./pages/Portfolio'));
 const MfaSetup = lazy(() => import('./pages/MfaSetup'));
+const Integrations = lazy(() => import('./pages/Integrations'));
+const Operations = lazy(() => import('./pages/Operations'));
 
 import './styles/styles.css';
 
@@ -60,12 +63,24 @@ const AppContent = () => {
     '/contracts',
     '/portfolio',
     '/deadlines',
-    '/security'
+    '/security',
+    '/integrations',
+    '/operations'
   ].some((p) => location.pathname.startsWith(p)) || location.pathname.startsWith('/document/');
+
+  React.useEffect(() => {
+    const isAuthed = Boolean(user || isAuthPage);
+    if (isAuthed) {
+      document.body.classList.add('authenticated', 'portal-active');
+    } else {
+      document.body.classList.remove('authenticated', 'portal-active');
+    }
+  }, [user, isAuthPage]);
 
   return (
     <>
       <Topbar />
+      <AiDegradedModeBanner />
       <main id="app" role="main" className="flex-1">
         <Suspense fallback={<RouteLoadingFallback />}>
           <Routes>
@@ -153,6 +168,22 @@ const AppContent = () => {
               element={
                 <ProtectedRoute>
                   <Security />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/integrations"
+              element={
+                <ProtectedRoute>
+                  <Integrations />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/operations"
+              element={
+                <ProtectedRoute requireAdmin={true}>
+                  <Operations />
                 </ProtectedRoute>
               }
             />

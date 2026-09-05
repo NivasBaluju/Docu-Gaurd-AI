@@ -53,11 +53,11 @@ export function InsightDetail() {
             <PullQuote
               quote={article.content[1] || article.dek}
               attribution={article.author}
-              subattribution="DocuGuard Legal Engineering Working Paper"
+              subattribution="DocuGuard AI Systems Architecture & Research"
             />
 
             <p className="measure-body">
-              Enterprise counsel seeking to automate this level of statutory diligence across existing master service agreements can integrate DocuGuard directly via the authenticated portal or consult with our systems counsel.
+              Enterprise legal and operations teams can leverage these capabilities directly within the DocuGuard authenticated workspace or configure custom automated continuous surveillance pipelines.
             </p>
           </div>
 
@@ -71,7 +71,7 @@ export function InsightDetail() {
                 {article.author}
               </h3>
               <p className="font-body text-body-sm text-ink-soft mt-1 max-w-md leading-relaxed">
-                Specializes in cross-border antitrust clearance, structural contract governance, and algorithmic dispute risk analysis at DocuGuard AI.
+                Conducts core systems engineering, applied zero-trust cryptography, and algorithmic contract intelligence for the DocuGuard AI enterprise platform.
               </p>
             </div>
           </div>

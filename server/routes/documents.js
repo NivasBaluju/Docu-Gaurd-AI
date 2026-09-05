@@ -20,6 +20,12 @@ const {
   getDocumentChanges,
   acknowledgeMonitoringEvent
 } = require('../services/contractMonitoringService');
+const {
+  createDecisionWorkflow,
+  listDocumentDecisions
+} = require('../services/contractDecisionWorkflowService');
+const { evaluateApprovalPolicy } = require('../services/approvalPolicyService');
+const policyComplianceService = require('../services/policyComplianceService');
 
 const router = express.Router();
 const uploadsDir = path.join(__dirname, '..', '..', 'data', 'uploads');
@@ -77,23 +83,36 @@ async function extractText(buffer, mimeType, originalName) {
         setTimeout(() => reject(new Error('PDF parsing timeout')), 10000)
       );
       const result = await Promise.race([parsePromise, timeoutPromise]);
-      return { text: result.text || '', confidence: 0.97 };
+      const extracted = (result.text || '').trim();
+      if (!extracted) {
+        return { text: '', confidence: 0.0, status: 'INSUFFICIENT_EVIDENCE', error: 'PDF contains no extractable digital text stream' };
+      }
+      return { text: extracted, confidence: 0.97, status: 'SUCCESS' };
     }
     if (ext === '.docx') {
       const mammoth = require('mammoth');
       const result = await mammoth.extractRawText({ buffer });
-      return { text: result.value || '', confidence: 0.98 };
+      const extracted = (result.value || '').trim();
+      if (!extracted) {
+        return { text: '', confidence: 0.0, status: 'INSUFFICIENT_EVIDENCE', error: 'DOCX contains no extractable text' };
+      }
+      return { text: extracted, confidence: 0.98, status: 'SUCCESS' };
     }
     if (mimeType.startsWith('text/') || ext === '.txt') {
-      return { text: buffer.toString('utf8'), confidence: 1.0 };
+      const extracted = buffer.toString('utf8').trim();
+      if (!extracted) {
+        return { text: '', confidence: 0.0, status: 'INSUFFICIENT_EVIDENCE', error: 'Text file is empty' };
+      }
+      return { text: extracted, confidence: 1.0, status: 'SUCCESS' };
     }
     if (mimeType.startsWith('image/')) {
-      return { text: '[Image file uploaded — OCR engine not bundled in this build. Upload a .txt/.pdf/.docx for full text analysis, or paste the text manually.]', confidence: 0.4 };
+      return { text: '', confidence: 0.0, status: 'OCR_REQUIRED', error: 'Image OCR required' };
     }
-    return { text: buffer.toString('utf8'), confidence: 0.5 };
+    const extracted = buffer.toString('utf8').trim();
+    return { text: extracted, confidence: extracted ? 0.5 : 0.0, status: extracted ? 'SUCCESS' : 'INSUFFICIENT_EVIDENCE' };
   } catch (e) {
-    console.warn('Extract text warning:', e.message);
-    return { text: '[Text extraction fallback]', confidence: 0.3 };
+    console.warn('Extract text failure:', e.message);
+    return { text: '', confidence: 0.0, status: 'EXTRACTION_FAILED', error: e.message };
   }
 }
 
@@ -154,13 +173,16 @@ router.post('/upload', requireAuth, upload.single('file'), async (req, res) => {
       console.warn('Disk write warning:', wErr.message);
     }
 
-    const { text, confidence } = await extractText(req.file.buffer, req.file.mimetype || '', req.file.originalname || '');
-    const risk = text ? riskScore(text).overall : 5;
+    const extractRes = await extractText(req.file.buffer, req.file.mimetype || '', req.file.originalname || '');
+    const text = extractRes.text || '';
+    const confidence = extractRes.confidence || 0.0;
+    const analysisStatus = extractRes.status === 'SUCCESS' ? 'NOT_STARTED' : (extractRes.status || 'INSUFFICIENT_EVIDENCE');
+    const risk = (extractRes.status === 'SUCCESS' && text) ? riskScore(text).overall : 0;
 
     await db.query(`
       INSERT INTO documents (id, user_id, filename, original_name, mime_type, size, sha256, encrypted, extracted_text, ocr_confidence, version_group, version_number, risk_score, analysis_status)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, true, $8, $9, $10, $11, $12, 'NOT_STARTED')
-    `, [id, req.user.id, storedName, req.file.originalname, req.file.mimetype, req.file.size, hash, text, confidence, id, 1, risk]);
+      VALUES ($1, $2, $3, $4, $5, $6, $7, true, $8, $9, $10, $11, $12, $13)
+    `, [id, req.user.id, storedName, req.file.originalname, req.file.mimetype, req.file.size, hash, text, confidence, id, 1, risk, analysisStatus]);
 
     await recordAudit(req.user.id, 'DOCUMENT_UPLOADED', { documentId: id, name: req.file.originalname, sha256: hash });
 
@@ -579,6 +601,124 @@ router.get('/:id/negotiation-suggestions', requireAuth, async (req, res) => {
   }
 });
 
+// --- Enterprise Word (DOCX) Redline Export with Tracked Changes -----------
+router.post('/:id/export-redline-docx', requireAuth, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const authCheck = await authorizeDocument(id, req.user);
+    if (authCheck.errorStatus) {
+      return res.status(authCheck.errorStatus).json({ error: authCheck.errorMessage });
+    }
+
+    const { mode = 'balanced', clauses = null } = req.body;
+    const { generateDocumentRedlineDocx } = require('../services/docxExportService');
+
+    const result = await generateDocumentRedlineDocx({
+      documentId: id,
+      userId: req.user.id,
+      negotiationMode: mode,
+      requestedClauses: clauses
+    });
+
+    if (req.query.download === 'true') {
+      return res.download(result.storage_path, result.filename);
+    }
+
+    return res.status(200).json({
+      success: true,
+      document_id: result.document_id,
+      filename: result.filename,
+      download_url: `/api/documents/${id}/download-redline-docx?file=${encodeURIComponent(result.filename)}`,
+      clauses_count: result.clauses_count,
+      generated_at: result.generated_at
+    });
+  } catch (err) {
+    console.error('DOCX redline export error:', err);
+    const status = err.statusCode || 500;
+    return res.status(status).json({ error: err.message, code: err.code || 'DOCX_EXPORT_FAILED' });
+  }
+});
+
+router.get('/:id/download-redline-docx', requireAuth, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const authCheck = await authorizeDocument(id, req.user);
+    if (authCheck.errorStatus) {
+      return res.status(authCheck.errorStatus).json({ error: authCheck.errorMessage });
+    }
+
+    const requestedFile = req.query.file;
+    if (!requestedFile || !/^redline_[a-zA-Z0-9_-]+\.docx$/.test(requestedFile)) {
+      return res.status(400).json({ error: 'Invalid or missing filename' });
+    }
+
+    const filePath = path.resolve(__dirname, '../../storage/docx_exports', requestedFile);
+    if (!fs.existsSync(filePath)) {
+      return res.status(404).json({ error: 'Export file not found or expired' });
+    }
+
+    return res.download(filePath, requestedFile);
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
+});
+
+// --- Phase F: Cryptographic Audit Export Package -----------
+router.post('/:id/export-audit-package', requireAuth, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const authCheck = await authorizeDocument(id, req.user);
+    if (authCheck.errorStatus) {
+      return res.status(authCheck.errorStatus).json({ error: authCheck.errorMessage });
+    }
+
+    const { generateCryptographicAuditExport } = require('../services/auditExportService');
+    const result = await generateCryptographicAuditExport({
+      documentId: id,
+      userId: req.user.id,
+      tenantId: req.user.tenant_id
+    });
+
+    return res.status(200).json({
+      success: true,
+      export_id: result.export_id,
+      filename: result.filename,
+      bundle_sha256: result.bundle_sha256,
+      sections_count: result.sections_count,
+      manifest: result.manifest,
+      download_url: `/api/documents/${id}/download-audit-package?file=${encodeURIComponent(result.filename)}`,
+      generated_at: result.generated_at
+    });
+  } catch (err) {
+    console.error('Audit package export error:', err);
+    return res.status(500).json({ error: err.message, code: 'AUDIT_EXPORT_FAILED' });
+  }
+});
+
+router.get('/:id/download-audit-package', requireAuth, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const authCheck = await authorizeDocument(id, req.user);
+    if (authCheck.errorStatus) {
+      return res.status(authCheck.errorStatus).json({ error: authCheck.errorMessage });
+    }
+
+    const requestedFile = req.query.file;
+    if (!requestedFile || !/^audit_package_[a-zA-Z0-9_-]+\.json$/.test(requestedFile)) {
+      return res.status(400).json({ error: 'Invalid or missing filename' });
+    }
+
+    const filePath = path.resolve(__dirname, '../../storage/audit_exports', requestedFile);
+    if (!fs.existsSync(filePath)) {
+      return res.status(404).json({ error: 'Audit export package not found or expired' });
+    }
+
+    return res.download(filePath, requestedFile);
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
+});
+
 // --- Phase 6.3: AI Contract Risk Simulation & What-If Analysis -----------
 router.post('/:id/simulate', requireAuth, aiLimiter, async (req, res) => {
   const startTime = Date.now();
@@ -945,6 +1085,142 @@ router.post('/:id/monitoring/:eventId/acknowledge', requireAuth, async (req, res
   } catch (err) {
     console.error('Acknowledge monitoring event error:', err);
     res.status(err.status || 500).json({ error: err.message || 'Failed to acknowledge monitoring event' });
+  }
+});
+
+// --- Phase 12: Decision Workflows & Approval Governance ---
+router.get('/:id/decisions', requireAuth, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const authCheck = await authorizeDocument(id, req.user);
+    if (authCheck.errorStatus) {
+      return res.status(authCheck.errorStatus).json({ error: authCheck.errorMessage });
+    }
+
+    const decisions = await listDocumentDecisions(id, req.user, req.query);
+    res.json({ success: true, decisions });
+  } catch (err) {
+    console.error('List document decisions error:', err);
+    res.status(err.status || 500).json({ error: err.message || 'Failed to list document decisions' });
+  }
+});
+
+router.post('/:id/decisions', requireAuth, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const authCheck = await authorizeDocument(id, req.user);
+    if (authCheck.errorStatus) {
+      return res.status(authCheck.errorStatus).json({ error: authCheck.errorMessage });
+    }
+
+    const result = await createDecisionWorkflow(req.user.id, id, req.user.id, req.body);
+    res.status(201).json({ success: true, decision: result });
+  } catch (err) {
+    console.error('Create decision workflow error:', err);
+    res.status(err.status || 500).json({ error: err.message || 'Failed to create decision workflow' });
+  }
+});
+
+router.post('/:id/decisions/policy-evaluate', requireAuth, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const authCheck = await authorizeDocument(id, req.user);
+    if (authCheck.errorStatus) {
+      return res.status(authCheck.errorStatus).json({ error: authCheck.errorMessage });
+    }
+
+    const evaluation = evaluateApprovalPolicy(req.body);
+    res.json({ success: true, evaluation });
+  } catch (err) {
+    console.error('Evaluate approval policy error:', err);
+    res.status(err.status || 500).json({ error: err.message || 'Failed to evaluate approval policy' });
+  }
+});
+
+// --- Phase 13: Document Governance, Policy Evaluation & Findings ---
+router.get('/:id/compliance-governance', requireAuth, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const authCheck = await authorizeDocument(id, req.user);
+    if (authCheck.errorStatus) {
+      return res.status(authCheck.errorStatus).json({ error: authCheck.errorMessage });
+    }
+
+    const tenantId = req.user.tenant_id || req.user.id;
+    const evaluation = await policyComplianceService.getDocumentCompliance(tenantId, id);
+    res.json({ success: true, evaluation });
+  } catch (err) {
+    console.error('Get document compliance error:', err);
+    res.status(err.status || 500).json({ error: err.message || 'Failed to get compliance evaluation' });
+  }
+});
+
+router.post('/:id/compliance-governance/evaluate', requireAuth, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const authCheck = await authorizeDocument(id, req.user);
+    if (authCheck.errorStatus) {
+      return res.status(authCheck.errorStatus).json({ error: authCheck.errorMessage });
+    }
+
+    const tenantId = req.user.tenant_id || req.user.id;
+    const evaluation = await policyComplianceService.evaluateDocumentCompliance(tenantId, id, req.user.id, req.body || {});
+    res.json({ success: true, evaluation });
+  } catch (err) {
+    console.error('Evaluate document compliance error:', err);
+    res.status(err.status || 500).json({ error: err.message || 'Failed to evaluate document compliance' });
+  }
+});
+
+router.get('/:id/compliance-governance/findings', requireAuth, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const authCheck = await authorizeDocument(id, req.user);
+    if (authCheck.errorStatus) {
+      return res.status(authCheck.errorStatus).json({ error: authCheck.errorMessage });
+    }
+
+    const tenantId = req.user.tenant_id || req.user.id;
+    const findings = await policyComplianceService.getDocumentFindings(tenantId, id);
+    res.json({ success: true, findings });
+  } catch (err) {
+    console.error('Get document findings error:', err);
+    res.status(err.status || 500).json({ error: err.message || 'Failed to get compliance findings' });
+  }
+});
+
+router.post('/:id/compliance-governance/findings/:findingId/exception', requireAuth, async (req, res) => {
+  try {
+    const { id, findingId } = req.params;
+    const authCheck = await authorizeDocument(id, req.user);
+    if (authCheck.errorStatus) {
+      return res.status(authCheck.errorStatus).json({ error: authCheck.errorMessage });
+    }
+
+    const tenantId = req.user.tenant_id || req.user.id;
+    const { reason } = req.body;
+    const exception = await policyComplianceService.requestException(tenantId, id, findingId, req.user.id, reason);
+    res.status(201).json({ success: true, exception });
+  } catch (err) {
+    console.error('Request exception error:', err);
+    res.status(err.status || 400).json({ error: err.message || 'Failed to request exception' });
+  }
+});
+
+router.get('/:id/compliance-governance/exceptions', requireAuth, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const authCheck = await authorizeDocument(id, req.user);
+    if (authCheck.errorStatus) {
+      return res.status(authCheck.errorStatus).json({ error: authCheck.errorMessage });
+    }
+
+    const tenantId = req.user.tenant_id || req.user.id;
+    const exceptions = await policyComplianceService.listExceptions(tenantId, { document_id: id });
+    res.json({ success: true, exceptions });
+  } catch (err) {
+    console.error('Get document exceptions error:', err);
+    res.status(err.status || 500).json({ error: err.message || 'Failed to get document exceptions' });
   }
 });
 

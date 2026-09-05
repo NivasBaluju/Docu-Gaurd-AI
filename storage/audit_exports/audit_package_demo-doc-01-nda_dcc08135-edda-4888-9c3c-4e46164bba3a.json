@@ -1,0 +1,390 @@
+{
+  "executive_summary": {
+    "export_id": "dcc08135-edda-4888-9c3c-4e46164bba3a",
+    "generated_at": "2026-09-05T07:06:13.244Z",
+    "document_id": "demo-doc-01-nda",
+    "tenant_id": null,
+    "document_name": "Mutual_Non_Disclosure_Agreement_NovaTech_Apex.pdf",
+    "sha256": "67f9ec5188bc2ffb7b25bb071d36d6f1c948572bfd7a800db262d5be169cbcb8",
+    "risk_score": 18,
+    "analysis_status": "COMPLETED",
+    "confidentiality_notice": "DocuGuard AI Authoritative Evidence-Backed Audit Package"
+  },
+  "decision_timeline": {
+    "workflows": [],
+    "comments": []
+  },
+  "risk_register": {
+    "overall_score": 18,
+    "risk_factors": []
+  },
+  "evidence_references": {
+    "total_clauses": 0,
+    "grounded_clauses": []
+  },
+  "governance_findings": {
+    "total_findings": 0,
+    "findings": []
+  },
+  "approval_history": {
+    "total_actions": 0,
+    "actions": []
+  },
+  "monitoring_events": {
+    "total_events": 0,
+    "events": []
+  },
+  "integration_events": {
+    "outbox_events": [
+      {
+        "id": "f22439f7-17ef-45c1-bf42-19310f7c46e6",
+        "tenant_id": "49d357c6-c6f3-489a-a5f6-9bca6d8ea434",
+        "integration_id": null,
+        "event_id": "evt-dlq-4a956c93-c4d1-4e18-bc3f-06a6dedbf6a2",
+        "event_type": "DOCUMENT_UPDATED",
+        "payload_json": {},
+        "status": "PENDING",
+        "attempt_count": 0,
+        "next_attempt_at": {},
+        "last_error": null,
+        "created_at": {},
+        "sent_at": null
+      },
+      {
+        "id": "c73abca9-403d-4c12-b64b-1db0ff038130",
+        "tenant_id": "49d357c6-c6f3-489a-a5f6-9bca6d8ea434",
+        "integration_id": null,
+        "event_id": "evt-48033a7a-137a-42d5-9eeb-dcbc03fc9b29",
+        "event_type": "DOCUMENT_IMPORTED",
+        "payload_json": {
+          "details": {},
+          "summary": "Test outbound event emission",
+          "version": "1",
+          "event_id": "evt-48033a7a-137a-42d5-9eeb-dcbc03fc9b29",
+          "tenant_id": "49d357c6-c6f3-489a-a5f6-9bca6d8ea434",
+          "event_type": "DOCUMENT_IMPORTED",
+          "occurred_at": "2026-09-05T05:23:52.264Z",
+          "source_object": "document",
+          "correlation_id": "corr-8a369e0f-f808-482f-a715-2704e8e80af3",
+          "source_object_id": "d6569fd9-2e3d-4880-b62b-7fccc6ce422a"
+        },
+        "status": "PENDING",
+        "attempt_count": 1,
+        "next_attempt_at": {},
+        "last_error": null,
+        "created_at": {},
+        "sent_at": null
+      },
+      {
+        "id": "34fea201-faf5-432f-83fc-af69623722c1",
+        "tenant_id": "49d357c6-c6f3-489a-a5f6-9bca6d8ea434",
+        "integration_id": null,
+        "event_id": "evt-c2a64b1a-a9e6-42bc-9317-d12e501bc98b",
+        "event_type": "DOCUMENT_UPDATED",
+        "payload_json": {
+          "details": {},
+          "summary": "Document Enterprise Subscription Agreement - Revised updated to external version 2",
+          "version": "2",
+          "event_id": "evt-c2a64b1a-a9e6-42bc-9317-d12e501bc98b",
+          "tenant_id": "49d357c6-c6f3-489a-a5f6-9bca6d8ea434",
+          "event_type": "DOCUMENT_UPDATED",
+          "occurred_at": "2026-09-05T05:23:49.501Z",
+          "source_object": "document",
+          "correlation_id": "intg-4026101d-6b01-430e-8978-a618eeffe6fe",
+          "source_object_id": "d6569fd9-2e3d-4880-b62b-7fccc6ce422a"
+        },
+        "status": "PENDING",
+        "attempt_count": 0,
+        "next_attempt_at": {},
+        "last_error": null,
+        "created_at": {},
+        "sent_at": null
+      },
+      {
+        "id": "3f44ae6b-e371-4ebd-a2eb-8bdba70c475b",
+        "tenant_id": "49d357c6-c6f3-489a-a5f6-9bca6d8ea434",
+        "integration_id": null,
+        "event_id": "evt-db69803e-1e9d-4ed4-a15f-af2bb9fa26dc",
+        "event_type": "DOCUMENT_IMPORTED",
+        "payload_json": {
+          "details": {},
+          "summary": "Document Enterprise Subscription Agreement imported via generic_rest",
+          "version": "1",
+          "event_id": "evt-db69803e-1e9d-4ed4-a15f-af2bb9fa26dc",
+          "tenant_id": "49d357c6-c6f3-489a-a5f6-9bca6d8ea434",
+          "event_type": "DOCUMENT_IMPORTED",
+          "occurred_at": "2026-09-05T05:23:36.470Z",
+          "source_object": "document",
+          "correlation_id": "intg-663ad6bc-4bb3-4fd8-893e-8a03acff0e74",
+          "source_object_id": "d6569fd9-2e3d-4880-b62b-7fccc6ce422a"
+        },
+        "status": "PENDING",
+        "attempt_count": 0,
+        "next_attempt_at": {},
+        "last_error": null,
+        "created_at": {},
+        "sent_at": null
+      },
+      {
+        "id": "55091fe9-81d3-4139-b143-34ab3aab2e83",
+        "tenant_id": "89db4887-6b7d-4203-a014-5c4b9b308024",
+        "integration_id": null,
+        "event_id": "evt-e4a107c1-628f-40bb-960d-c389cb5e1592",
+        "event_type": "DOCUMENT_IMPORTED",
+        "payload_json": {
+          "details": {},
+          "summary": "Smoke test document imported",
+          "version": "1",
+          "event_id": "evt-e4a107c1-628f-40bb-960d-c389cb5e1592",
+          "tenant_id": "89db4887-6b7d-4203-a014-5c4b9b308024",
+          "event_type": "DOCUMENT_IMPORTED",
+          "occurred_at": "2026-09-04T19:24:42.952Z",
+          "source_object": "document",
+          "correlation_id": "corr-023955d0-ebe6-40da-a3a6-b8443a0e068e",
+          "source_object_id": "05b9c186-ce05-4d12-ba4d-c18385801356"
+        },
+        "status": "PENDING",
+        "attempt_count": 0,
+        "next_attempt_at": {},
+        "last_error": null,
+        "created_at": {},
+        "sent_at": null
+      },
+      {
+        "id": "e2714cd2-4eb0-4b4f-8bce-6d2764143321",
+        "tenant_id": "85ed45a6-e1f4-4ca8-b5a8-161f4e1e001f",
+        "integration_id": null,
+        "event_id": "evt-dlq-f309d765-31df-451c-91ff-af9fcfd2814d",
+        "event_type": "DOCUMENT_UPDATED",
+        "payload_json": {},
+        "status": "PENDING",
+        "attempt_count": 0,
+        "next_attempt_at": {},
+        "last_error": null,
+        "created_at": {},
+        "sent_at": null
+      },
+      {
+        "id": "5a5fbfa8-9bfd-4fef-bde9-6caac991dfb1",
+        "tenant_id": "85ed45a6-e1f4-4ca8-b5a8-161f4e1e001f",
+        "integration_id": null,
+        "event_id": "evt-995672e8-e548-4533-91e8-827f4dbbc359",
+        "event_type": "DOCUMENT_IMPORTED",
+        "payload_json": {
+          "details": {},
+          "summary": "Test outbound event emission",
+          "version": "1",
+          "event_id": "evt-995672e8-e548-4533-91e8-827f4dbbc359",
+          "tenant_id": "85ed45a6-e1f4-4ca8-b5a8-161f4e1e001f",
+          "event_type": "DOCUMENT_IMPORTED",
+          "occurred_at": "2026-09-04T18:54:39.291Z",
+          "source_object": "document",
+          "correlation_id": "corr-cc1b8006-c5f8-4d6e-b35f-dfedc4945f30",
+          "source_object_id": "adb4dd22-7977-4f52-893a-7f25111490b7"
+        },
+        "status": "PENDING",
+        "attempt_count": 1,
+        "next_attempt_at": {},
+        "last_error": null,
+        "created_at": {},
+        "sent_at": null
+      },
+      {
+        "id": "cffe6324-6739-4929-92ce-8590674a8dfc",
+        "tenant_id": "85ed45a6-e1f4-4ca8-b5a8-161f4e1e001f",
+        "integration_id": null,
+        "event_id": "evt-15017447-6c3b-4a8b-9590-4498862c7943",
+        "event_type": "DOCUMENT_UPDATED",
+        "payload_json": {
+          "details": {},
+          "summary": "Document Enterprise Subscription Agreement - Revised updated to external version 2",
+          "version": "2",
+          "event_id": "evt-15017447-6c3b-4a8b-9590-4498862c7943",
+          "tenant_id": "85ed45a6-e1f4-4ca8-b5a8-161f4e1e001f",
+          "event_type": "DOCUMENT_UPDATED",
+          "occurred_at": "2026-09-04T18:54:36.982Z",
+          "source_object": "document",
+          "correlation_id": "intg-41a4deb2-6c38-4c60-a0e0-30b50886c85c",
+          "source_object_id": "adb4dd22-7977-4f52-893a-7f25111490b7"
+        },
+        "status": "PENDING",
+        "attempt_count": 0,
+        "next_attempt_at": {},
+        "last_error": null,
+        "created_at": {},
+        "sent_at": null
+      },
+      {
+        "id": "85db311a-6b1c-477d-975d-df0c152fd3cf",
+        "tenant_id": "85ed45a6-e1f4-4ca8-b5a8-161f4e1e001f",
+        "integration_id": null,
+        "event_id": "evt-6f2ffdf7-41a8-420b-9e15-515b836c47e1",
+        "event_type": "DOCUMENT_IMPORTED",
+        "payload_json": {
+          "details": {},
+          "summary": "Document Enterprise Subscription Agreement imported via generic_rest",
+          "version": "1",
+          "event_id": "evt-6f2ffdf7-41a8-420b-9e15-515b836c47e1",
+          "tenant_id": "85ed45a6-e1f4-4ca8-b5a8-161f4e1e001f",
+          "event_type": "DOCUMENT_IMPORTED",
+          "occurred_at": "2026-09-04T18:54:24.432Z",
+          "source_object": "document",
+          "correlation_id": "intg-0fc760fc-a0ee-407d-9f74-357b0b620dd6",
+          "source_object_id": "adb4dd22-7977-4f52-893a-7f25111490b7"
+        },
+        "status": "PENDING",
+        "attempt_count": 0,
+        "next_attempt_at": {},
+        "last_error": null,
+        "created_at": {},
+        "sent_at": null
+      },
+      {
+        "id": "4fb16ec9-873a-4ba8-ae70-37eb35ac9b61",
+        "tenant_id": "4a77a01c-c7fc-4299-aca6-aae472da70f1",
+        "integration_id": null,
+        "event_id": "evt-dlq-9b0b32b3-58c3-4c5d-8e46-d89e89e69511",
+        "event_type": "DOCUMENT_UPDATED",
+        "payload_json": {},
+        "status": "PENDING",
+        "attempt_count": 0,
+        "next_attempt_at": {},
+        "last_error": null,
+        "created_at": {},
+        "sent_at": null
+      },
+      {
+        "id": "98ba61e2-8cb7-4912-8eea-b8d732f886a2",
+        "tenant_id": "4a77a01c-c7fc-4299-aca6-aae472da70f1",
+        "integration_id": null,
+        "event_id": "evt-f69ac519-6505-4b68-bc52-1dd722579e2c",
+        "event_type": "DOCUMENT_IMPORTED",
+        "payload_json": {
+          "details": {},
+          "summary": "Test outbound event emission",
+          "version": "1",
+          "event_id": "evt-f69ac519-6505-4b68-bc52-1dd722579e2c",
+          "tenant_id": "4a77a01c-c7fc-4299-aca6-aae472da70f1",
+          "event_type": "DOCUMENT_IMPORTED",
+          "occurred_at": "2026-09-04T18:53:30.259Z",
+          "source_object": "document",
+          "correlation_id": "corr-a93c07c1-f426-4dc5-9f77-8db32ff9abab",
+          "source_object_id": "d4075cc8-8fc2-4833-982d-c9da8b3e4755"
+        },
+        "status": "PENDING",
+        "attempt_count": 1,
+        "next_attempt_at": {},
+        "last_error": null,
+        "created_at": {},
+        "sent_at": null
+      },
+      {
+        "id": "98696f6e-98c0-4e77-bca8-c1980815aa69",
+        "tenant_id": "4a77a01c-c7fc-4299-aca6-aae472da70f1",
+        "integration_id": null,
+        "event_id": "evt-faa68239-7ac4-4cb5-83e8-1fcde189380d",
+        "event_type": "DOCUMENT_UPDATED",
+        "payload_json": {
+          "details": {},
+          "summary": "Document Enterprise Subscription Agreement - Revised updated to external version 2",
+          "version": "2",
+          "event_id": "evt-faa68239-7ac4-4cb5-83e8-1fcde189380d",
+          "tenant_id": "4a77a01c-c7fc-4299-aca6-aae472da70f1",
+          "event_type": "DOCUMENT_UPDATED",
+          "occurred_at": "2026-09-04T18:53:27.959Z",
+          "source_object": "document",
+          "correlation_id": "intg-f4765d0c-1e7e-4c0e-a10b-61d8439af487",
+          "source_object_id": "d4075cc8-8fc2-4833-982d-c9da8b3e4755"
+        },
+        "status": "PENDING",
+        "attempt_count": 0,
+        "next_attempt_at": {},
+        "last_error": null,
+        "created_at": {},
+        "sent_at": null
+      },
+      {
+        "id": "1cd007b9-afd4-43a1-a3ae-96887ea7a06a",
+        "tenant_id": "4a77a01c-c7fc-4299-aca6-aae472da70f1",
+        "integration_id": null,
+        "event_id": "evt-f7c7abd4-88b9-4af2-bd02-ecb00702aa80",
+        "event_type": "DOCUMENT_IMPORTED",
+        "payload_json": {
+          "details": {},
+          "summary": "Document Enterprise Subscription Agreement imported via generic_rest",
+          "version": "1",
+          "event_id": "evt-f7c7abd4-88b9-4af2-bd02-ecb00702aa80",
+          "tenant_id": "4a77a01c-c7fc-4299-aca6-aae472da70f1",
+          "event_type": "DOCUMENT_IMPORTED",
+          "occurred_at": "2026-09-04T18:53:11.762Z",
+          "source_object": "document",
+          "correlation_id": "intg-f4038951-592a-4513-baf1-9f7ffd082a26",
+          "source_object_id": "d4075cc8-8fc2-4833-982d-c9da8b3e4755"
+        },
+        "status": "PENDING",
+        "attempt_count": 0,
+        "next_attempt_at": {},
+        "last_error": null,
+        "created_at": {},
+        "sent_at": null
+      }
+    ]
+  },
+  "blockchain_ledger_verification": {
+    "chain_valid": true,
+    "blocks_inspected": 50,
+    "latest_block": {
+      "block_index": 2004,
+      "action": "DOCX_REDLINE_EXPORTED",
+      "details_json": "{\"document_id\":\"demo-doc-01-nda\",\"filename\":\"redline_demo-doc-01-nda_1788591750136.docx\",\"clauses_count\":3,\"negotiation_mode\":\"protective\"}",
+      "prev_hash": "f8d5c674d4b6c065526bfb685ff78bbf9a85536c55f764cad86ac37eb8699592",
+      "hash": "66e8df37ca70909060df3471f5ad1d24924a69e7d30651b00976f23be0c0765c",
+      "created_at": "2026-09-05T01:32:30.631Z"
+    },
+    "hash_algorithm": "SHA-256"
+  },
+  "manifest": {
+    "export_id": "dcc08135-edda-4888-9c3c-4e46164bba3a",
+    "generated_at": "2026-09-05T07:06:15.908Z",
+    "generator": "DocuGuard AI Enterprise Audit Exporter v2.0",
+    "secret_scrubbing_applied": true,
+    "file_checksums": {
+      "executive_summary.json": {
+        "sha256": "07ff0e3ef2433a02e61c8c27e66b440d1aba4b28ae9a668384bccd3adf180eec",
+        "size_bytes": 454
+      },
+      "decision_timeline.json": {
+        "sha256": "e57a3acf132b295586cc3f5675271ebb937690c7184c116e40d85308d386ebc9",
+        "size_bytes": 39
+      },
+      "risk_register.json": {
+        "sha256": "74787ec3e94e6e2dfd0dc522c089e62a4d13532164ba1c50e277dabcecc0dde1",
+        "size_bytes": 47
+      },
+      "evidence_references.json": {
+        "sha256": "c74ee1193077341eda3f04b2f151077d990df0c04ffbc75d24549d57e556e1d5",
+        "size_bytes": 50
+      },
+      "governance_findings.json": {
+        "sha256": "2b5ff1f6384bdf6c4ad03281bde7836dd881a206b50587f01b07c8c635a51b67",
+        "size_bytes": 43
+      },
+      "approval_history.json": {
+        "sha256": "50afaaea379329533e7570e66ea68f65c7bb51c8ce8a10ca7ef8d81adb84b07f",
+        "size_bytes": 41
+      },
+      "monitoring_events.json": {
+        "sha256": "915b3df9f55f6a44dd9811aee9f26f1283a85921c895f00da7b4929402f465be",
+        "size_bytes": 39
+      },
+      "integration_events.json": {
+        "sha256": "a78a976c8cbeb1243487952b4f056563e1235d1cc970b8120fa57395caa1e9e9",
+        "size_bytes": 10983
+      },
+      "blockchain_ledger_verification.json": {
+        "sha256": "f97d1249fd34d1497a215a8c11d3f3691ae1e5a6c64980708b4682917df474c8",
+        "size_bytes": 558
+      }
+    }
+  }
+}

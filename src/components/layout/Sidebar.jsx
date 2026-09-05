@@ -8,7 +8,7 @@ import { DURATIONS, EASE_OUT } from '../../styles/motion';
 export const Sidebar = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { logout } = useAuth();
+  const { user, logout } = useAuth();
   const pathname = location.pathname;
 
   const navItems = [
@@ -17,10 +17,14 @@ export const Sidebar = () => {
     { path: '/documents', icon: <Icon.document />, label: 'Documents' },
     { path: '/upload', icon: <Icon.upload />, label: 'Upload Document' },
     { path: '/contracts', icon: <Icon.pen />, label: 'Generate Contract' },
+    { path: '/integrations', icon: <Icon.zap />, label: 'Integrations' },
   ];
 
   const secItems = [
-    { path: '/security', icon: <Icon.shield />, label: 'Security Center' },
+    { path: '/security', icon: <Icon.shield />, label: 'Security & Ledger' },
+    ...(user?.role === 'admin'
+      ? [{ path: '/operations', icon: <Icon.settings />, label: 'Operations & DR' }]
+      : []),
   ];
 
   const isDocDetail = pathname.startsWith('/document/');

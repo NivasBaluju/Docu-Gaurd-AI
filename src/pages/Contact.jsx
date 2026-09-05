@@ -60,23 +60,23 @@ export function Contact() {
 
             <div className="pt-10 border-t border-rule space-y-6">
               <h2 className="font-body text-heading-02 text-ink font-semibold">
-                Direct Dispatch Lines
+                Direct Communication Protocols
               </h2>
-              <div className="space-y-4 font-body text-body-sm text-neutral-600">
+              <div className="space-y-4 font-body text-body-sm text-ink-soft">
                 <div>
-                  <p className="text-ink font-medium">New York Executive Chamber</p>
-                  <p>123 Example Avenue, New York, NY 10001</p>
-                  <p className="text-neutral-500">+1 (212) 555-0100</p>
+                  <p className="text-ink font-medium">Enterprise &amp; Executive Briefings</p>
+                  <p>briefings@docuguard.ai</p>
+                  <p className="text-ink-soft text-micro mt-0.5">Encrypted dispatch • 1 business day SLA</p>
                 </div>
                 <div>
-                  <p className="text-ink font-medium">London Regulatory Center</p>
-                  <p>45 Example Street, London EC2A 4NE</p>
-                  <p className="text-neutral-500">+44 20 7946 0100</p>
+                  <p className="text-ink font-medium">Statutory &amp; Regulatory Inquiries</p>
+                  <p>legal@docuguard.ai</p>
+                  <p className="text-ink-soft text-micro mt-0.5">Delaware Chancery, UCC &amp; EU GDPR compliance</p>
                 </div>
                 <div>
-                  <p className="text-ink font-medium">Singapore Cross-Border Office</p>
-                  <p>8 Example Road, #20-01, Singapore 018956</p>
-                  <p className="text-neutral-500">+65 6100 0100</p>
+                  <p className="text-ink font-medium">Zero-Trust Security &amp; Audit Operations</p>
+                  <p>security@docuguard.ai</p>
+                  <p className="text-ink-soft text-micro mt-0.5">SHA-256 ledger verification &amp; SOC 2 reports</p>
                 </div>
               </div>
             </div>

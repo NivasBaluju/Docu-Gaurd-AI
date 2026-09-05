@@ -68,12 +68,12 @@ export function Trust() {
             </span>
             <div className="mb-4">
               <RedactionReveal barColor="#0A0A0A">
-                <h3 className="display-02 text-paper font-medium leading-tight">
+                <h3 className="display-02 text-white font-medium leading-tight">
                   We eliminate contractual liabilities before execution.
                 </h3>
               </RedactionReveal>
             </div>
-            <p className="font-body text-body text-neutral-400 mt-6 leading-relaxed">
+            <p className="font-body text-body text-ink-soft mt-6 leading-relaxed">
               Every analysis produced by DocuGuard is backed by verifiable statutory references, preserving non-repudiation and evidential authority in commercial dispute environments.
             </p>
           </div>

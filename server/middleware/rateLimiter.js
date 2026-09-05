@@ -46,8 +46,34 @@ const aiLimiter = rateLimit({
   }
 });
 
+// 4. Integration Operations Limiter (Sync runs, connection checks)
+const integrationLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 60,
+  standardHeaders: true,
+  legacyHeaders: false,
+  validate: false,
+  message: {
+    error: 'Integration operational throughput limit reached. Please wait before retrying.'
+  }
+});
+
+// 5. Inbound Webhook Limiter (Prevents webhook flood / resource exhaustion)
+const webhookLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 120,
+  standardHeaders: true,
+  legacyHeaders: false,
+  validate: false,
+  message: {
+    error: 'Webhook receiver rate limit exceeded.'
+  }
+});
+
 module.exports = {
   authLimiter,
   otpVerifyLimiter,
-  aiLimiter
+  aiLimiter,
+  integrationLimiter,
+  webhookLimiter
 };

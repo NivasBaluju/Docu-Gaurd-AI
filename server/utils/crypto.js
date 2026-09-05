@@ -139,6 +139,7 @@ function randomToken(bytes = 24) {
 }
 
 module.exports = {
+  MASTER_KEY,
   encryptBuffer,
   decryptBuffer,
   encryptSecret,

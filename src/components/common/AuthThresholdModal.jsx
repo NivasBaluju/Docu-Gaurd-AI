@@ -54,11 +54,7 @@ export function AuthThresholdModal({
       role="dialog"
       aria-modal="true"
       aria-label="Security Threshold Verification"
-      className="fixed inset-0 z-50 flex items-center justify-center bg-ink text-paper"
-      style={{
-        backgroundColor: '#0A0A0A',
-        color: '#FAF9F6'
-      }}
+      className="fixed inset-0 z-50 flex items-center justify-center bg-[#0A0A0A] text-[#FAF9F6]"
     >
       <div className="max-w-md w-full px-8 py-12 text-center flex flex-col items-center">
         {/* ThinkingOrb or Checkmark based on step */}
@@ -66,8 +62,8 @@ export function AuthThresholdModal({
           {internalStep < 2 ? (
             <ThinkingOrb state="working" size={64} />
           ) : internalStep === 2 ? (
-            <div className="w-16 h-16 border border-paper flex items-center justify-center animate-fade-in">
-              <IconCheckmark className="w-8 h-8 text-paper" strokeWidth={2} />
+            <div className="w-16 h-16 border border-white flex items-center justify-center animate-fade-in">
+              <IconCheckmark className="w-8 h-8 text-white" strokeWidth={2} />
             </div>
           ) : (
             <ThinkingOrb state="solving" size={64} />
@@ -75,7 +71,7 @@ export function AuthThresholdModal({
         </div>
 
         {/* Dynamic Telemetry Status */}
-        <h3 className="font-display text-2xl font-medium tracking-tight mb-2">
+        <h3 className="font-display text-2xl font-medium tracking-tight mb-2 text-white">
           {internalStep === 1 && 'Verifying Authentication Pass...'}
           {internalStep === 2 && 'Identity Confirmed'}
           {internalStep >= 3 && 'Initializing Secure Workspace...'}
@@ -90,7 +86,7 @@ export function AuthThresholdModal({
         {/* Structural progress hairline */}
         <div className="w-48 h-px bg-neutral-800 mt-8 relative overflow-hidden">
           <div
-            className="absolute left-0 top-0 h-full bg-paper transition-all duration-base ease-out-expo"
+            className="absolute left-0 top-0 h-full bg-white transition-all duration-base ease-out-expo"
             style={{
               width: internalStep === 1 ? '30%' : internalStep === 2 ? '70%' : '100%'
             }}

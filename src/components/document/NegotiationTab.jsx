@@ -6,6 +6,7 @@ import Icon from '../common/Icon';
 import EmptyState from '../common/EmptyState';
 import SkeletonLoader from '../common/SkeletonLoader';
 import { buttonMotion, EASE_OUT } from '../../styles/motion';
+import LegalSideBySideRedline from './LegalSideBySideRedline';
 
 const MODES = [
   { id: 'balanced', label: 'Balanced', icon: '🟢', desc: 'Fair, mutual compromise' },
@@ -21,6 +22,7 @@ export const NegotiationTab = ({ doc }) => {
   const [negotiationResult, setNegotiationResult] = useState(null);
   const [loadingList, setLoadingList] = useState(true);
   const [generating, setGenerating] = useState(false);
+  const [exportingDocx, setExportingDocx] = useState(false);
   const [acceptedClauses, setAcceptedClauses] = useState({});
   const { toast } = useToast();
 
@@ -211,181 +213,99 @@ export const NegotiationTab = ({ doc }) => {
       </div>
 
       {/* 3. Negotiation Analysis & Redline Card */}
+      {/* Mode Selector */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '10px', marginBottom: '20px' }}>
+        {MODES.map((m) => (
+          <button
+            key={m.id}
+            type="button"
+            className={`btn btn-sm ${activeMode === m.id ? 'btn-primary' : 'btn-secondary'}`}
+            onClick={() => setActiveMode(m.id)}
+            style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', padding: '10px 12px', height: 'auto', textAlign: 'left' }}
+          >
+            <div style={{ fontWeight: 600, fontSize: '13px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <span>{m.icon}</span> {m.label}
+            </div>
+            <div style={{ fontSize: '11px', opacity: 0.75, marginTop: '2px' }}>{m.desc}</div>
+          </button>
+        ))}
+      </div>
+
+      {/* Clause Opportunity Tabs */}
+      <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '10px', marginBottom: '16px', borderBottom: '1px solid var(--line)' }}>
+        {opportunities.map((opp) => (
+          <button
+            key={opp.clauseId}
+            type="button"
+            className={`btn btn-sm ${selectedClauseId === opp.clauseId ? 'btn-secondary active' : 'btn-ghost'}`}
+            onClick={() => setSelectedClauseId(opp.clauseId)}
+            style={{
+              whiteSpace: 'nowrap',
+              fontSize: '12px',
+              borderBottom: selectedClauseId === opp.clauseId ? '2px solid var(--gold)' : 'none',
+              borderRadius: '4px 4px 0 0'
+            }}
+          >
+            {opp.clauseType}
+            <span className={`badge ${opp.riskSeverity === 'HIGH' ? 'badge-danger' : 'badge-warn'}`} style={{ marginLeft: '6px', fontSize: '10px' }}>
+              {opp.riskSeverity}
+            </span>
+          </button>
+        ))}
+      </div>
+
       {generating ? (
-        <div style={{ padding: '36px 0', textAlign: 'center' }}>
-          <SkeletonLoader.Card count={1} height="200px" />
-          <div className="text-lo mt-12" style={{ fontSize: '12px' }}>
-            Applying {activeMode} negotiation posture and generating word-level redline…
-          </div>
-        </div>
+        <SkeletonLoader.Card count={2} height="120px" />
       ) : negotiationResult ? (
         <div style={{ display: 'grid', gap: '16px' }}>
-          {/* Card A: Document Evidence (Immutable Fact) */}
+          {/* Card A: Original Document Evidence */}
           <div
             style={{
-              background: 'rgba(0, 0, 0, 0.25)',
+              background: 'rgba(255, 255, 255, 0.02)',
               border: '1px solid rgba(255, 255, 255, 0.08)',
               borderRadius: '8px',
               padding: '16px'
             }}
           >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-              <span style={{ fontWeight: 600, color: 'var(--gold)', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                📄 Found in Document ({negotiationResult.documentEvidence?.section || 'Contract'})
+              <span style={{ fontWeight: 600, color: 'var(--mid)', fontSize: '12px', letterSpacing: '0.05em' }}>
+                ORIGINAL DOCUMENT CLAUSE (DOCUMENT FACT)
               </span>
-              <span className="badge badge-neutral" style={{ fontSize: '10px' }}>
-                Immutable Document Fact
+              <span className="source-tag" style={{ fontSize: '11px' }}>
+                Segment ID: {negotiationResult.documentEvidence?.clauseId || selectedClauseId}
               </span>
             </div>
             <div
               style={{
-                fontFamily: 'var(--font-mono, monospace)',
-                fontSize: '12.5px',
-                color: 'var(--mid)',
+                fontFamily: 'Georgia, serif',
+                fontSize: '13.5px',
                 lineHeight: '1.6',
-                background: 'rgba(255, 255, 255, 0.02)',
-                padding: '12px 14px',
-                borderRadius: '6px',
-                borderLeft: '3px solid var(--gold)'
+                color: 'var(--hi)',
+                fontStyle: 'italic',
+                padding: '8px 12px',
+                borderLeft: '3px solid var(--gold)',
+                background: 'rgba(0, 0, 0, 0.2)'
               }}
             >
               "{negotiationResult.documentEvidence?.clause}"
             </div>
           </div>
 
-          {/* Card B: AI Strategic Recommendation */}
-          <div
-            style={{
-              background: 'rgba(59, 130, 246, 0.04)',
-              border: '1px solid rgba(59, 130, 246, 0.2)',
-              borderRadius: '8px',
-              padding: '16px'
-            }}
-          >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-              <span style={{ fontWeight: 600, color: 'var(--royal)', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                💡 AI Strategic Recommendation ({activeMode.toUpperCase()} MODE)
-              </span>
-              <span className={`badge ${negotiationResult.aiRecommendation?.riskSeverity === 'HIGH' ? 'badge-danger' : 'badge-warn'}`} style={{ fontSize: '10.5px' }}>
-                {negotiationResult.aiRecommendation?.riskSeverity} RISK
-              </span>
-            </div>
-
-            <div style={{ display: 'grid', gap: '8px', fontSize: '13px' }}>
-              <div>
-                <strong style={{ color: 'var(--hi)' }}>Identified Imbalance: </strong>
-                <span style={{ color: 'var(--mid)' }}>{negotiationResult.aiRecommendation?.identifiedImbalance}</span>
-              </div>
-              <div>
-                <strong style={{ color: 'var(--hi)' }}>Negotiation Strategy: </strong>
-                <span style={{ color: 'var(--mid)' }}>{negotiationResult.aiRecommendation?.strategy}</span>
-              </div>
-              {negotiationResult.aiRecommendation?.objectives && (
-                <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginTop: '4px' }}>
-                  {negotiationResult.aiRecommendation.objectives.map((obj, oIdx) => (
-                    <span key={oIdx} className="source-tag" style={{ fontSize: '10.5px' }}>
-                      🎯 {obj.replace(/_/g, ' ')}
-                    </span>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Card C: Word-Level Visual Redline */}
-          <div
-            style={{
-              background: 'rgba(0, 0, 0, 0.35)',
-              border: '1px solid rgba(255, 255, 255, 0.1)',
-              borderRadius: '8px',
-              padding: '16px'
-            }}
-          >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-              <span style={{ fontWeight: 600, color: 'var(--hi)', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                ✍️ Proposed Redline Diff
-              </span>
-              {negotiationResult.redline?.summary && (
-                <div style={{ display: 'flex', gap: '6px', fontSize: '11px' }}>
-                  <span style={{ color: '#34d399', fontWeight: 600 }}>+{negotiationResult.redline.summary.additions} added</span>
-                  <span className="text-lo">·</span>
-                  <span style={{ color: '#f87171', fontWeight: 600 }}>-{negotiationResult.redline.summary.deletions} removed</span>
-                </div>
-              )}
-            </div>
-
-            {/* Word-Level Rendered Redline */}
-            <div
-              style={{
-                lineHeight: '1.7',
-                fontSize: '13.5px',
-                padding: '14px 16px',
-                borderRadius: '6px',
-                background: 'rgba(255, 255, 255, 0.02)',
-                border: '1px solid rgba(255, 255, 255, 0.06)'
-              }}
-            >
-              {negotiationResult.redline?.operations?.map((op, opIdx) => {
-                if (op.type === 'delete') {
-                  return (
-                    <del
-                      key={opIdx}
-                      style={{
-                        background: 'rgba(239, 68, 68, 0.2)',
-                        color: '#fca5a5',
-                        textDecoration: 'line-through',
-                        padding: '1px 4px',
-                        borderRadius: '3px',
-                        margin: '0 1px'
-                      }}
-                    >
-                      {op.text}
-                    </del>
-                  );
-                }
-                if (op.type === 'insert') {
-                  return (
-                    <ins
-                      key={opIdx}
-                      style={{
-                        background: 'rgba(16, 185, 129, 0.2)',
-                        color: '#6ee7b7',
-                        textDecoration: 'none',
-                        fontWeight: 600,
-                        padding: '1px 4px',
-                        borderRadius: '3px',
-                        margin: '0 1px'
-                      }}
-                    >
-                      {op.text}
-                    </ins>
-                  );
-                }
-                return <span key={opIdx} style={{ color: 'var(--hi)' }}>{op.text}</span>;
-              })}
-            </div>
-
-            {/* Redline Actions */}
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '14px' }}>
-              <motion.button
-                type="button"
-                className="btn btn-secondary btn-sm"
-                onClick={() => handleCopyText(negotiationResult.aiRecommendation?.suggestedRevision)}
-                {...buttonMotion}
-              >
-                <Icon.copy /> Copy Revised Text
-              </motion.button>
-              <motion.button
-                type="button"
-                className={`btn btn-sm ${isAccepted ? 'btn-ghost' : 'btn-primary'}`}
-                onClick={() => handleAccept(selectedClauseId)}
-                disabled={isAccepted}
-                {...buttonMotion}
-              >
-                <Icon.check /> {isAccepted ? 'Accepted in Draft' : 'Accept Revision'}
-              </motion.button>
-            </div>
-          </div>
+          {/* Card C: Legal Side-by-Side Redline & Word-Level Diff View */}
+          <LegalSideBySideRedline
+            originalText={negotiationResult.documentEvidence?.clause || ''}
+            proposedText={negotiationResult.aiRecommendation?.suggestedRevision || ''}
+            diffOperations={negotiationResult.redline?.operations || []}
+            clauseType={selectedOpp?.clauseType || 'Negotiated Provision'}
+            clauseId={selectedClauseId || 'CL-01'}
+            riskSeverity={negotiationResult.aiRecommendation?.riskSeverity || 'MEDIUM'}
+            rationale={negotiationResult.aiRecommendation?.strategy || 'Balanced risk allocation'}
+            evidenceRef={`Segment ${selectedClauseId}`}
+            onAccept={() => handleAccept(selectedClauseId)}
+            isAccepted={isAccepted}
+            onExportDocx={handleExportDocx}
+            exportingDocx={exportingDocx}
+          />
         </div>
       ) : null}
     </div>

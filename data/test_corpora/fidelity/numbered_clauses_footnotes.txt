@@ -1,0 +1,20 @@
+INTELLECTUAL PROPERTY LICENSING AGREEMENT
+
+Article I: Grant of Rights
+Section 1.01. Primary Grant.*
+Licensor hereby grants Licensee a worldwide, non-transferable, non-exclusive license to use the Software during the Term.
+
+Section 1.02. Sublicensing Restrictions.
+Licensee shall not sublicense or delegate any licensed rights to any third party without express prior written consent.**
+
+Article II: Royalties and Auditing
+Section 2.01. Running Royalty.
+Licensee shall pay five percent (5%) of Net Sales.
+
+Section 2.02. Annual Audit.
+Licensor may conduct an audit of Licensee books upon thirty (30) days prior written notice.
+
+---
+Footnotes:
+* Exclusive of territories listed in Annex 1.
+** Affiliates of Licensee are permitted subject to Section 4.05.

@@ -19,11 +19,11 @@ export function ContentCard({
   const CardContent = (
     <div className={`group block ${className}`} {...props}>
       {badge && (
-        <span className="inline-block font-body text-micro text-neutral-500 mb-2">
+        <span className="inline-block font-body text-micro text-ink-soft mb-2 tracking-wider uppercase">
           {badge}
         </span>
       )}
-      <h3 className="font-body font-semibold text-heading-01 text-ink group-hover:text-black transition-colors">
+      <h3 className="font-body font-semibold text-heading-01 text-ink group-hover:underline underline-offset-4 decoration-1 transition-colors">
         {title}
       </h3>
       {subtitle && (
@@ -32,7 +32,7 @@ export function ContentCard({
         </p>
       )}
       {meta && (
-        <p className="font-body text-micro text-neutral-500 mt-3">
+        <p className="font-body text-micro text-ink-soft mt-3">
           {meta}
         </p>
       )}

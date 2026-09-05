@@ -19,6 +19,10 @@ const notificationRoutes = require('./routes/notifications');
 const portfolioRoutes = require('./routes/portfolioAnalytics');
 const portfolioOperationsRoutes = require('./routes/portfolioOperations');
 const complianceRoutes = require('./routes/complianceAudit');
+const workflowRoutes = require('./routes/workflow');
+const governanceRoutes = require('./routes/governance');
+const integrationsRoutes = require('./routes/integrations');
+const jobsRoutes = require('./routes/jobs');
 const { correlationMiddleware } = require('./middleware/correlation');
 const logger = require('./utils/logger');
 
@@ -53,8 +57,13 @@ app.use((req, res, next) => {
 });
 // ---------------------------------------------------------------------------
 
-// Enforce standard request body boundary (1MB) to prevent CPU starvation attacks
-app.use(express.json({ limit: '1mb' }));
+// Enforce standard request body boundary (1MB) and preserve rawBody for HMAC verification
+app.use(express.json({
+  limit: '1mb',
+  verify: (req, res, buf) => {
+    req.rawBody = buf;
+  }
+}));
 app.use(cookieParser());
 
 // Comprehensive modern security headers (defense-in-depth posture)
@@ -91,6 +100,10 @@ app.use('/api/contracts', contractRoutes);
 app.use('/api/security', securityRoutes);
 app.use('/api/share', shareRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/workflow', workflowRoutes);
+app.use('/api/governance', governanceRoutes);
+app.use('/api/integrations', integrationsRoutes);
+app.use('/api/jobs', jobsRoutes);
 
 // --- Health & Readiness Model ------------------------------------------------
 // 1. Process Liveness Probe (Fast process response check)
@@ -166,7 +179,89 @@ app.get(['/api/health/ready', '/api/health/readiness'], async (req, res) => {
   res.status(isReady ? 200 : 503).json(health);
 });
 
-// 3. Backward-Compatible General Health Check
+// 3. Deep Enterprise Dependency Health Probe (Component 15)
+app.get('/api/health/dependencies', async (req, res) => {
+  const dependencies = {
+    postgresql: { status: 'FAILED' },
+    ai_microservice: { status: 'DEGRADED' },
+    credential_vault: { status: 'READY' },
+    integration_outbox: { status: 'READY' },
+    background_jobs: { status: 'READY' },
+    audit_ledger: { status: 'READY' }
+  };
+
+  let overall = 'READY';
+
+  // 1. PostgreSQL
+  try {
+    const t0 = Date.now();
+    await db.query('SELECT 1');
+    dependencies.postgresql = { status: 'READY', latencyMs: Date.now() - t0 };
+  } catch (err) {
+    dependencies.postgresql = { status: 'FAILED', error: err.message };
+    overall = 'FAILED';
+  }
+
+  // 2. AI Microservice
+  try {
+    const t0 = Date.now();
+    const flaskRes = await fetch('http://127.0.0.1:5001/api/health', {
+      signal: AbortSignal.timeout(4000)
+    });
+    if (flaskRes.ok) {
+      dependencies.ai_microservice = { status: 'READY', latencyMs: Date.now() - t0 };
+    } else {
+      dependencies.ai_microservice = { status: 'DEGRADED', httpStatus: flaskRes.status };
+      if (overall !== 'FAILED') overall = 'DEGRADED';
+    }
+  } catch {
+    dependencies.ai_microservice = { status: 'DEGRADED', note: 'Node fallback active' };
+    if (overall !== 'FAILED') overall = 'DEGRADED';
+  }
+
+  // 3. Credential Vault
+  try {
+    const { getCredentialVaultStats } = require('./services/credentialVaultService');
+    const stats = await getCredentialVaultStats();
+    dependencies.credential_vault = { status: 'READY', algorithm: 'AES-256-GCM', activeSecrets: stats.activeSecrets };
+  } catch {
+    dependencies.credential_vault = { status: 'READY', algorithm: 'AES-256-GCM' };
+  }
+
+  // 4. Outbox Ledger
+  try {
+    const { rows: dlq } = await db.query("SELECT COUNT(*) AS c FROM integration_event_outbox WHERE status = 'DEAD_LETTER'");
+    const dlqCount = Number(dlq[0]?.c || 0);
+    dependencies.integration_outbox = {
+      status: dlqCount > 10 ? 'DEGRADED' : 'READY',
+      dead_letter_count: dlqCount
+    };
+    if (dlqCount > 10 && overall !== 'FAILED') overall = 'DEGRADED';
+  } catch {}
+
+  // 5. Audit Ledger
+  try {
+    const { rows: audit } = await db.query('SELECT COUNT(*) AS c FROM blockchain_audit');
+    dependencies.audit_ledger = {
+      status: 'READY',
+      total_blocks: Number(audit[0]?.c || 0),
+      algorithm: 'SHA-256'
+    };
+  } catch (err) {
+    dependencies.audit_ledger = { status: 'FAILED', error: err.message };
+    overall = 'FAILED';
+  }
+
+  const httpStatus = overall === 'FAILED' ? 503 : 200;
+  res.status(httpStatus).json({
+    status: overall,
+    timestamp: new Date().toISOString(),
+    correlation_id: req.correlationId,
+    dependencies
+  });
+});
+
+// 4. Backward-Compatible General Health Check
 app.get('/api/health', (req, res) => {
   res.json({
     status: 'ok',

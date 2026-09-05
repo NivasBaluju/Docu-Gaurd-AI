@@ -222,4 +222,28 @@ router.get('/change-intelligence', requireAuth, async (req, res, next) => {
   }
 });
 
+/**
+ * GET /api/portfolio/roi
+ * Phase L: Transparent, un-fabricated business ROI analytics.
+ */
+router.get('/roi', requireAuth, async (req, res, next) => {
+  try {
+    const { getBusinessRoiAnalytics } = require('../services/businessRoiService');
+    const tenantId = req.user.tenant_id;
+    const { manual_minutes, hourly_rate } = req.query;
+
+    const data = await getBusinessRoiAnalytics({
+      tenantId,
+      assumptions: {
+        manualReviewMinutes: manual_minutes,
+        hourlyRateUsd: hourly_rate
+      }
+    });
+
+    res.json(data);
+  } catch (err) {
+    next(err);
+  }
+});
+
 module.exports = router;

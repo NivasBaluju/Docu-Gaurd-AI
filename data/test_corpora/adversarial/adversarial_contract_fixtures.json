@@ -1,0 +1,133 @@
+[
+  {
+    "id": "adv-01-conflicting-clauses",
+    "name": "Conflicting Termination Clauses Agreement",
+    "description": "Clause 4 specifies immediate termination on notice; Clause 12 specifies 90 days prior written notice with no early termination.",
+    "text": "MASTER SERVICES AGREEMENT\n\nSection 4. Termination for Convenience.\nClient may terminate this Agreement at any time, with or without cause, immediately upon written notice to Vendor.\n\nSection 12. Term and Unconditional Period.\nThis Agreement shall remain in effect for three (3) years. Neither party may terminate this Agreement prior to expiration without ninety (90) days prior written notice and payment of all fees through the end of the term.",
+    "expected": {
+      "has_conflicting_clauses": true,
+      "conflicting_sections": ["Section 4", "Section 12"],
+      "ambiguity_detected": true,
+      "monetary_exposure": "NOT_AVAILABLE"
+    }
+  },
+  {
+    "id": "adv-02-conflicting-dates",
+    "name": "Contradictory Effective and Expiration Dates",
+    "description": "Effective Date is stated as January 1, 2026; Renewal date is stated as December 31, 2025 (retroactive renewal prior to effective date).",
+    "text": "COMMERCIAL LEASE AGREEMENT\n\n1. Parties and Commencement.\nEffective Date: January 1, 2026.\nTerm: Initial term of twelve (12) months expiring December 31, 2026.\n\n2. Mandatory Renewal Notice.\nTenant must submit notice of renewal by December 31, 2025. Failure to submit renewal notice by December 31, 2025 results in automatic expiration of the Lease.",
+    "expected": {
+      "has_conflicting_dates": true,
+      "anomaly": "Renewal notice deadline precedes contract effective commencement",
+      "effective_date": "2026-01-01",
+      "monetary_exposure": "NOT_AVAILABLE"
+    }
+  },
+  {
+    "id": "adv-03-contradictory-renewal-terms",
+    "name": "Evergreen vs Strict Non-Renewal Agreement",
+    "description": "Clause 3.1 mandates perpetual automatic renewal unless terminated by mutual consent; Clause 3.4 declares agreement strictly expires without renewal.",
+    "text": "SOFTWARE AS A SERVICE AGREEMENT\n\nClause 3.1. Automatic Perpetual Renewal.\nThis Agreement shall automatically renew for successive one-year periods perpetually unless both parties mutually agree in writing to terminate at least thirty (30) days prior to the expiration of the then-current period.\n\nClause 3.4. Expiration Without Renewal.\nThis Agreement strictly expires on December 31, 2026 and shall under no circumstances renew automatically. Any further engagement requires execution of a completely new agreement.",
+    "expected": {
+      "contradictory_renewal": true,
+      "evergreen_conflict": true,
+      "deterministic_flags": ["EVERGREEN_DISPUTE", "MUTUAL_CONSENT_OVERRIDE"]
+    }
+  },
+  {
+    "id": "adv-04-ambiguous-monetary-amounts",
+    "name": "Ambiguous Monetary Amounts and Words Mismatch",
+    "description": "Numerical figure ($50,000) does not match written amount ('Five Hundred Thousand Dollars').",
+    "text": "PROFESSIONAL SERVICES ENGAGEMENT\n\nSection 5. Compensation and Fee Schedule.\nClient agrees to pay Consultant a fixed fee of $50,000 (Five Hundred Thousand United States Dollars) payable in monthly installments upon receipt of invoice.",
+    "expected": {
+      "monetary_discrepancy": true,
+      "numeric_amount": 50000,
+      "written_amount": 500000,
+      "exposure_verdict": "NOT_AVAILABLE",
+      "requires_human_adjudication": true
+    }
+  },
+  {
+    "id": "adv-05-missing-monetary-values",
+    "name": "Zero-Fabrication Missing Monetary Caps",
+    "description": "Agreement specifies indemnity and unlimited liability with no dollar figure mentioned anywhere.",
+    "text": "MUTUAL INDEMNITY AGREEMENT\n\nSection 8. Indemnification.\nEach party shall defend, indemnify, and hold harmless the other party against any and all claims, losses, liabilities, damages, costs, and expenses arising out of any breach of confidentiality or intellectual property infringement without limitation.",
+    "expected": {
+      "monetary_amount_grounded": false,
+      "liability_cap_grounded": false,
+      "monetary_exposure": "NOT_AVAILABLE",
+      "zero_fabrication_validated": true
+    }
+  },
+  {
+    "id": "adv-06-unusual-currency-formats",
+    "name": "Multi-Currency and Non-Standard Number Formats",
+    "description": "Uses European period/comma inversion and foreign currencies (EUR 1.250.000,00 and JPY 15,000,000).",
+    "text": "CROSS-BORDER DISTRIBUTOR CONTRACT\n\nPayment Terms:\nTranche A: EUR 1.250.000,00 payable to Frankfurt escrow.\nTranche B: JPY 15,000,000 payable upon Tokyo customs clearance.\nTranche C: CHF 250.000,50 for Zurich regulatory clearance.",
+    "expected": {
+      "multi_currency": true,
+      "currencies_detected": ["EUR", "JPY", "CHF"],
+      "usd_exposure_direct": "NOT_AVAILABLE"
+    }
+  },
+  {
+    "id": "adv-07-nested-indemnity-language",
+    "name": "Nested Recursive Indemnity and Third-Party Pass-Through",
+    "description": "Indemnification extends to affiliates, sub-contractors, and downstream customers with cascading defense obligations.",
+    "text": "SUPPLY CHAIN FRAMEWORK AGREEMENT\n\nSection 14. Nested Indemnity Obligations.\nSupplier shall defend, indemnify, and hold harmless Buyer, Buyer's Affiliates, Buyer's Customers, and each of their respective officers, directors, employees, agents, successors, and assigns from and against any third-party claims, and Supplier shall require all Supplier subcontractors to execute identical pass-through indemnity obligations benefiting Buyer.",
+    "expected": {
+      "high_indemnity_risk": true,
+      "third_party_beneficiaries": true,
+      "unlimited_indemnity": true
+    }
+  },
+  {
+    "id": "adv-08-cross-referenced-clauses",
+    "name": "Cross-Referenced Interdependent Clauses",
+    "description": "Liability exclusion refers to Section 18.2(b), which in turn refers to Exhibit C definitions not included in main body.",
+    "text": "CLOUD HOSTING AGREEMENT\n\nSection 18.1. Limitation of Liability.\nSubject to Section 18.2(b), neither party's liability shall exceed the fees paid in the prior twelve (12) months.\n\nSection 18.2(b). Carve-outs.\nThe limitation in Section 18.1 shall not apply to breaches under Section 6 (Confidentiality) or any obligations defined in Exhibit C (Security Standards).",
+    "expected": {
+      "has_cross_references": true,
+      "referenced_sections": ["18.2(b)", "6", "Exhibit C"],
+      "carveouts_present": true,
+      "evidence_dependencies": ["Exhibit C"]
+    }
+  },
+  {
+    "id": "adv-09-amendments-overriding-originals",
+    "name": "Amendment With Superseding Governing Law and Cap",
+    "description": "Original agreement states Delaware law and $100k cap; Amendment 1 states New York law and $2M cap.",
+    "text": "AMENDMENT NO. 1 TO MASTER SERVICES AGREEMENT\n\nRecitals: The parties entered into an MSA dated January 15, 2024.\n\n1. Superseding Governing Law.\nNotwithstanding Section 22 of the Original Agreement, this Agreement shall be governed exclusively by the laws of the State of New York.\n\n2. Modification of Liability Cap.\nSection 15 of the Original Agreement is deleted in its entirety and replaced with: 'Vendor aggregate liability shall be capped at $2,000,000.00 USD.'",
+    "expected": {
+      "amendment_override": true,
+      "superseded_terms": ["Governing Law", "Liability Cap"],
+      "prior_cap": 100000,
+      "new_cap": 2000000
+    }
+  },
+  {
+    "id": "adv-10-risky-appearing-but-explicitly-capped",
+    "name": "Aggressive Language Explicitly Capped by Super-Clause",
+    "description": "Language claims full consequential damages and lost profits, but subsequent clause caps all claims strictly to $10,000.",
+    "text": "ENTERPRISE PILOT AGREEMENT\n\nSection 9. Damages Scope.\nClient may recover direct damages, indirect damages, lost profits, reputational harm, and consequential losses resulting from software disruption.\n\nSection 10. Absolute Liability Super-Cap.\nNOTWITHSTANDING ANYTHING ELSE IN THIS AGREEMENT, INCLUDING SECTION 9, IN NO EVENT SHALL VENDOR'S TOTAL AGGREGATE LIABILITY EXCEED $10,000 USD UNDER ANY LEGAL THEORY WHATSOEVER.",
+    "expected": {
+      "apparent_risk": "CONSEQUENTIAL_DAMAGES_PERMITTED",
+      "actual_risk_capped": true,
+      "aggregate_cap_usd": 10000,
+      "overriding_clause": "Section 10"
+    }
+  },
+  {
+    "id": "adv-11-safe-appearing-hidden-obligations",
+    "name": "Harmless Sounding Clause With Hidden Unilateral Audit Right & Penalties",
+    "description": "Standard cooperation clause contains hidden obligation to allow unannounced physical facility audits and pay 25% penalty on dispute.",
+    "text": "STANDARD VENDOR ONBOARDING PROTOCOL\n\nSection 3. Operational Alignment.\nBoth parties will maintain standard operational records and engage in good-faith collaboration.\n\nSection 3.3. Verification Support.\nTo confirm alignment, Buyer reserves the right at any time, without prior notice, to enter Vendor facilities, examine all proprietary source code, inspect all financial records, and if any variance is asserted by Buyer, Vendor shall immediately remit twenty-five percent (25%) of total historical contract value as an unappealable operational penalty.",
+    "expected": {
+      "hidden_obligation": true,
+      "unannounced_audit_right": true,
+      "unilateral_penalty": true,
+      "penalty_percentage": 25,
+      "risk_classification": "CRITICAL_POLICY_VIOLATION"
+    }
+  }
+]

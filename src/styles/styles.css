@@ -141,6 +141,15 @@ body {
   flex-direction: column;
 }
 
+body.authenticated,
+body.portal-active,
+.authenticated-layout,
+.authenticated-layout main,
+.authenticated-layout .page-content {
+  background: #000000 !important;
+  background-image: none !important;
+}
+
 #root {
   min-height: 100vh;
   width: 100%;
@@ -710,18 +719,25 @@ a.editorial-link:hover, .editorial-link:hover {
 .sidebar {
   width: 264px;
   flex-shrink: 0;
-  background-color: rgba(8, 8, 12, 0.88);
+  background-color: rgba(8, 8, 12, 0.94);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border-right: 1px solid var(--rule);
-  padding: var(--space-6) var(--space-4);
+  padding: 12px 10px;
   display: flex;
   flex-direction: column;
-  gap: var(--space-1);
+  gap: 2px;
   min-height: calc(100vh - 88px);
   position: sticky;
   top: 88px;
   align-self: flex-start;
+  overflow: hidden;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.sidebar::-webkit-scrollbar {
+  display: none;
 }
 
 .page-content {
@@ -742,31 +758,33 @@ a.editorial-link:hover, .editorial-link:hover {
     position: static;
     border-right: none;
     border-bottom: 1px solid var(--rule);
+    overflow: visible;
   }
 }
 
 .sidebar-label {
   font-family: var(--font-body);
-  font-size: 0.75rem;
+  font-size: 0.6875rem;
   font-weight: 600;
   color: var(--ink-soft);
-  padding: var(--space-4) var(--space-3) var(--space-2);
-  letter-spacing: 0.04em;
+  padding: 8px 10px 4px;
+  letter-spacing: 0.05em;
   text-transform: uppercase;
 }
 
 .sidebar-item {
   display: flex;
   align-items: center;
-  gap: var(--space-3);
+  gap: 8px;
   width: 100%;
-  padding: var(--space-3) var(--space-3);
-  min-height: 44px;
+  padding: 6px 10px;
+  min-height: 36px;
   background: transparent;
   border: none;
   border-left: 3px solid transparent;
+  border-radius: 4px;
   font-family: var(--font-body);
-  font-size: 0.9375rem;
+  font-size: 0.85rem;
   font-weight: 500;
   color: var(--ink-soft);
   cursor: pointer;
@@ -790,12 +808,12 @@ a.editorial-link:hover, .editorial-link:hover {
 .sidebar-divider {
   height: 1px;
   background-color: var(--rule);
-  margin: var(--space-4) var(--space-3);
+  margin: 6px 10px;
 }
 
 .sidebar-bottom {
   margin-top: auto;
-  padding-top: var(--space-4);
+  padding-top: 6px;
   border-top: 1px solid var(--rule);
 }
 
@@ -1864,4 +1882,55 @@ a.editorial-link:hover, .editorial-link:hover {
   .observatory-nodes-container {
     grid-template-columns: 1fr;
   }
+}
+
+/* ==========================================================================
+   SYSTEM GUIDE MODAL DEDICATED VISIBLE SCROLLBAR
+   ========================================================================== */
+
+.guide-scrollable {
+  overflow-y: auto !important;
+  overscroll-behavior: contain !important;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.45) rgba(255, 255, 255, 0.08);
+}
+
+.guide-scrollable::-webkit-scrollbar {
+  width: 8px;
+  display: block !important;
+}
+
+.guide-scrollable::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 4px;
+}
+
+.guide-scrollable::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.4);
+  border-radius: 4px;
+  border: 1px solid rgba(0, 0, 0, 0.4);
+}
+
+.guide-scrollable::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.65);
+}
+
+/* ==========================================================================
+   GLOBAL ACCESSIBILITY & CONTRAST (PREVENT BLACK-ON-BLACK TEXT)
+   ========================================================================== */
+
+select, option {
+  background-color: #0C0C10 !important;
+  color: #FFFFFF !important;
+}
+
+select option:hover,
+select option:focus,
+select option:checked {
+  background-color: #1F1F28 !important;
+  color: #FFFFFF !important;
+}
+
+input, textarea {
+  color-scheme: dark;
 }

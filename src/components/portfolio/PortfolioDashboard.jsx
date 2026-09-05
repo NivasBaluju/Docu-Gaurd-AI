@@ -9,6 +9,8 @@ import PortfolioCompliancePanel from '../compliance/PortfolioCompliancePanel';
 import BulkOperationHistoryPanel from './BulkOperationHistoryPanel';
 import PendingApprovalsQueue from './PendingApprovalsQueue';
 import PortfolioMonitoring from './PortfolioMonitoring';
+import CompactPortfolioTableView from './CompactPortfolioTableView';
+import BusinessRoiCard from '../analytics/BusinessRoiCard';
 import SkeletonLoader from '../common/SkeletonLoader';
 import { PortfolioAnalyticsApi } from '../../services/portfolioAnalyticsApi';
 import { useToast } from '../../context/ToastContext';
@@ -16,7 +18,8 @@ import { useToast } from '../../context/ToastContext';
 export const PortfolioDashboard = () => {
   const [summary, setSummary] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState('MONITORING'); // Default to MONITORING in Phase 11 or OVERVIEW
+  const [activeSection, setActiveSection] = useState('MONITORING');
+  const [viewMode, setViewMode] = useState('EXECUTIVE'); // 'EXECUTIVE' | 'DENSE'
   const { toast } = useToast();
 
   const fetchSummary = async () => {
@@ -35,6 +38,49 @@ export const PortfolioDashboard = () => {
     fetchSummary();
   }, []);
 
+  const totalUrgent = summary
+    ? (summary.criticalActions || 0) + (summary.overdueActions || 0) + (summary.escalatedActions || 0)
+    : 0;
+
+  const sections = [
+    {
+      id: 'MONITORING',
+      num: '01',
+      label: 'Continuous Monitoring',
+      icon: '📡',
+      desc: 'Real-time event stream, triggers, breach detection & telemetry'
+    },
+    {
+      id: 'CONTRACTS',
+      num: '02',
+      label: 'Contract Health & Risk',
+      icon: '📊',
+      desc: 'Health score rankings, risk matrices & exposure distributions'
+    },
+    {
+      id: 'ATTENTION',
+      num: '03',
+      label: 'Attention & Deadlines',
+      icon: '🚨',
+      badge: totalUrgent > 0 ? totalUrgent : null,
+      desc: 'Priority remediation queue, expiring renewals & workload distribution'
+    },
+    {
+      id: 'APPROVALS',
+      num: '04',
+      label: 'Governed Approvals',
+      icon: '🛡️',
+      desc: 'Dual-signatory authorization, policy signoffs & bulk operations'
+    },
+    {
+      id: 'AUDIT',
+      num: '05',
+      label: 'Compliance & Export',
+      icon: '📜',
+      desc: 'Statutory compliance evaluation & certified data portability'
+    }
+  ];
+
   if (loading) {
     return (
       <div style={{ padding: '24px', maxWidth: '1280px', margin: '0 auto' }}>
@@ -50,173 +96,185 @@ export const PortfolioDashboard = () => {
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', maxWidth: '1280px', margin: '0 auto' }}>
-      {/* 1. Summary Cards Header */}
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '28px', maxWidth: '1280px', margin: '0 auto' }}>
+      {/* 1. Executive Summary Cards Header */}
       <PortfolioSummaryCards summary={summary} />
 
-      {/* 2. Navigation Mode Switcher */}
-      <div
-        className="card bg-paper-dim border border-rule"
-        style={{
-          padding: '6px 8px',
-          display: 'flex',
-          gap: '8px',
-          borderRadius: '0px',
-          width: 'fit-content',
-          flexWrap: 'wrap',
-        }}
-      >
-        <button
-          className={`btn btn-sm ${activeTab === 'MONITORING' ? 'btn-primary' : 'btn-ghost'}`}
-          onClick={() => setActiveTab('MONITORING')}
-          style={{ fontSize: '12.5px', padding: '6px 14px' }}
-        >
-          📡 Continuous Monitoring
-        </button>
-        <button
-          className={`btn btn-sm ${activeTab === 'OVERVIEW' ? 'btn-primary' : 'btn-ghost'}`}
-          onClick={() => setActiveTab('OVERVIEW')}
-          style={{ fontSize: '12.5px', padding: '6px 14px' }}
-        >
-          📊 Portfolio Overview
-        </button>
-        <button
-          className={`btn btn-sm ${activeTab === 'ATTENTION' ? 'btn-primary' : 'btn-ghost'}`}
-          onClick={() => setActiveTab('ATTENTION')}
-          style={{ fontSize: '12.5px', padding: '6px 14px' }}
-        >
-          🚨 Executive Attention Queue
-          {summary?.criticalActions + summary?.overdueActions + summary?.escalatedActions > 0 && (
-            <span
-              style={{
-                marginLeft: '6px',
-                fontSize: '10px',
-                padding: '2px 6px',
-                borderRadius: '10px',
-                background: 'rgba(239, 68, 68, 0.3)',
-                color: '#FFF'
-              }}
-            >
-              {summary.criticalActions + summary.overdueActions + summary.escalatedActions}
-            </span>
-          )}
-        </button>
-        <button
-          className={`btn btn-sm ${activeTab === 'CONTRACTS' ? 'btn-primary' : 'btn-ghost'}`}
-          onClick={() => setActiveTab('CONTRACTS')}
-          style={{ fontSize: '12.5px', padding: '6px 14px' }}
-        >
-          📁 Contract Health Rankings
-        </button>
-        <button
-          className={`btn btn-sm ${activeTab === 'WORKLOAD' ? 'btn-primary' : 'btn-ghost'}`}
-          onClick={() => setActiveTab('WORKLOAD')}
-          style={{ fontSize: '12.5px', padding: '6px 14px' }}
-        >
-          👥 Team Workload &amp; Deadlines
-        </button>
-        <button
-          className={`btn btn-sm ${activeTab === 'AUDIT' ? 'btn-primary' : 'btn-ghost'}`}
-          onClick={() => setActiveTab('AUDIT')}
-          style={{ fontSize: '12.5px', padding: '6px 14px' }}
-        >
-          🛡️ Compliance &amp; Export
-        </button>
-        <button
-          className={`btn btn-sm ${activeTab === 'BULK_OPS' ? 'btn-primary' : 'btn-ghost'}`}
-          onClick={() => setActiveTab('BULK_OPS')}
-          style={{ fontSize: '12.5px', padding: '6px 14px' }}
-        >
-          ⚡ Bulk Operations
-        </button>
-        <button
-          className={`btn btn-sm ${activeTab === 'APPROVALS' ? 'btn-primary' : 'btn-ghost'}`}
-          onClick={() => setActiveTab('APPROVALS')}
-          style={{ fontSize: '12.5px', padding: '6px 14px' }}
-        >
-          🛡️ Governed Approvals
-        </button>
+      {/* Dual Mode Switcher: Rich Executive vs Dense Operational */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid rgba(255, 255, 255, 0.12)', paddingBottom: '12px' }}>
+        <div>
+          <span style={{ fontFamily: 'monospace', fontSize: '11px', fontWeight: 700, letterSpacing: '1px', textTransform: 'uppercase', color: '#A1A1AA' }}>
+            PORTFOLIO WORKSPACE MODE
+          </span>
+          <div style={{ fontSize: '16px', fontWeight: 700, color: '#FFFFFF', fontFamily: 'var(--font-serif, "Fraunces", Georgia, serif)' }}>
+            {viewMode === 'EXECUTIVE' ? 'Rich Executive Overview' : 'Dense Operational View'}
+          </div>
+        </div>
+
+        <div style={{ display: 'flex', border: '1px solid rgba(255, 255, 255, 0.2)', background: 'rgba(255, 255, 255, 0.04)' }}>
+          <button
+            type="button"
+            onClick={() => setViewMode('EXECUTIVE')}
+            style={{
+              padding: '6px 14px',
+              fontSize: '12px',
+              fontWeight: 600,
+              border: 'none',
+              background: viewMode === 'EXECUTIVE' ? '#FFFFFF' : 'transparent',
+              color: viewMode === 'EXECUTIVE' ? '#000000' : '#D4D4D8',
+              cursor: 'pointer',
+              transition: 'all 0.15s ease'
+            }}
+          >
+            📰 Rich Executive View
+          </button>
+          <button
+            type="button"
+            onClick={() => setViewMode('DENSE')}
+            style={{
+              padding: '6px 14px',
+              fontSize: '12px',
+              fontWeight: 600,
+              border: 'none',
+              borderLeft: '1px solid rgba(255, 255, 255, 0.12)',
+              background: viewMode === 'DENSE' ? '#FFFFFF' : 'transparent',
+              color: viewMode === 'DENSE' ? '#000000' : '#D4D4D8',
+              cursor: 'pointer',
+              transition: 'all 0.15s ease'
+            }}
+          >
+            📋 Dense Operational View
+          </button>
+        </div>
       </div>
 
-      {/* 3. Tab Contents */}
-      {activeTab === 'MONITORING' && (
+      {viewMode === 'DENSE' ? (
+        <CompactPortfolioTableView />
+      ) : (
+        <>
+          {/* 2. Structured Section Navigator (Divided into 5 distinct focused views) */}
+      <div className="bg-paper-dim border border-rule p-2">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2">
+          {sections.map((s) => {
+            const isActive = activeSection === s.id;
+            return (
+              <button
+                key={s.id}
+                type="button"
+                onClick={() => setActiveSection(s.id)}
+                className={`text-left p-3 border transition-all duration-fast flex flex-col justify-between ${
+                  isActive
+                    ? 'bg-ink text-paper border-ink font-medium shadow-sm'
+                    : 'bg-paper text-ink border-rule hover:border-ink/50 hover:bg-white/[0.03]'
+                }`}
+                style={{ minHeight: '68px' }}
+              >
+                <div className="flex items-center justify-between w-full">
+                  <span className="font-body text-micro opacity-60 tracking-wider">
+                    [{s.num}]
+                  </span>
+                  {s.badge && (
+                    <span className="font-body text-micro px-1.5 py-0.2 bg-signal text-white font-bold">
+                      {s.badge}
+                    </span>
+                  )}
+                </div>
+                <div className="flex items-center gap-1.5 mt-1">
+                  <span className="text-sm">{s.icon}</span>
+                  <span className="font-body text-label font-semibold truncate">
+                    {s.label}
+                  </span>
+                </div>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Section Header Description */}
+      <div className="border-b border-rule pb-3 flex items-center justify-between">
+        <div>
+          <span className="font-body text-micro text-ink-soft block uppercase tracking-wider">
+            Portfolio Section {sections.find((s) => s.id === activeSection)?.num}
+          </span>
+          <h2 className="font-display text-xl text-ink font-semibold mt-0.5">
+            {sections.find((s) => s.id === activeSection)?.label}
+          </h2>
+        </div>
+        <p className="font-body text-body-sm text-ink-soft hidden md:block">
+          {sections.find((s) => s.id === activeSection)?.desc}
+        </p>
+      </div>
+
+      {/* 3. Section Content Panels */}
+
+      {/* SECTION 01: Pulse & Continuous Monitoring */}
+      {activeSection === 'MONITORING' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
           <PortfolioMonitoring />
         </div>
       )}
 
-      {activeTab === 'OVERVIEW' && (
+      {/* SECTION 02: Contract Health Rankings & Risk Distribution */}
+      {activeSection === 'CONTRACTS' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-          {/* Top Priority Attention Queue */}
-          <PortfolioAttentionQueue />
-
-          {/* Grid with Risk Distribution & Deadlines */}
-          <div className="grid grid-2 gap-16">
+          <BusinessRoiCard />
+          <PortfolioHealthTable />
+          <div className="border-t border-rule pt-6">
             <PortfolioRiskDistribution />
-            <PortfolioWorkload />
           </div>
-
-          <PortfolioDeadlinesAndEscalations />
-          <PortfolioHealthTable />
         </div>
       )}
 
-      {activeTab === 'ATTENTION' && (
+      {/* SECTION 03: Executive Attention Queue & Deadlines */}
+      {activeSection === 'ATTENTION' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
           <PortfolioAttentionQueue />
-          <PortfolioDeadlinesAndEscalations />
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mt-2">
+            <div className="lg:col-span-7">
+              <PortfolioDeadlinesAndEscalations />
+            </div>
+            <div className="lg:col-span-5">
+              <PortfolioWorkload />
+            </div>
+          </div>
         </div>
       )}
 
-      {activeTab === 'CONTRACTS' && (
+      {/* SECTION 04: Governed Approvals & Bulk Operations */}
+      {activeSection === 'APPROVALS' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-          <PortfolioHealthTable />
-          <PortfolioRiskDistribution />
+          <PendingApprovalsQueue onDecided={fetchSummary} />
+          <div className="border-t border-rule pt-6">
+            <div className="card p-6 mb-4 bg-paper-dim border border-rule">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-base font-semibold text-ink m-0">Bulk Action Dispatch</h3>
+                  <p className="text-sm text-ink-soft m-0 mt-1">
+                    Multi-contract assignment, deadline shifts, and batch lifecycle transitions.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  className="btn btn-primary btn-sm"
+                  onClick={() => setActiveSection('ATTENTION')}
+                >
+                  Go to Attention Queue →
+                </button>
+              </div>
+            </div>
+            <BulkOperationHistoryPanel />
+          </div>
         </div>
       )}
 
-      {activeTab === 'WORKLOAD' && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-          <PortfolioWorkload />
-          <PortfolioDeadlinesAndEscalations />
-        </div>
-      )}
-
-      {activeTab === 'AUDIT' && (
+      {/* SECTION 05: Compliance & Export Audit */}
+      {activeSection === 'AUDIT' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
           <PortfolioCompliancePanel />
         </div>
       )}
-
-      {activeTab === 'BULK_OPS' && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-          {/* Route to the Attention Queue where bulk ops are initiated */}
-          <div className="card" style={{ padding: '24px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '16px' }}>
-              <span style={{ fontSize: '20px' }}>⚡</span>
-              <div>
-                <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 700, color: 'var(--ink)' }}>Bulk Operations</h3>
-                <p style={{ margin: '4px 0 0', fontSize: '13px', color: 'var(--ink-soft)' }}>
-                  Select actions from the Attention Queue to run bulk assignment, deadline updates, or status transitions.
-                </p>
-              </div>
-            </div>
-            <button
-              className="btn btn-primary btn-sm"
-              onClick={() => setActiveTab('ATTENTION')}
-              style={{ fontSize: '13px' }}
-            >
-              🚨 Go to Attention Queue →
-            </button>
-          </div>
-          <BulkOperationHistoryPanel />
-        </div>
-      )}
-
-      {activeTab === 'APPROVALS' && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-          <PendingApprovalsQueue onDecided={fetchSummary} />
-        </div>
+        </>
       )}
     </div>
   );

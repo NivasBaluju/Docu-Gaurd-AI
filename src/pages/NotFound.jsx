@@ -20,11 +20,11 @@ export function NotFound() {
           [CLASSIFICATION: RESTRICTED]
         </span>
 
-        <h1 className="display-02 text-paper tracking-tight mb-6">
+        <h1 className="display-02 text-white tracking-tight mb-6">
           This page has been redacted.
         </h1>
 
-        <p className="font-body text-body-lg text-neutral-400 mb-10 max-w-md mx-auto">
+        <p className="font-body text-body-lg text-ink-soft mb-10 max-w-md mx-auto">
           The document, specification, or route you are looking for does not exist, or has been archived by administrative policy.
         </p>
 

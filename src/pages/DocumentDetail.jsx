@@ -19,6 +19,8 @@ const ChatTab = lazy(() => import('../components/document/ChatTab'));
 const NegotiationTab = lazy(() => import('../components/document/NegotiationTab'));
 const SimulationTab = lazy(() => import('../components/document/SimulationTab'));
 const IntelligenceTab = lazy(() => import('../components/document/IntelligenceTab'));
+const DecisionWorkflow = lazy(() => import('../components/workflow/DecisionWorkflow'));
+const GovernanceConsole = lazy(() => import('../components/governance/GovernanceConsole'));
 const ActionsTab = lazy(() => import('../components/document/ActionsTab'));
 const ComplianceAuditPanel = lazy(() => import('../components/compliance/ComplianceAuditPanel'));
 const PiiTab = lazy(() => import('../components/document/PiiTab'));
@@ -34,6 +36,8 @@ const DOC_TABS = [
   { id: 'negotiation', label: 'Negotiation' },
   { id: 'simulation', label: 'Simulation' },
   { id: 'intelligence', label: '🧠 Intelligence' },
+  { id: 'decisions', label: '🤝 Approvals' },
+  { id: 'governance', label: '📜 Policy Governance' },
   { id: 'actions', label: '⚡ Action Center' },
   { id: 'audit', label: '🛡️ Audit & Export' },
   { id: 'pii', label: 'PII / Redact' },
@@ -281,6 +285,8 @@ export const DocumentDetail = () => {
               {activeTab === 'negotiation' && <NegotiationTab doc={doc} />}
               {activeTab === 'simulation' && <SimulationTab doc={doc} />}
               {activeTab === 'intelligence' && <IntelligenceTab doc={doc} refreshTrigger={refreshTrigger} />}
+              {activeTab === 'decisions' && <DecisionWorkflow doc={doc} refreshTrigger={refreshTrigger} />}
+              {activeTab === 'governance' && <GovernanceConsole doc={doc} />}
               {activeTab === 'actions' && <ActionsTab doc={doc} refreshTrigger={refreshTrigger} />}
               {activeTab === 'audit' && <ComplianceAuditPanel doc={doc} />}
               {activeTab === 'pii' && <PiiTab doc={doc} />}

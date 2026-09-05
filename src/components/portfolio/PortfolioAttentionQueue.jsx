@@ -18,7 +18,7 @@ export const PortfolioAttentionQueue = () => {
   const [page, setPage] = useState(1);
   const [selectedIds, setSelectedIds] = useState(new Set());
   const [showBulkModal, setShowBulkModal] = useState(false);
-  const limit = 15;
+  const limit = 8;
   const navigate = useNavigate();
   const { toast } = useToast();
 

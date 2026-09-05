@@ -1,0 +1,15 @@
+FEE SCHEDULE AND TIERS MASTER AGREEMENT
+
+Exhibit A: Tier Pricing Table
+| Tier Name | User Count Min | User Count Max | Monthly Unit Rate ($ USD) | Overage Rate |
+| Starter   | 1              | 50             | $25.00                    | $35.00       |
+| Growth    | 51             | 250            | $20.00                    | $30.00       |
+| Scale     | 251            | 1000           | $15.00                    | $22.50       |
+| Enterprise| 1001           | Unlimited      | $10.00                    | Custom       |
+
+Section 2. Billing SLA Table
+| Severity Level | Response Time | Target Resolution | Escalation Contact |
+| Severity 1     | < 15 minutes  | 4 hours            | VP of Engineering  |
+| Severity 2     | < 1 hour      | 8 hours            | Support Lead       |
+| Severity 3     | < 4 hours     | 24 hours           | Ticket Queue       |
+| Severity 4     | < 12 hours    | Next Release       | Community Portal   |

@@ -9,9 +9,9 @@ import Sidebar from './Sidebar';
  */
 export const AuthenticatedLayout = ({ children }) => {
   return (
-    <div className="authenticated-layout flex flex-col lg:flex-row w-full min-h-[calc(100vh-88px)] mt-[88px]">
+    <div className="authenticated-layout flex flex-col lg:flex-row w-full min-h-[calc(100vh-88px)] mt-[88px] bg-[#000000]">
       <Sidebar />
-      <main className="page-content flex-1 min-w-0 p-6 lg:p-10 overflow-x-hidden bg-transparent">
+      <main className="page-content flex-1 min-w-0 p-6 lg:p-10 overflow-x-hidden bg-[#000000]">
         {children}
       </main>
     </div>

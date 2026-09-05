@@ -143,4 +143,461 @@ router.get('/threat-logs', requireAdmin, async (req, res) => {
   }
 });
 
+// ============================================================================
+// PHASE 15: ENTERPRISE OPERATIONS & RELIABILITY ENDPOINTS
+// ============================================================================
+
+const backupService = require('../services/backupService');
+const dataExportService = require('../services/dataExportService');
+const dataImportService = require('../services/dataImportService');
+const tenantLifecycleService = require('../services/tenantLifecycleService');
+const legalHoldService = require('../services/legalHoldService');
+const retentionEnforcementService = require('../services/retentionEnforcementService');
+const jobExecutionService = require('../services/jobExecutionService');
+const operationalMetricsService = require('../services/operationalMetricsService');
+const productionConfigService = require('../services/productionConfigService');
+const featureFlagService = require('../services/featureFlagService');
+const databaseIntegrityService = require('../services/databaseIntegrityService');
+const demoSeedService = require('../services/demoSeedService');
+const { formatErrorResponse } = require('../utils/errorTaxonomy');
+
+// 1. Centralized Operational Metrics
+router.get('/operations/metrics', requireAdmin, async (req, res) => {
+  try {
+    const tenantId = req.query.tenant_id || null;
+    const metrics = await operationalMetricsService.getOperationalMetrics(tenantId);
+    res.json(metrics);
+  } catch (err) {
+    res.status(500).json(formatErrorResponse(err, req.correlationId));
+  }
+});
+
+// 2. Database Schema & Constraint Integrity
+router.get('/database/integrity', requireAdmin, async (req, res) => {
+  try {
+    const report = await databaseIntegrityService.checkDatabaseIntegrity();
+    res.json(report);
+  } catch (err) {
+    res.status(500).json(formatErrorResponse(err, req.correlationId));
+  }
+});
+
+// 3. Cryptographic Audit Integrity (Component 27)
+router.get('/audit/integrity', requireAdmin, async (req, res) => {
+  try {
+    const verification = await verifyChain();
+    res.json({
+      status: verification.valid ? 'VALID' : 'INVALID',
+      total_blocks: verification.totalBlocks,
+      algorithm: 'SHA-256',
+      timestamp: new Date().toISOString(),
+      correlation_id: req.correlationId
+    });
+  } catch (err) {
+    res.status(500).json(formatErrorResponse(err, req.correlationId));
+  }
+});
+
+// 4. Backups & Disaster Recovery
+router.get('/backups', requireAdmin, async (req, res) => {
+  try {
+    const tenantId = req.query.tenant_id || null;
+    const backups = await backupService.listBackups({ tenantId });
+    res.json({ backups });
+  } catch (err) {
+    res.status(500).json(formatErrorResponse(err, req.correlationId));
+  }
+});
+
+router.post('/backups', requireAdmin, async (req, res) => {
+  try {
+    const { tenant_id, type = 'FULL_DATABASE', description = '' } = req.body;
+    const backup = await backupService.createBackup({
+      tenantId: tenant_id || null,
+      type,
+      createdBy: req.user.id,
+      description
+    });
+    res.status(201).json(backup);
+  } catch (err) {
+    res.status(500).json(formatErrorResponse(err, req.correlationId));
+  }
+});
+
+router.post('/backups/:id/verify', requireAdmin, async (req, res) => {
+  try {
+    const result = await backupService.verifyBackup(req.params.id);
+    res.json(result);
+  } catch (err) {
+    res.status(500).json(formatErrorResponse(err, req.correlationId));
+  }
+});
+
+router.post('/backups/:id/restore', requireAdmin, async (req, res) => {
+  try {
+    const { dry_run = false, isolation_prefix = 'isolated_recovery_' } = req.body;
+    const result = await backupService.restoreBackup(req.params.id, {
+      targetIsolationPrefix: isolation_prefix,
+      dryRun: Boolean(dry_run),
+      adminUserId: req.user.id
+    });
+    res.json(result);
+  } catch (err) {
+    res.status(500).json(formatErrorResponse(err, req.correlationId));
+  }
+});
+
+router.post('/backups/:id/verify-external', requireAdmin, async (req, res) => {
+  try {
+    const result = await backupService.verifyExternalBackup(req.params.id);
+    res.json(result);
+  } catch (err) {
+    res.status(500).json(formatErrorResponse(err, req.correlationId));
+  }
+});
+
+router.post('/backups/:id/restore-external', requireAdmin, async (req, res) => {
+  try {
+    const { dry_run = false, isolation_prefix = 'isolated_external_recovery_' } = req.body;
+    const result = await backupService.restoreFromExternalBackup(req.params.id, {
+      targetIsolationPrefix: isolation_prefix,
+      dryRun: Boolean(dry_run),
+      adminUserId: req.user.id
+    });
+    res.json(result);
+  } catch (err) {
+    res.status(500).json(formatErrorResponse(err, req.correlationId));
+  }
+});
+
+router.post('/backups/prune', requireAdmin, async (req, res) => {
+  try {
+    const { dry_run = false } = req.body;
+    const result = await backupService.pruneExpiredBackups({ dryRun: Boolean(dry_run) });
+    res.json(result);
+  } catch (err) {
+    res.status(500).json(formatErrorResponse(err, req.correlationId));
+  }
+});
+
+router.get('/backups/metrics', requireAdmin, async (req, res) => {
+  try {
+    const metrics = await backupService.getRecoveryMetrics();
+    res.json(metrics);
+  } catch (err) {
+    res.status(500).json(formatErrorResponse(err, req.correlationId));
+  }
+});
+
+// 5. Data Export & Import Portability
+router.post('/export', requireAdmin, async (req, res) => {
+  try {
+    const { tenant_id } = req.body;
+    if (!tenant_id) return res.status(400).json({ error: 'tenant_id is required' });
+    const exportPackage = await dataExportService.exportTenantData(tenant_id, { requestedBy: req.user.id });
+    res.json(exportPackage);
+  } catch (err) {
+    res.status(500).json(formatErrorResponse(err, req.correlationId));
+  }
+});
+
+router.post('/import', requireAdmin, async (req, res) => {
+  try {
+    const { package: exportPayload, target_tenant_id, mode = 'DRY_RUN' } = req.body;
+    if (!exportPayload || !target_tenant_id) {
+      return res.status(400).json({ error: 'package and target_tenant_id are required' });
+    }
+    const report = await dataImportService.importTenantData(exportPayload, {
+      targetTenantId: target_tenant_id,
+      mode,
+      importedBy: req.user.id
+    });
+    res.json(report);
+  } catch (err) {
+    res.status(500).json(formatErrorResponse(err, req.correlationId));
+  }
+});
+
+// 6. Tenant Lifecycle Management
+router.get('/lifecycle/:tenantId', requireAdmin, async (req, res) => {
+  try {
+    const status = await tenantLifecycleService.getTenantStatus(req.params.tenantId);
+    res.json(status);
+  } catch (err) {
+    res.status(500).json(formatErrorResponse(err, req.correlationId));
+  }
+});
+
+router.post('/lifecycle/:tenantId/suspend', requireAdmin, async (req, res) => {
+  try {
+    const result = await tenantLifecycleService.suspendTenant(req.params.tenantId, {
+      reason: req.body.reason,
+      adminUserId: req.user.id
+    });
+    res.json(result);
+  } catch (err) {
+    res.status(500).json(formatErrorResponse(err, req.correlationId));
+  }
+});
+
+router.post('/lifecycle/:tenantId/resume', requireAdmin, async (req, res) => {
+  try {
+    const result = await tenantLifecycleService.resumeTenant(req.params.tenantId, {
+      reason: req.body.reason,
+      adminUserId: req.user.id
+    });
+    res.json(result);
+  } catch (err) {
+    res.status(500).json(formatErrorResponse(err, req.correlationId));
+  }
+});
+
+router.post('/lifecycle/:tenantId/archive', requireAdmin, async (req, res) => {
+  try {
+    const result = await tenantLifecycleService.archiveTenant(req.params.tenantId, {
+      reason: req.body.reason,
+      adminUserId: req.user.id
+    });
+    res.json(result);
+  } catch (err) {
+    res.status(500).json(formatErrorResponse(err, req.correlationId));
+  }
+});
+
+router.post('/lifecycle/:tenantId/request-deletion', requireAdmin, async (req, res) => {
+  try {
+    const result = await tenantLifecycleService.requestTenantDeletion(req.params.tenantId, {
+      reason: req.body.reason,
+      adminUserId: req.user.id,
+      scheduledDays: req.body.scheduled_days || 30
+    });
+    res.json(result);
+  } catch (err) {
+    res.status(500).json(formatErrorResponse(err, req.correlationId));
+  }
+});
+
+router.post('/lifecycle/:tenantId/authorize-deletion', requireAdmin, async (req, res) => {
+  try {
+    const result = await tenantLifecycleService.authorizeTenantDeletion(req.params.tenantId, {
+      reason: req.body.reason,
+      adminUserId: req.user.id
+    });
+    res.json(result);
+  } catch (err) {
+    res.status(500).json(formatErrorResponse(err, req.correlationId));
+  }
+});
+
+router.post('/lifecycle/:tenantId/cancel-deletion', requireAdmin, async (req, res) => {
+  try {
+    const result = await tenantLifecycleService.cancelTenantDeletion(req.params.tenantId, {
+      reason: req.body.reason,
+      adminUserId: req.user.id
+    });
+    res.json(result);
+  } catch (err) {
+    res.status(500).json(formatErrorResponse(err, req.correlationId));
+  }
+});
+
+router.post('/lifecycle/:tenantId/execute-deletion', requireAdmin, async (req, res) => {
+  try {
+    const result = await tenantLifecycleService.executeTenantDeletion(req.params.tenantId, {
+      adminUserId: req.user.id
+    });
+    res.json(result);
+  } catch (err) {
+    res.status(500).json(formatErrorResponse(err, req.correlationId));
+  }
+});
+
+// 7. Retention Enforcement
+router.post('/retention/preview', requireAdmin, async (req, res) => {
+  try {
+    const { tenant_id, policy_id } = req.body;
+    if (!tenant_id) return res.status(400).json({ error: 'tenant_id is required' });
+    const preview = await retentionEnforcementService.previewRetention(tenant_id, { policyId: policy_id });
+    res.json(preview);
+  } catch (err) {
+    res.status(500).json(formatErrorResponse(err, req.correlationId));
+  }
+});
+
+router.post('/retention/apply', requireAdmin, async (req, res) => {
+  try {
+    const { tenant_id, policy_id } = req.body;
+    if (!tenant_id) return res.status(400).json({ error: 'tenant_id is required' });
+    const result = await retentionEnforcementService.applyRetention(tenant_id, {
+      policyId: policy_id,
+      executedBy: req.user.id
+    });
+    res.json(result);
+  } catch (err) {
+    res.status(500).json(formatErrorResponse(err, req.correlationId));
+  }
+});
+
+// 8. Legal Holds
+router.get('/legal-holds', requireAdmin, async (req, res) => {
+  try {
+    const tenantId = req.query.tenant_id;
+    if (!tenantId) return res.status(400).json({ error: 'tenant_id query param is required' });
+    const holds = await legalHoldService.listLegalHolds(tenantId);
+    res.json({ legal_holds: holds });
+  } catch (err) {
+    res.status(500).json(formatErrorResponse(err, req.correlationId));
+  }
+});
+
+router.post('/legal-holds', requireAdmin, async (req, res) => {
+  try {
+    const { tenant_id, name, matter_id, description, scope_type, scope_id } = req.body;
+    const hold = await legalHoldService.createLegalHold({
+      tenantId: tenant_id,
+      name,
+      matterId: matter_id,
+      description,
+      scopeType: scope_type,
+      scopeId: scope_id,
+      createdBy: req.user.id
+    });
+    res.status(201).json(hold);
+  } catch (err) {
+    res.status(500).json(formatErrorResponse(err, req.correlationId));
+  }
+});
+
+router.post('/legal-holds/:id/release', requireAdmin, async (req, res) => {
+  try {
+    const { tenant_id, reason } = req.body;
+    const result = await legalHoldService.releaseLegalHold(req.params.id, {
+      tenantId: tenant_id,
+      releasedBy: req.user.id,
+      reason
+    });
+    res.json(result);
+  } catch (err) {
+    res.status(500).json(formatErrorResponse(err, req.correlationId));
+  }
+});
+
+// 9. Emergency Break-Glass Controls (Component 21)
+router.post('/break-glass', requireAdmin, async (req, res) => {
+  try {
+    const { reason, tenant_id, scope = 'EMERGENCY_RECOVERY' } = req.body;
+    if (!reason || !tenant_id) {
+      return res.status(400).json({ error: 'Explicit justification reason and tenant_id are required for break-glass' });
+    }
+
+    const logId = require('crypto').randomUUID();
+    await db.query(`
+      INSERT INTO admin_break_glass_logs (id, admin_user_id, tenant_id, reason, scope, correlation_id, ip_address)
+      VALUES ($1, $2, $3, $4, $5, $6, $7)
+    `, [logId, req.user.id, tenant_id, reason, scope, req.correlationId || 'none', req.ip]);
+
+    await recordAudit(req.user.id, 'ADMIN_BREAK_GLASS_INVOKED', {
+      break_glass_id: logId,
+      tenant_id,
+      reason,
+      scope,
+      admin_email: req.user.email
+    });
+
+    res.json({
+      break_glass_id: logId,
+      status: 'AUTHORIZED',
+      admin_user_id: req.user.id,
+      timestamp: new Date().toISOString(),
+      correlation_id: req.correlationId
+    });
+  } catch (err) {
+    res.status(500).json(formatErrorResponse(err, req.correlationId));
+  }
+});
+
+// 10. Background Jobs
+router.get('/jobs', requireAdmin, async (req, res) => {
+  try {
+    const { tenant_id, status, limit = 50 } = req.query;
+    const jobs = await jobExecutionService.listJobs({ tenantId: tenant_id, status, limit: Number(limit) });
+    res.json({ jobs });
+  } catch (err) {
+    res.status(500).json(formatErrorResponse(err, req.correlationId));
+  }
+});
+
+router.post('/jobs/:id/retry', requireAdmin, async (req, res) => {
+  try {
+    const result = await jobExecutionService.retryJob(req.params.id, { adminUserId: req.user.id });
+    res.json(result);
+  } catch (err) {
+    res.status(500).json(formatErrorResponse(err, req.correlationId));
+  }
+});
+
+// 11. Feature Flags & Configuration Fingerprint
+router.get('/feature-flags', requireAdmin, async (req, res) => {
+  try {
+    const flags = await featureFlagService.listFeatureFlags();
+    res.json({ feature_flags: flags });
+  } catch (err) {
+    res.status(500).json(formatErrorResponse(err, req.correlationId));
+  }
+});
+
+router.post('/feature-flags', requireAdmin, async (req, res) => {
+  try {
+    const { flag_key, is_enabled, description, tenant_overrides } = req.body;
+    const result = await featureFlagService.setFeatureFlag(flag_key, {
+      isEnabled: Boolean(is_enabled),
+      description,
+      tenantOverrides: tenant_overrides || {},
+      adminUserId: req.user.id
+    });
+    res.json(result);
+  } catch (err) {
+    res.status(500).json(formatErrorResponse(err, req.correlationId));
+  }
+});
+
+router.get('/config/fingerprint', requireAdmin, (req, res) => {
+  try {
+    const fingerprint = productionConfigService.getConfigurationFingerprint();
+    res.json(fingerprint);
+  } catch (err) {
+    res.status(500).json(formatErrorResponse(err, req.correlationId));
+  }
+});
+
+// 12. Curated Demo / Showcase Environment
+router.get('/demo/status', requireAdmin, async (req, res) => {
+  try {
+    const status = await demoSeedService.getDemoStatus();
+    res.json(status);
+  } catch (err) {
+    res.status(500).json(formatErrorResponse(err, req.correlationId));
+  }
+});
+
+router.post('/demo/seed', requireAdmin, async (req, res) => {
+  try {
+    const result = await demoSeedService.seedDemoDataset(req.user.id);
+    res.json(result);
+  } catch (err) {
+    res.status(500).json(formatErrorResponse(err, req.correlationId));
+  }
+});
+
+router.post('/demo/purge', requireAdmin, async (req, res) => {
+  try {
+    const result = await demoSeedService.purgeDemoDataset(req.user.id);
+    res.json(result);
+  } catch (err) {
+    res.status(500).json(formatErrorResponse(err, req.correlationId));
+  }
+});
+
 module.exports = router;
+
+

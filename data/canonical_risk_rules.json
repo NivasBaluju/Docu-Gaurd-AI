@@ -1,0 +1,124 @@
+{
+  "formula_version": "2.0.0",
+  "name": "Canonical Deterministic Contract Risk Formula",
+  "description": "Shared mathematical and pattern definition between Python (FastAPI/Flask) and Node.js runtimes to eliminate architectural split-brain.",
+  "parameters": {
+    "minimum_baseline_score": 5,
+    "maximum_ceiling_score": 100,
+    "moderated_omissions_ceiling": 35,
+    "thresholds": {
+      "low_max": 25,
+      "medium_max": 55
+    }
+  },
+  "hazard_patterns": [
+    {
+      "id": "HAZARD_UNLIMITED_LIABILITY",
+      "regex": "(unlimited\\s+liability|no\\s+cap\\s+on\\s+liability)",
+      "type": "CONFIRMED_HAZARD_UNLIMITED_LIABILITY",
+      "severity": "HIGH",
+      "points": 20,
+      "reason": "Explicit unlimited liability exposure detected without standard indemnification caps."
+    },
+    {
+      "id": "HAZARD_PERPETUAL_BINDING",
+      "regex": "(automatic(?:ally)?\\s+renew(?:s|al)?(?!\\s+upon\\s+notice)|\\bin\\s+perpetuity\\b)",
+      "type": "CONFIRMED_HAZARD_PERPETUAL_BINDING",
+      "severity": "MEDIUM",
+      "points": 12,
+      "reason": "Perpetual duration or automatic renewal lock-in without mandatory prior notice."
+    },
+    {
+      "id": "HAZARD_UNILATERAL_DISCRETION",
+      "regex": "(sole\\s+and\\s+absolute\\s+discretion|unilateral(?:ly)?\\s+modify)",
+      "type": "CONFIRMED_HAZARD_UNILATERAL_DISCRETION",
+      "severity": "HIGH",
+      "points": 15,
+      "reason": "Unilateral modification rights granting one party unchecked discretion."
+    },
+    {
+      "id": "HAZARD_RIGHTS_WAIVER",
+      "regex": "(non-refundable|waives?\\s+all\\s+(?:rights|claims|warranties))",
+      "type": "CONFIRMED_HAZARD_RIGHTS_WAIVER",
+      "severity": "MEDIUM",
+      "points": 10,
+      "reason": "Broad waiver of claims or statutory warranty protections."
+    },
+    {
+      "id": "HAZARD_ARBITRARY_TERMINATION",
+      "regex": "(immediate\\s+termination\\s+without\\s+(?:cause|notice))",
+      "type": "CONFIRMED_HAZARD_ARBITRARY_TERMINATION",
+      "severity": "HIGH",
+      "points": 15,
+      "reason": "Immediate termination without cure period or required default notice."
+    }
+  ],
+  "canonical_test_vectors": [
+    {
+      "id": "vector-01-clean-mutual-nda",
+      "text": "This Mutual Non-Disclosure Agreement is entered into by and between the parties. Each party agrees to hold the other's proprietary information in strict confidence with reasonable care. Term is two years.",
+      "missing_omissions": [],
+      "expected": {
+        "score": 5,
+        "level": "LOW",
+        "hazardPoints": 0,
+        "omissionPoints": 0,
+        "hazardsMatched": []
+      }
+    },
+    {
+      "id": "vector-02-unlimited-liability-only",
+      "text": "Vendor agrees to assume unlimited liability for any intellectual property disputes arising under this agreement.",
+      "missing_omissions": [],
+      "expected": {
+        "score": 20,
+        "level": "LOW",
+        "hazardPoints": 20,
+        "omissionPoints": 0,
+        "hazardsMatched": ["CONFIRMED_HAZARD_UNLIMITED_LIABILITY"]
+      }
+    },
+    {
+      "id": "vector-03-perpetual-and-unilateral",
+      "text": "This agreement shall automatically renew perpetually. Company reserves the right at its sole and absolute discretion to alter service parameters at any time.",
+      "missing_omissions": [],
+      "expected": {
+        "score": 27,
+        "level": "MEDIUM",
+        "hazardPoints": 27,
+        "omissionPoints": 0,
+        "hazardsMatched": ["CONFIRMED_HAZARD_PERPETUAL_BINDING", "CONFIRMED_HAZARD_UNILATERAL_DISCRETION"]
+      }
+    },
+    {
+      "id": "vector-04-high-risk-toxic-triad",
+      "text": "Vendor assumes unlimited liability. Customer may execute immediate termination without cause. Customer waives all warranties and all fees are strictly non-refundable.",
+      "missing_omissions": [],
+      "expected": {
+        "score": 45,
+        "level": "MEDIUM",
+        "hazardPoints": 45,
+        "omissionPoints": 0,
+        "hazardsMatched": ["CONFIRMED_HAZARD_UNLIMITED_LIABILITY", "CONFIRMED_HAZARD_RIGHTS_WAIVER", "CONFIRMED_HAZARD_ARBITRARY_TERMINATION"]
+      }
+    },
+    {
+      "id": "vector-05-full-toxic-compound",
+      "text": "Parties agree to unlimited liability with no cap on liability. The agreement binds parties in perpetuity. Licensor maintains sole and absolute discretion over all source data. All payments are non-refundable and Licensee waives all rights. Licensor may order immediate termination without notice.",
+      "missing_omissions": [],
+      "expected": {
+        "score": 72,
+        "level": "HIGH",
+        "hazardPoints": 72,
+        "omissionPoints": 0,
+        "hazardsMatched": [
+          "CONFIRMED_HAZARD_UNLIMITED_LIABILITY",
+          "CONFIRMED_HAZARD_PERPETUAL_BINDING",
+          "CONFIRMED_HAZARD_UNILATERAL_DISCRETION",
+          "CONFIRMED_HAZARD_RIGHTS_WAIVER",
+          "CONFIRMED_HAZARD_ARBITRARY_TERMINATION"
+        ]
+      }
+    }
+  ]
+}

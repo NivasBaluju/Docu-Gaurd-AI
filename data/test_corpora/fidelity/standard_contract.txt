@@ -1,0 +1,18 @@
+SERVICES LEVEL AGREEMENT
+
+1. Definitions
+1.1 "Services" refers to cloud computing services described in Order Forms.
+1.2 "Uptime Target" refers to 99.95% monthly uptime.
+
+2. Performance Standards
+Vendor shall deliver Services with 99.95% availability during each calendar month.
+If Vendor fails to meet Uptime Target, Customer shall receive a 10% service credit.
+
+3. Payment Terms
+Invoices are payable within thirty (30) days of receipt via electronic funds transfer.
+
+4. Termination
+Either party may terminate upon thirty (30) days written notice for uncured material breach.
+
+5. Governing Law
+This Agreement is governed by the laws of Delaware without regard to conflict of laws principles.

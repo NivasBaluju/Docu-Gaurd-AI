@@ -1,0 +1,97 @@
+{
+  "executive_summary": {
+    "export_id": "d8b20fa2-22ea-4284-8914-2133c604bf92",
+    "generated_at": "2026-09-05T07:29:11.819Z",
+    "document_id": "demo-doc-01-nda",
+    "tenant_id": "tenant-enterprise-default",
+    "document_name": "Mutual_Non_Disclosure_Agreement_NovaTech_Apex.pdf",
+    "sha256": "67f9ec5188bc2ffb7b25bb071d36d6f1c948572bfd7a800db262d5be169cbcb8",
+    "risk_score": 18,
+    "analysis_status": "COMPLETED",
+    "confidentiality_notice": "DocuGuard AI Authoritative Evidence-Backed Audit Package"
+  },
+  "decision_timeline": {
+    "workflows": [],
+    "comments": []
+  },
+  "risk_register": {
+    "overall_score": 18,
+    "risk_factors": []
+  },
+  "evidence_references": {
+    "total_clauses": 0,
+    "grounded_clauses": []
+  },
+  "governance_findings": {
+    "total_findings": 0,
+    "findings": []
+  },
+  "approval_history": {
+    "total_actions": 0,
+    "actions": []
+  },
+  "monitoring_events": {
+    "total_events": 0,
+    "events": []
+  },
+  "integration_events": {
+    "outbox_events": []
+  },
+  "blockchain_ledger_verification": {
+    "chain_valid": true,
+    "blocks_inspected": 50,
+    "latest_block": {
+      "block_index": 2094,
+      "action": "ENTERPRISE_IDP_CONFIGURED",
+      "details_json": "{\"tenant_id\":\"tenant-acme-corp\",\"protocol\":\"OIDC\",\"provider_name\":\"Azure AD / Entra ID Enterprise OIDC\"}",
+      "prev_hash": "44ea2ac546ad9c73f696b0bb516fd50f55f7af02f77ad443b3792ed74a5e6a35",
+      "hash": "42f16733b7d2c6f8cf862165a82980cf0eb4725604faa91a7989eac8318735ad",
+      "created_at": "2026-09-05T01:59:11.251Z"
+    },
+    "hash_algorithm": "SHA-256"
+  },
+  "manifest": {
+    "export_id": "d8b20fa2-22ea-4284-8914-2133c604bf92",
+    "generated_at": "2026-09-05T07:29:14.612Z",
+    "generator": "DocuGuard AI Enterprise Audit Exporter v2.0",
+    "secret_scrubbing_applied": true,
+    "file_checksums": {
+      "executive_summary.json": {
+        "sha256": "3e2f3b5509e52706af7283c65d98f7f2d4228faf207a060dcc90bd09113cbd25",
+        "size_bytes": 477
+      },
+      "decision_timeline.json": {
+        "sha256": "e57a3acf132b295586cc3f5675271ebb937690c7184c116e40d85308d386ebc9",
+        "size_bytes": 39
+      },
+      "risk_register.json": {
+        "sha256": "74787ec3e94e6e2dfd0dc522c089e62a4d13532164ba1c50e277dabcecc0dde1",
+        "size_bytes": 47
+      },
+      "evidence_references.json": {
+        "sha256": "c74ee1193077341eda3f04b2f151077d990df0c04ffbc75d24549d57e556e1d5",
+        "size_bytes": 50
+      },
+      "governance_findings.json": {
+        "sha256": "2b5ff1f6384bdf6c4ad03281bde7836dd881a206b50587f01b07c8c635a51b67",
+        "size_bytes": 43
+      },
+      "approval_history.json": {
+        "sha256": "50afaaea379329533e7570e66ea68f65c7bb51c8ce8a10ca7ef8d81adb84b07f",
+        "size_bytes": 41
+      },
+      "monitoring_events.json": {
+        "sha256": "915b3df9f55f6a44dd9811aee9f26f1283a85921c895f00da7b4929402f465be",
+        "size_bytes": 39
+      },
+      "integration_events.json": {
+        "sha256": "482a05f613b303258acf14e2b529cea2cad60442c52a80b43f47a7b755dbc2fb",
+        "size_bytes": 25
+      },
+      "blockchain_ledger_verification.json": {
+        "sha256": "22f79c657965d6cdfa22ae9aa71173a938948497c2cac247a954dd204f55f299",
+        "size_bytes": 525
+      }
+    }
+  }
+}

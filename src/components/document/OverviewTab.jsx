@@ -1,15 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
+import { useNavigate } from 'react-router-dom';
 import Api from '../../services/api';
 import { useToast } from '../../context/ToastContext';
 import Icon from '../common/Icon';
 import SkeletonLoader from '../common/SkeletonLoader';
 import { buttonMotion, EASE_OUT } from '../../styles/motion';
+import ContractCommandCenter from './ContractCommandCenter';
 
 export const OverviewTab = ({ doc, analysisData, loadingAnalysis }) => {
   const [simplified, setSimplified] = useState(null);
   const [simplifying, setSimplifying] = useState(false);
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const handleSimplify = async () => {
     setSimplifying(true);
@@ -32,6 +35,13 @@ export const OverviewTab = ({ doc, analysisData, loadingAnalysis }) => {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+      {/* Contract Command Center (Decision Summary & Ground Truth Breadcrumbs) */}
+      <ContractCommandCenter
+        doc={doc}
+        analysisData={analysisData}
+        onNavigateTab={(targetTab) => navigate(`/document/${doc.id}/${targetTab}`)}
+      />
+
       {/* High-Value Executive KPI Summary */}
       <div className="grid grid-4" style={{ gap: '14px' }}>
         <div className="card" style={{ padding: '16px', margin: 0 }}>
