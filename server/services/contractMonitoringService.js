@@ -25,6 +25,7 @@ const logger = require('../utils/logger');
 
 const FLASK_HOST = process.env.FLASK_HOST || '127.0.0.1';
 const FLASK_PORT = process.env.FLASK_PORT || 5001;
+const AI_MICROSERVICE_URL = (process.env.AI_MICROSERVICE_URL || `http://${FLASK_HOST}:${FLASK_PORT}`).replace(/\/+$/, '');
 const INTERNAL_KEY = process.env.INTERNAL_SERVICE_KEY || 'docuguard-internal-service-secret-key-default';
 
 const NOT_AVAILABLE = 'NOT_AVAILABLE';
@@ -412,44 +413,21 @@ function computeLocalChanges(prevText, currText, prevIntel, currIntel, docId) {
 /**
  * Fetch monitoring evaluation from Flask microservice.
  */
-function fetchMonitoringFromFlask(docId, correlationId) {
-  return new Promise((resolve, reject) => {
-    const options = {
-      hostname: FLASK_HOST,
-      port: FLASK_PORT,
-      path: `/api/documents/${encodeURIComponent(docId)}/monitoring/evaluate`,
-      method: 'GET',
-      headers: {
-        'x-internal-service-key': INTERNAL_KEY,
-        'x-correlation-id': correlationId || uuidv4()
-      },
-      timeout: 8000
-    };
-
-    const req = http.request(options, (res) => {
-      let data = '';
-      res.on('data', chunk => { data += chunk; });
-      res.on('end', () => {
-        if (res.statusCode >= 200 && res.statusCode < 300) {
-          try {
-            resolve(JSON.parse(data));
-          } catch (e) {
-            reject(new Error(`Failed to parse Flask monitoring response: ${e.message}`));
-          }
-        } else {
-          reject(new Error(`Flask returned status ${res.statusCode}: ${data.slice(0, 200)}`));
-        }
-      });
-    });
-
-    req.on('timeout', () => {
-      req.destroy();
-      reject(new Error('Flask monitoring request timed out'));
-    });
-
-    req.on('error', err => reject(err));
-    req.end();
+async function fetchMonitoringFromFlask(docId, correlationId) {
+  const res = await fetch(`${AI_MICROSERVICE_URL}/api/documents/${encodeURIComponent(docId)}/monitoring/evaluate`, {
+    method: 'GET',
+    headers: {
+      'x-internal-service-key': INTERNAL_KEY,
+      'x-correlation-id': correlationId || uuidv4()
+    },
+    signal: AbortSignal.timeout(8000)
   });
+
+  if (res.ok) {
+    return await res.json();
+  }
+  const text = await res.text();
+  throw new Error(`Microservice returned status ${res.status}: ${text.slice(0, 200)}`);
 }
 
 /**

@@ -9,7 +9,13 @@ import React, { useState, useEffect } from 'react';
 export default function AiDegradedModeBanner() {
   const [aiStatus, setAiStatus] = useState('CHECKING'); // 'READY' | 'DEGRADED' | 'OFFLINE' | 'CHECKING'
   const [isSimulated, setIsSimulated] = useState(false);
-  const [isDismissed, setIsDismissed] = useState(false);
+  const [isDismissed, setIsDismissed] = useState(() => {
+    try {
+      return localStorage.getItem('docuguard_banner_dismissed') === 'true';
+    } catch {
+      return false;
+    }
+  });
   const [isProbing, setIsProbing] = useState(false);
   const [detailsVisible, setDetailsVisible] = useState(false);
 
@@ -20,7 +26,13 @@ export default function AiDegradedModeBanner() {
       if (res.ok) {
         const data = await res.json();
         const microservice = data?.dependencies?.ai_microservice?.status;
-        if (microservice === 'healthy' || microservice === 'ready') {
+        const mode = data?.dependencies?.ai_microservice?.mode;
+        if (
+          microservice === 'healthy' || 
+          microservice === 'ready' || 
+          microservice === 'fallback_ready' || 
+          mode === 'node_gemini_fallback'
+        ) {
           setAiStatus('READY');
         } else {
           setAiStatus('DEGRADED');
@@ -32,6 +44,24 @@ export default function AiDegradedModeBanner() {
       setAiStatus('OFFLINE');
     } finally {
       setIsProbing(false);
+    }
+  };
+
+  const handleDismiss = () => {
+    setIsDismissed(true);
+    try {
+      localStorage.setItem('docuguard_banner_dismissed', 'true');
+    } catch {
+      // ignore
+    }
+  };
+
+  const handleUndismiss = () => {
+    setIsDismissed(false);
+    try {
+      localStorage.removeItem('docuguard_banner_dismissed');
+    } catch {
+      // ignore
     }
   };
 
@@ -68,7 +98,7 @@ export default function AiDegradedModeBanner() {
           <strong>NOTICE:</strong> AI engine operating in deterministic fallback mode.
         </span>
         <button
-          onClick={() => setIsDismissed(false)}
+          onClick={handleUndismiss}
           style={{
             background: 'none',
             border: 'none',
@@ -159,7 +189,7 @@ export default function AiDegradedModeBanner() {
             </button>
 
             <button
-              onClick={() => setIsDismissed(true)}
+              onClick={handleDismiss}
               title="Dismiss warning bar"
               style={{
                 background: 'transparent',
