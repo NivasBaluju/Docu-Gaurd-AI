@@ -75,7 +75,7 @@ export function Topbar() {
               to="/"
               className="font-display text-2xl font-medium tracking-tight text-ink no-underline select-none"
             >
-              DocuGuard AI
+              Deciva
             </Link>
             {user && (
               <span className="hidden xl:inline-block text-micro uppercase tracking-widest text-ink-soft border border-rule px-2 py-0.5">

@@ -1,4 +1,4 @@
-# DocuGuard AI — Security Configuration & Credential Protection
+# Deciva — Security Configuration & Credential Protection
 
 ---
 

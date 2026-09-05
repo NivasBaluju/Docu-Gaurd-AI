@@ -1,5 +1,5 @@
 /**
- * DocuGuard AI — Phase 12 Approval Policy Engine
+ * Deciva — Phase 12 Approval Policy Engine
  * ---------------------------------------------------------------------------
  * Deterministically evaluates whether a contract decision requires approval,
  * independent review, and distinct reviewer/approver roles based on grounded

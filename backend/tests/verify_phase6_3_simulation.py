@@ -87,8 +87,8 @@ def run_all_tests():
     print("=== STARTING PHASE 6.3: AI CONTRACT RISK SIMULATION VERIFICATION ===")
     print("=" * 70)
 
-    token_a = authenticate_user("admin@docugaurd.ai", "Password123!")
-    token_b = authenticate_user("auditor@docugaurd.ai", "Password123!", name="Auditor User")
+    token_a = authenticate_user("admin@deciva.ai", "Password123!")
+    token_b = authenticate_user("auditor@deciva.ai", "Password123!", name="Auditor User")
     assert token_a and token_b, "Failed to authenticate test users."
     print("  [Setup] Authenticated sessions established (Admin + Non-Admin Auditor).")
 

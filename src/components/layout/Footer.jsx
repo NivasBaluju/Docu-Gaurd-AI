@@ -109,7 +109,7 @@ export function Footer() {
               <p>
                 Enterprise counsel and executive inquiries:
                 <br />
-                <span className="text-white font-medium">briefings@docuguard.ai</span>
+                <span className="text-white font-medium">briefings@deciva.ai</span>
               </p>
               <div>
                 <Link
@@ -134,7 +134,7 @@ export function Footer() {
         {/* Bottom Metadata Bar */}
         <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 font-body text-micro text-neutral-500">
           <p className="m-0">
-            © 2026 DocuGuard AI. Precision legal intelligence and zero-trust contract governance.
+            © 2026 Deciva. Precision legal intelligence and zero-trust contract governance.
           </p>
 
           <div className="flex items-center gap-4">

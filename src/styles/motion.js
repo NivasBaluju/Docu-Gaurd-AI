@@ -1,5 +1,5 @@
 /**
- * Docu-Gaurd AI — Centralized Motion Design System
+ * Deciva — Centralized Motion Design System
  * -------------------------------------------------------------
  * Minimal, restrained, and intentional motion primitives powered by Motion.
  * Respects prefers-reduced-motion and follows enterprise legal-tech aesthetics.

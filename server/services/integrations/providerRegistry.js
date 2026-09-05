@@ -1,5 +1,5 @@
 /**
- * DocuGuard AI — Integration Provider Registry
+ * Deciva — Integration Provider Registry
  * ---------------------------------------------------------------------------
  * Factory and registry mapping provider slugs to concrete Provider instances.
  */

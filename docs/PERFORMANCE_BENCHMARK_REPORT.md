@@ -1,8 +1,8 @@
-# DocuGuard AI — Operational Performance Benchmark Report
+# Deciva — Operational Performance Benchmark Report
 Generated: 2026-09-05T06:29:22.578Z
 
 ## Executive Summary
-DocuGuard AI was benchmarked under defined operational workloads spanning database access, algorithmic 9-dimension risk scoring, continuous monitoring, policy governance, data portability, disaster recovery restoration, and concurrent HTTP client load.
+Deciva was benchmarked under defined operational workloads spanning database access, algorithmic 9-dimension risk scoring, continuous monitoring, policy governance, data portability, disaster recovery restoration, and concurrent HTTP client load.
 
 ---
 
@@ -46,4 +46,4 @@ DocuGuard AI was benchmarked under defined operational workloads spanning databa
 ---
 
 ## Architectural Signoff
-Under defined operational load, DocuGuard AI sustains sub-50ms core intelligence pipeline operations and satisfies enterprise RPO (<60m) and RTO (<30m) recovery targets.
+Under defined operational load, Deciva sustains sub-50ms core intelligence pipeline operations and satisfies enterprise RPO (<60m) and RTO (<30m) recovery targets.

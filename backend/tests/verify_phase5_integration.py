@@ -14,13 +14,13 @@ print("=== STARTING PHASE 5 FRONTEND INTEGRATION VALIDATION ===\n")
 print("1. Authenticating with Node Gateway...")
 # Attempt registration if user does not exist
 requests.post(f"{BASE_URL}/api/auth/register", json={
-    "name": "DocuGuard Admin",
-    "email": "admin@docugaurd.ai",
+    "name": "Deciva Admin",
+    "email": "admin@deciva.ai",
     "password": "Password123!"
 })
 
 login_res = requests.post(f"{BASE_URL}/api/auth/login", json={
-    "email": "admin@docugaurd.ai",
+    "email": "admin@deciva.ai",
     "password": "Password123!"
 }).json()
 print("  Login Response:", login_res)

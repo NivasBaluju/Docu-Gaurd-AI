@@ -1,5 +1,5 @@
 const Api = (() => {
-  const TOKEN_KEY = 'docugaurd_token';
+  const TOKEN_KEY = 'deciva_token';
 
   function getToken() { return localStorage.getItem(TOKEN_KEY); }
   function setToken(t) { localStorage.setItem(TOKEN_KEY, t); }

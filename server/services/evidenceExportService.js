@@ -250,8 +250,8 @@ function generatePdfExport(exportType, evidencePackage) {
         size: 'A4',
         bufferPages: true,
         info: {
-          Title: isPortfolio ? 'DocuGuard AI — Portfolio Governance Audit' : `DocuGuard AI — Contract Compliance Audit (${manifest?.subject?.documentName || 'Contract'})`,
-          Author: 'DocuGuard AI Compliance Engine',
+          Title: isPortfolio ? 'Deciva — Portfolio Governance Audit' : `Deciva — Contract Compliance Audit (${manifest?.subject?.documentName || 'Contract'})`,
+          Author: 'Deciva Compliance Engine',
           Subject: 'Executive Compliance & Integrity-Verifiable Audit Evidence',
           Keywords: 'compliance, audit, governance, integrity, contract intelligence'
         }
@@ -272,7 +272,7 @@ function generatePdfExport(exportType, evidencePackage) {
   // 1. Header Banner
   doc.rect(40, 40, 515, 45).fill('#0F172A');
   doc.fillColor('#FFFFFF').fontSize(16).font('Helvetica-Bold')
-    .text('DOCUGUARD AI', 55, 48);
+    .text('DECIVA', 55, 48);
   doc.fontSize(10).font('Helvetica')
     .text('ENTERPRISE CONTRACT GOVERNANCE & COMPLIANCE AUDIT', 55, 66);
 
@@ -496,7 +496,7 @@ function generatePdfExport(exportType, evidencePackage) {
   const bottomY = 770;
   doc.rect(40, bottomY, 515, 30).fill('#F1F5F9');
   doc.fillColor(MUTED).fontSize(7).font('Helvetica')
-    .text('Verification: To verify payload integrity, submit the canonical JSON export to POST /api/compliance/verify or use the DocuGuard AI UI.', 50, bottomY + 7);
+    .text('Verification: To verify payload integrity, submit the canonical JSON export to POST /api/compliance/verify or use the Deciva UI.', 50, bottomY + 7);
   doc.end();
     } catch (err) {
       reject(err);

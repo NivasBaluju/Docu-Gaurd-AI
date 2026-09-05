@@ -1,5 +1,5 @@
 /**
- * DocuGuard AI — Enterprise Outbound Event & Outbox Delivery Service
+ * Deciva — Enterprise Outbound Event & Outbox Delivery Service
  * ---------------------------------------------------------------------------
  * Implements the transactional Outbox pattern for reliable at-least-once event delivery.
  * Features bounded exponential backoff retries, Dead-Letter Queue (DLQ), and cryptographic audit.

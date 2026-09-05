@@ -1,4 +1,4 @@
-# DocuGuard AI — Complete Enterprise System Specification
+# Deciva — Complete Enterprise System Specification
 
 ---
 
@@ -75,7 +75,7 @@ The production PostgreSQL database contains **50 relational base tables** organi
 | `integration_config_versions` | Phase 14 | Versioned connector credentials and endpoint settings |
 | `integration_sync_runs` | Phase 14 | Batch & real-time sync execution history (Primary Domain Table) |
 | `integration_idempotency_keys` | Phase 14 | Inbound and outbound deduplication keys (Primary Domain Table) |
-| `integration_object_mappings` | Phase 14 | DocuGuard ID to Salesforce/SAP/Jira ID mappings (Primary Domain Table) |
+| `integration_object_mappings` | Phase 14 | Deciva ID to Salesforce/SAP/Jira ID mappings (Primary Domain Table) |
 | `integration_webhook_events` | Phase 14 | Raw incoming webhook payloads and states (Primary Domain Table) |
 | `integration_event_outbox` | Phase 14 | Durable transactional outbox for outbound calls (Primary Domain Table) |
 

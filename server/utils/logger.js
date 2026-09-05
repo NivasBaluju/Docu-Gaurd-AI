@@ -1,5 +1,5 @@
 /**
- * DocuGuard AI — Enterprise Structured Logger
+ * Deciva — Enterprise Structured Logger
  * ---------------------------------------------------------------------------
  * Emits clean, machine-readable JSON logs for operational observability.
  * Strictly redacts all sensitive information (passwords, tokens, encryption

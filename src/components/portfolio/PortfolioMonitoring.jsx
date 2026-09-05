@@ -346,7 +346,7 @@ export const PortfolioMonitoring = () => {
       {activeSubTab === 'CALENDAR' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
           <div style={{ fontSize: '13px', color: 'var(--ink-muted, #888)', fontStyle: 'italic' }}>
-            Note: In strict compliance with DocuGuard's No-Fabrication architecture, only contract events with explicit textual citations appear on this timeline.
+            Note: In strict compliance with Deciva's No-Fabrication architecture, only contract events with explicit textual citations appear on this timeline.
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>

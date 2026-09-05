@@ -1,5 +1,5 @@
 /**
- * DocuGuard AI — Contract Portfolio Monitoring & Lifecycle Service (Phase 11)
+ * Deciva — Contract Portfolio Monitoring & Lifecycle Service (Phase 11)
  * ---------------------------------------------------------------------------
  * Continuous, deterministic portfolio intelligence and monitoring engine.
  * 
@@ -26,7 +26,7 @@ const logger = require('../utils/logger');
 const FLASK_HOST = process.env.FLASK_HOST || '127.0.0.1';
 const FLASK_PORT = process.env.FLASK_PORT || 5001;
 const AI_MICROSERVICE_URL = (process.env.AI_MICROSERVICE_URL || `http://${FLASK_HOST}:${FLASK_PORT}`).replace(/\/+$/, '');
-const INTERNAL_KEY = process.env.INTERNAL_SERVICE_KEY || 'docuguard-internal-service-secret-key-default';
+const INTERNAL_KEY = process.env.INTERNAL_SERVICE_KEY || 'deciva-internal-service-secret-key-default';
 
 const NOT_AVAILABLE = 'NOT_AVAILABLE';
 const UNKNOWN = 'UNKNOWN';
@@ -754,7 +754,7 @@ async function runPortfolioMonitoring(user, correlationId = uuidv4()) {
     correlationId,
     userId,
     operationType: 'CONTRACT_MONITORING',
-    provider: 'docuguard_monitoring_engine',
+    provider: 'deciva_monitoring_engine',
     model: 'deterministic_change_lifecycle_v11',
     durationMs,
     status: 'SUCCESS',

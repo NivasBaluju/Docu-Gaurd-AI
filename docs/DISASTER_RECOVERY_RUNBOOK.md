@@ -1,4 +1,4 @@
-# DocuGuard AI — Disaster Recovery & Business Continuity Runbook
+# Deciva — Disaster Recovery & Business Continuity Runbook
 
 ---
 

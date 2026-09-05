@@ -1,4 +1,4 @@
-# DocuGuard AI — Security & Operational Incident Response Runbook
+# Deciva — Security & Operational Incident Response Runbook
 
 ---
 

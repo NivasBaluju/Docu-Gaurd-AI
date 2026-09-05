@@ -15,7 +15,7 @@ export function Terms() {
           Terms of Use
         </h1>
         <p className="font-body text-body-sm text-ink-soft mb-12 pb-6 border-b border-rule">
-          Last updated: September 2025 • DocuGuard Operating Agreement
+          Last updated: September 2025 • Deciva Operating Agreement
         </p>
 
         <div className="font-body text-body text-ink space-y-8 leading-relaxed">
@@ -24,7 +24,7 @@ export function Terms() {
               1. Scope of Intelligence &amp; Legal Warranty
             </h2>
             <p className="measure-body">
-              DocuGuard AI is an advanced algorithmic contract examination and risk detection instrument designed to assist licensed legal counsel and enterprise compliance executives. The platform's analysis, redline suggestions, and scenario probabilities do not constitute formal legal advice or substitute for human legal judgment.
+              Deciva is an advanced algorithmic contract examination and risk detection instrument designed to assist licensed legal counsel and enterprise compliance executives. The platform's analysis, redline suggestions, and scenario probabilities do not constitute formal legal advice or substitute for human legal judgment.
             </p>
           </section>
 

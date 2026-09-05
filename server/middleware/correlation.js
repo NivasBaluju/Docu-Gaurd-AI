@@ -1,5 +1,5 @@
 /**
- * DocuGuard AI — Request Correlation Middleware
+ * Deciva — Request Correlation Middleware
  * ---------------------------------------------------------------------------
  * Assigns or extracts an X-Correlation-Id for every incoming HTTP request.
  * Propagates the ID on response headers and across service boundaries (Node -> Flask).

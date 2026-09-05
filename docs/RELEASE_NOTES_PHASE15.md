@@ -1,4 +1,4 @@
-# DocuGuard AI — Phase 15 Enterprise Release Notes
+# Deciva — Phase 15 Enterprise Release Notes
 
 ---
 
@@ -13,7 +13,7 @@
 
 ## 2. Executive Summary
 
-Phase 15 is the definitive release-hardening, reliability, and productization milestone for DocuGuard AI. It consolidates the contract intelligence (Phase 10), continuous monitoring (Phase 11), human review workflow (Phase 12), compliance governance (Phase 13), and enterprise interoperability connectors (Phase 14) into an operationally recoverable, auditable, and resilient product.
+Phase 15 is the definitive release-hardening, reliability, and productization milestone for Deciva. It consolidates the contract intelligence (Phase 10), continuous monitoring (Phase 11), human review workflow (Phase 12), compliance governance (Phase 13), and enterprise interoperability connectors (Phase 14) into an operationally recoverable, auditable, and resilient product.
 
 ---
 

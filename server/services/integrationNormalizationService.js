@@ -1,7 +1,7 @@
 /**
- * DocuGuard AI — Canonical Integration Normalization Service
+ * Deciva — Canonical Integration Normalization Service
  * ---------------------------------------------------------------------------
- * Normalizes external provider payloads into canonical DocuGuard representations.
+ * Normalizes external provider payloads into canonical Deciva representations.
  * Enforces zero-fabrication guarantees: missing fields remain null/NOT_PROVIDED.
  * Preserves contract text verbatim as legal evidence.
  */

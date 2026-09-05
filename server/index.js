@@ -39,7 +39,7 @@ app.use(correlationMiddleware);
 // --- CORS -------------------------------------------------------------------
 // Allow the Vercel-hosted frontend and local dev to reach the API.
 const ALLOWED_ORIGINS = [
-  process.env.CLIENT_URL,           // e.g. https://docu-gaurd-ai.vercel.app
+  process.env.CLIENT_URL,           // e.g. https://deciva-ai.vercel.app
   'http://localhost:5000',
   'http://localhost:3000',
 ].filter(Boolean);
@@ -111,7 +111,7 @@ app.use('/api/jobs', jobsRoutes);
 app.get(['/api/health/live', '/api/health/liveness'], (req, res) => {
   res.status(200).json({
     status: 'live',
-    service: 'Docu-Gaurd AI Gateway',
+    service: 'Deciva Gateway',
     timestamp: new Date().toISOString(),
     uptime: Math.floor(process.uptime()),
     correlationId: req.correlationId
@@ -122,7 +122,7 @@ app.get(['/api/health/live', '/api/health/liveness'], (req, res) => {
 app.get(['/api/health/ready', '/api/health/readiness'], async (req, res) => {
   const health = {
     status: 'ready',
-    service: 'Docu-Gaurd AI Gateway',
+    service: 'Deciva Gateway',
     timestamp: new Date().toISOString(),
     uptime: Math.floor(process.uptime()),
     correlationId: req.correlationId,
@@ -267,7 +267,7 @@ app.get('/api/health/dependencies', async (req, res) => {
 app.get('/api/health', (req, res) => {
   res.json({
     status: 'ok',
-    service: 'Docu-Gaurd AI',
+    service: 'Deciva',
     time: new Date().toISOString(),
     correlationId: req.correlationId
   });
@@ -278,7 +278,7 @@ app.get('/api/health', (req, res) => {
   try {
     const { rows } = await db.query('SELECT COUNT(*) AS c FROM blockchain_audit');
     if (Number(rows[0].c) === 0) {
-      await recordAudit(null, 'SYSTEM_INITIALIZED', { message: 'Docu-Gaurd AI audit ledger initialized' });
+      await recordAudit(null, 'SYSTEM_INITIALIZED', { message: 'Deciva audit ledger initialized' });
     }
   } catch (e) {
     console.error('Failed to initialize audit ledger:', e.message);
@@ -304,7 +304,7 @@ app.use(errorHandler);
 // Local dev: start HTTP server. On Vercel, the file is imported as a module.
 if (require.main === module) {
   app.listen(PORT, () => {
-    console.log(`\n  Docu-Gaurd AI running at http://localhost:${PORT}\n`);
+    console.log(`\n  Deciva running at http://localhost:${PORT}\n`);
   });
 }
 

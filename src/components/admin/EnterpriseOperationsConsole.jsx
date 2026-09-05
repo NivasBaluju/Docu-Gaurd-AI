@@ -244,7 +244,7 @@ export default function EnterpriseOperationsConsole() {
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `DocuGuard_Export_${target}_${Date.now()}.json`;
+      a.download = `Deciva_Export_${target}_${Date.now()}.json`;
       a.click();
       URL.revokeObjectURL(url);
       showToast('Export package generated and downloaded cleanly!', 'success');
@@ -734,7 +734,7 @@ export default function EnterpriseOperationsConsole() {
           <div style={{ border: '1px solid #e5e5e5', padding: '1.5rem', borderRadius: '4px' }}>
             <h3 style={{ fontSize: '1.25rem', fontWeight: 700, margin: '0 0 0.5rem 0' }}>Tenant Data Export</h3>
             <p style={{ color: '#737373', fontSize: '0.85rem', marginBottom: '1.25rem' }}>
-              Generates a complete, relational JSON export package spanning all 13 DocuGuard domains with SHA-256 checksums. Secrets and API credentials are strictly excluded.
+              Generates a complete, relational JSON export package spanning all 13 Deciva domains with SHA-256 checksums. Secrets and API credentials are strictly excluded.
             </p>
             <div style={{ marginBottom: '1rem' }}>
               <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '0.4rem' }}>Target Tenant ID</label>
@@ -759,7 +759,7 @@ export default function EnterpriseOperationsConsole() {
           <div style={{ border: '1px solid #e5e5e5', padding: '1.5rem', borderRadius: '4px' }}>
             <h3 style={{ fontSize: '1.25rem', fontWeight: 700, margin: '0 0 0.5rem 0' }}>Validated Data Import</h3>
             <p style={{ color: '#737373', fontSize: '0.85rem', marginBottom: '1.25rem' }}>
-              Restores or migrates portable DocuGuard export packages into a tenant with referential validation and dry-run capabilities.
+              Restores or migrates portable Deciva export packages into a tenant with referential validation and dry-run capabilities.
             </p>
             <form onSubmit={handleImport}>
               <div style={{ marginBottom: '0.75rem' }}>
@@ -793,7 +793,7 @@ export default function EnterpriseOperationsConsole() {
                   value={importPayloadText}
                   onChange={e => setImportPayloadText(e.target.value)}
                   rows={4}
-                  placeholder="Paste DocuGuardExport JSON here..."
+                  placeholder="Paste DecivaExport JSON here..."
                   required
                   style={{ width: '100%', padding: '0.6rem', border: '1px solid #d4d4d4', borderRadius: '3px', fontFamily: 'monospace', fontSize: '0.75rem' }}
                 />
@@ -1099,7 +1099,7 @@ export default function EnterpriseOperationsConsole() {
                 Curated 5-to-10 Minute Demonstration Showcase
               </h3>
               <p style={{ color: '#737373', margin: 0, fontSize: '0.9rem', maxWidth: '800px', lineHeight: 1.5 }}>
-                A controlled dataset illustrating the complete DocuGuard enterprise narrative:
+                A controlled dataset illustrating the complete Deciva enterprise narrative:
                 <strong> Upload &rarr; Evidence &rarr; Risk &rarr; What-If &rarr; Decision &rarr; Approval &rarr; Governance &rarr; Monitoring &rarr; Audit</strong>.
               </p>
             </div>

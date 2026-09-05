@@ -2,7 +2,7 @@
 """
 verify_phase7_7_analytics.py
 Phase 7.7 Verification Suite: Workflow Escalation, Attention Management & Operational Intelligence
-DocuGuard AI
+Deciva
 """
 
 import sys

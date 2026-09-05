@@ -1,5 +1,5 @@
 /**
- * DocuGuard AI — Contract Decision Workflow Routes (Phase 12)
+ * Deciva — Contract Decision Workflow Routes (Phase 12)
  * ---------------------------------------------------------------------------
  * Authenticated endpoints for enterprise human-in-the-loop decision governance,
  * approval policies, multi-reviewer collaboration, and inbox management.

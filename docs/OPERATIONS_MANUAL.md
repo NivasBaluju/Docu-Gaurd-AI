@@ -1,10 +1,10 @@
-# DocuGuard AI — Enterprise Operations Manual
+# Deciva — Enterprise Operations Manual
 
 ---
 
 ## 1. Enterprise Operations Console Overview
 
-The Enterprise Operations Console (`/operations`) is the central command surface for DocuGuard AI site reliability engineers and enterprise administrators.
+The Enterprise Operations Console (`/operations`) is the central command surface for Deciva site reliability engineers and enterprise administrators.
 
 Built strictly under the **Paper and Ink** design philosophy:
 * Tactile, high-density data tables with monospace metric fonts.

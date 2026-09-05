@@ -14,7 +14,7 @@ export default function Integrations() {
               Enterprise Integrations
             </h1>
             <p className="font-body text-sm text-muted mt-1 max-w-2xl">
-              Connect DocuGuard AI with external document repositories, CRM/ERP systems, and enterprise webhook pipelines while preserving internal governance authority.
+              Connect Deciva with external document repositories, CRM/ERP systems, and enterprise webhook pipelines while preserving internal governance authority.
             </p>
           </div>
 

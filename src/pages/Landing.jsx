@@ -45,7 +45,7 @@ export function Landing() {
         <div className="container-wide w-full relative z-10">
           <HeroEntrance
             headline="Judgment, applied with precision."
-            subheadline="DocuGuard AI evaluates the contracts that define an enterprise's future — diligence, risk mitigation, autonomous negotiation, and governance."
+            subheadline="Deciva evaluates the contracts that define an enterprise's future — diligence, risk mitigation, autonomous negotiation, and governance."
           >
             <div className="flex flex-wrap items-center gap-4 mt-8">
               <Button href="/contact" variant="primary">
@@ -68,7 +68,7 @@ export function Landing() {
                 Operating Mandate
               </span>
               <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl text-ink font-medium leading-tight tracking-tight">
-                Contractual commitments are dynamic financial liabilities. DocuGuard applies machine intelligence to declassify risk, govern bulk mutations, and enforce cryptographic compliance.
+                Contractual commitments are dynamic financial liabilities. Deciva applies machine intelligence to declassify risk, govern bulk mutations, and enforce cryptographic compliance.
               </h2>
             </div>
             <div className="lg:col-span-4 border-l border-rule pl-8 lg:pl-12 pt-2 space-y-6">
@@ -349,7 +349,7 @@ export function Landing() {
               compliance frameworks and statutory regimes monitored continuously across your portfolio.
             </h3>
             <p className="font-body text-body text-ink-soft mt-6 max-w-2xl leading-relaxed">
-              From Delaware corporate precedent and UCC obligations to European Union GDPR Article 28 mandates, DocuGuard continuously validates contract terms against changing statutory baselines.
+              From Delaware corporate precedent and UCC obligations to European Union GDPR Article 28 mandates, Deciva continuously validates contract terms against changing statutory baselines.
             </p>
           </div>
         </div>
@@ -434,7 +434,7 @@ export function Landing() {
               Hardware enclave processing with zero multi-tenant data leakage.
             </h3>
             <p className="font-body text-body text-ink-soft leading-relaxed mb-8">
-              DocuGuard isolates all contract telemetry inside hardware-encrypted enclaves. Your legal data is never used to train global AI models, and every calculation produces an immutable SHA-256 evidence package for independent judicial verification.
+              Deciva isolates all contract telemetry inside hardware-encrypted enclaves. Your legal data is never used to train global AI models, and every calculation produces an immutable SHA-256 evidence package for independent judicial verification.
             </p>
             <TextLinkButton href="/trust">
               Read Security Architecture & SOC 2 Telemetry
@@ -456,7 +456,7 @@ export function Landing() {
             Executive Briefing
           </span>
           <h2 className="display-02 text-white tracking-tight mb-6">
-            Retain DocuGuard for your portfolio.
+            Retain Deciva for your portfolio.
           </h2>
           <p className="font-body text-body text-ink-soft max-w-xl mx-auto mb-10 leading-relaxed">
             Schedule a confidential briefing with our legal engineering team to evaluate your contract exposure.

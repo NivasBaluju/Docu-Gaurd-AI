@@ -2,7 +2,7 @@
  * server/services/demoSeedService.js
  * Component 5: Curated Demo / Seed Showcase Environment
  * Provides a controlled 5-contract demonstration dataset illustrating the complete
- * 5-to-10 minute DocuGuard lifecycle narrative:
+ * 5-to-10 minute Deciva lifecycle narrative:
  * Upload -> Evidence -> Risk -> What-If -> Decision -> Approval -> Governance -> Monitoring -> Audit
  */
 
@@ -42,7 +42,7 @@ This Mutual Non-Disclosure Agreement ("Agreement") is entered into by and betwee
     category: 'EMPLOYMENT',
     extracted_text: `
 EXECUTIVE EMPLOYMENT & PROPRIETARY RIGHTS AGREEMENT
-This Executive Employment Agreement is entered into between DocuGuard Systems Inc. ("Company") and Jane Doe ("Executive").
+This Executive Employment Agreement is entered into between Deciva Systems Inc. ("Company") and Jane Doe ("Executive").
 1. TITLE & DUTIES: Executive shall serve as Vice President of Systems Engineering, reporting to the Chief Technology Officer.
 2. COMPENSATION & INCENTIVES: Base salary of $280,000 annually with equity incentive vesting over a four-year schedule subject to a one-year cliff.
 3. PROPRIETARY RIGHTS & INVENTIONS: All intellectual property, patentable inventions, software architectures, and trade secrets authored or invented during employment vest immediately in Company.
@@ -99,7 +99,7 @@ This Agreement governs Enterprise Cloud Platform services provided by AetherScal
     category: 'JOINT_VENTURE',
     extracted_text: `
 STRATEGIC JOINT DEVELOPMENT & LICENSING AGREEMENT
-This Strategic Agreement is entered into between DocuGuard Innovations LLC and QuantumBio Consortium Inc.
+This Strategic Agreement is entered into between Deciva Innovations LLC and QuantumBio Consortium Inc.
 1. COLLABORATION SCOPE: Joint research, development, and commercialization of AI-directed pharmaceutical compliance verification algorithms.
 2. BUDGET & FINANCIAL ALLOCATION: Initial joint capital expenditure of $2,500,000 allocated across Phase 1 clinical trial validations.
 3. DUAL-SIGNATORY APPROVAL: Any expenditure, IP assignment, or subcontracting agreement exceeding $1,000,000 requires explicit dual-signatory approval from both General Legal Counsel and Vice President of Finance.

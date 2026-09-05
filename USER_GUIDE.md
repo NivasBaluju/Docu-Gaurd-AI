@@ -1,4 +1,4 @@
-# DocuGuard AI — Comprehensive Platform User Guide & Operational Manual
+# Deciva — Comprehensive Platform User Guide & Operational Manual
 
 > **Version:** 1.0.0 Enterprise Production  
 > **Classification:** Operational Manual & User Reference  
@@ -56,12 +56,12 @@
 
 ## 1. Executive Overview & Platform Purpose
 
-**DocuGuard AI** is an enterprise-grade AI legal copilot, contract lifecycle governance system, and zero-trust security observatory. It is designed to solve the critical challenges that organizations face when handling commercial contracts, NDAs, Master Service Agreements (MSAs), indentures, and vendor agreements:
+**Deciva** is an enterprise-grade AI legal copilot, contract lifecycle governance system, and zero-trust security observatory. It is designed to solve the critical challenges that organizations face when handling commercial contracts, NDAs, Master Service Agreements (MSAs), indentures, and vendor agreements:
 
 - **Unquantified Risk:** Uncapped indemnities, ambiguous termination windows, and lopsided liabilities buried deep inside 100-page agreements.
 - **Surprise Auto-Renewals:** Missing statutory opt-out deadlines (e.g. 60-day written notice before annual rollover) that lock companies into unwanted multimillion-dollar commitments.
-- **LLM Data Bleed:** Generic chatbot tools leaking proprietary client legal agreements into public AI training sets. DocuGuard uses hardware-isolated ephemeral memory chambers with strict zero-retention guarantees.
-- **Tampering & Repudiation:** Disputed changes or unauthorized contract modifications. DocuGuard anchors every document, redline, and administrative decision to an immutable, chained SHA-256 cryptographic audit ledger.
+- **LLM Data Bleed:** Generic chatbot tools leaking proprietary client legal agreements into public AI training sets. Deciva uses hardware-isolated ephemeral memory chambers with strict zero-retention guarantees.
+- **Tampering & Repudiation:** Disputed changes or unauthorized contract modifications. Deciva anchors every document, redline, and administrative decision to an immutable, chained SHA-256 cryptographic audit ledger.
 
 ---
 
@@ -76,7 +76,7 @@ Follow this operational flow to test and master the platform immediately:
  Authenticator      Compute SHA-256            Clause Checklist            BATNA Modeling              Audit Anchoring
 ```
 
-1. **Navigate to the Application:** Open your browser to `http://localhost:5000` (or your deployed URL e.g., `https://docu-gaurd-ai.vercel.app`).
+1. **Navigate to the Application:** Open your browser to `http://localhost:5000` (or your deployed URL e.g., `https://deciva-ai.vercel.app`).
 2. **Access Your Account:** Click **Login** in the top navigation bar. If testing locally, sign in with your enterprise credentials, or register a new user via **Register**.
 3. **Go to Ingestion Chamber:** Click **Intake Chamber** or **Upload** in the navigation header.
 4. **Deposit a Document:** Drag-and-drop a sample contract (PDF, DOCX, or TXT) into the intake surface. The system will automatically compute the SHA-256 cryptographic hash, extract clauses, and index risks.
@@ -87,7 +87,7 @@ Follow this operational flow to test and master the platform immediately:
 
 ## 3. Authentication, Identity & Multi-Factor Access
 
-DocuGuard enforces strict, identity-grounded zero-trust access controls.
+Deciva enforces strict, identity-grounded zero-trust access controls.
 
 ### 3.1 Registering an Account (`/register`)
 - **Fields:**
@@ -164,7 +164,7 @@ The **Dashboard** (`/dashboard`) serves as the chief legal and operational comma
 
 ## 5. The Document Intake Chamber (Upload & Ingestion)
 
-The **Intake Chamber** (`/upload`) is the front door for bringing contracts into the DocuGuard intelligence and compliance engine.
+The **Intake Chamber** (`/upload`) is the front door for bringing contracts into the Deciva intelligence and compliance engine.
 
 <a id="step-by-step-upload-instructions"></a>
 ### 5.1 Step-by-Step Upload Instructions
@@ -532,7 +532,7 @@ At the top of the workspace, you will find document metadata and global actions:
   - `Download Limits`: Single-use (1 download), 5 downloads, or Unlimited downloads within window.
   - `Password Protection (Optional)`: Requires recipient to enter a passphrase before unlocking the document.
 - **Buttons:**
-  - **"Generate Secure Share Link"** — Issues a unique cryptographic token URL (e.g., `https://docu-gaurd.ai/#/share/t-9a8b7c...`).
+  - **"Generate Secure Share Link"** — Issues a unique cryptographic token URL (e.g., `https://deciva.ai/#/share/t-9a8b7c...`).
   - **"Revoke Link Immediately"** — Instantly invalidates the link, blocking any further external access.
 
 ---
@@ -616,7 +616,7 @@ The **Portfolio Hub** (`/portfolio`) provides continuous oversight across your e
 
 <a id="compliance-roi"></a>
 ### 8.6 Tab 05: Compliance & Business ROI Analytics
-- **Business ROI Card:** Quantifies the financial value delivered by DocuGuard AI:
+- **Business ROI Card:** Quantifies the financial value delivered by Deciva:
   - `Hours Saved`: Time saved across contract review (calculated at 4.2 hours per contract average).
   - `Cost Avoidance`: Financial loss prevented by flagging uncapped indemnities and auto-renewals.
   - `Statutory Compliance Average`: Aggregate compliance percentage across Delaware, UCC, and GDPR benchmarks.
@@ -669,7 +669,7 @@ The centerpiece of the Security Center is the interactive **Radial Observatory**
 
 ## 10. Enterprise Integrations Console
 
-The **Integrations Console** (`/integrations`) allows DocuGuard to interoperate with external enterprise ecosystems while maintaining strict internal governance.
+The **Integrations Console** (`/integrations`) allows Deciva to interoperate with external enterprise ecosystems while maintaining strict internal governance.
 
 - **Available Connectors:**
   - `Salesforce CRM`: Sync contracts against Opportunity and Account records.
@@ -777,4 +777,4 @@ The **Enterprise Operations Console** (`/operations`) is accessible exclusively 
 
 ---
 
-*DocuGuard AI — Enterprise Security, Grounded Intelligence, and Non-Repudiation Built In.*
+*Deciva — Enterprise Security, Grounded Intelligence, and Non-Repudiation Built In.*

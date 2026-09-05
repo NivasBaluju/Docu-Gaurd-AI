@@ -1,5 +1,5 @@
 """
-DocuGuard AI — Enterprise Word (DOCX) Redline Export Generator
+Deciva — Enterprise Word (DOCX) Redline Export Generator
 Generates high-fidelity Microsoft Word documents (.docx) with native OpenXML
 tracked changes (<w:ins> and <w:del>), side-by-side comparison tables,
 and evidence-grounded audit traceability.
@@ -18,7 +18,7 @@ from docx.oxml.ns import qn, nsdecls
 def create_element(name):
     return OxmlElement(name)
 
-def add_tracked_deletion(paragraph, deleted_text, author="DocuGuard AI", date="2026-09-05T12:00:00Z", revision_id="1"):
+def add_tracked_deletion(paragraph, deleted_text, author="Deciva", date="2026-09-05T12:00:00Z", revision_id="1"):
     """Adds native OpenXML <w:del> element recognized as a tracked deletion in Word."""
     p = paragraph._p
     del_elem = OxmlElement('w:del')
@@ -31,7 +31,7 @@ def add_tracked_deletion(paragraph, deleted_text, author="DocuGuard AI", date="2
     del_elem.append(del_text)
     p.append(del_elem)
 
-def add_tracked_insertion(paragraph, inserted_text, author="DocuGuard AI", date="2026-09-05T12:00:00Z", revision_id="2"):
+def add_tracked_insertion(paragraph, inserted_text, author="Deciva", date="2026-09-05T12:00:00Z", revision_id="2"):
     """Adds native OpenXML <w:ins> element recognized as a tracked insertion in Word."""
     p = paragraph._p
     ins_elem = OxmlElement('w:ins')
@@ -87,7 +87,7 @@ def generate_redline_docx(data: dict, output_path: str):
 
     # Document Title (Fraunces / Georgia Serif style)
     title_p = doc.add_paragraph()
-    title_run = title_p.add_run("DOCUGUARD AI — REDLINE & NEGOTIATION EXPORT")
+    title_run = title_p.add_run("DECIVA — REDLINE & NEGOTIATION EXPORT")
     title_run.font.name = "Georgia"
     title_run.font.size = Pt(18)
     title_run.font.bold = True
@@ -223,10 +223,10 @@ def generate_redline_docx(data: dict, output_path: str):
                 w_type = word_item.get('type')
                 w_text = word_item.get('text', '')
                 if w_type == 'del':
-                    add_tracked_deletion(tracked_p, w_text + " ", author="DocuGuard AI", revision_id=str(rev_counter))
+                    add_tracked_deletion(tracked_p, w_text + " ", author="Deciva", revision_id=str(rev_counter))
                     rev_counter += 1
                 elif w_type == 'add':
-                    add_tracked_insertion(tracked_p, w_text + " ", author="DocuGuard AI", revision_id=str(rev_counter))
+                    add_tracked_insertion(tracked_p, w_text + " ", author="Deciva", revision_id=str(rev_counter))
                     rev_counter += 1
                 else:
                     r = tracked_p.add_run(w_text + " ")
@@ -234,9 +234,9 @@ def generate_redline_docx(data: dict, output_path: str):
                     r.font.size = Pt(9.5)
         else:
             # Fallback if precomputed diff words not supplied: show deletion then insertion
-            add_tracked_deletion(tracked_p, cl.get('originalText', ''), author="DocuGuard AI", revision_id=str(rev_counter))
+            add_tracked_deletion(tracked_p, cl.get('originalText', ''), author="Deciva", revision_id=str(rev_counter))
             rev_counter += 1
-            add_tracked_insertion(tracked_p, " " + cl.get('proposedText', ''), author="DocuGuard AI", revision_id=str(rev_counter))
+            add_tracked_insertion(tracked_p, " " + cl.get('proposedText', ''), author="Deciva", revision_id=str(rev_counter))
             rev_counter += 1
 
         doc.add_paragraph().paragraph_format.space_after = Pt(14)
@@ -245,7 +245,7 @@ def generate_redline_docx(data: dict, output_path: str):
     footer = doc.sections[0].footer
     f_p = footer.paragraphs[0]
     f_p.alignment = WD_ALIGN_PARAGRAPH.RIGHT
-    f_run = f_p.add_run("DocuGuard AI — Enterprise Contract Assurance  |  Non-Repudiation Verified")
+    f_run = f_p.add_run("Deciva — Enterprise Contract Assurance  |  Non-Repudiation Verified")
     f_run.font.size = Pt(8)
     f_run.font.color.rgb = RGBColor(0x88, 0x88, 0x88)
 

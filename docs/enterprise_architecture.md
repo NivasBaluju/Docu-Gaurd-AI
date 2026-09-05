@@ -1,16 +1,16 @@
-# DocuGuard AI — Enterprise Architecture Specification
+# Deciva — Enterprise Architecture Specification
 
 ---
 
 ## 1. Executive Summary
 
-DocuGuard AI is a production-grade, policy-aware enterprise contract intelligence and governance platform. It features an authoritative, deterministic lifecycle that connects raw legal contract evidence to executive decision intelligence, automated continuous monitoring, collaborative human review and approvals, organizational compliance governance, secure enterprise system connectors, and immutable operational reliability.
+Deciva is a production-grade, policy-aware enterprise contract intelligence and governance platform. It features an authoritative, deterministic lifecycle that connects raw legal contract evidence to executive decision intelligence, automated continuous monitoring, collaborative human review and approvals, organizational compliance governance, secure enterprise system connectors, and immutable operational reliability.
 
 ---
 
 ## 2. Authoritative Chain of Truth
 
-No component in DocuGuard AI operates as an isolated intelligence silo. All operations adhere strictly to a single, linear, deterministic chain of truth:
+No component in Deciva operates as an isolated intelligence silo. All operations adhere strictly to a single, linear, deterministic chain of truth:
 
 ```
                     CONTRACT EVIDENCE

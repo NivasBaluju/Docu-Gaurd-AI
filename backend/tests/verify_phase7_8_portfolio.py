@@ -2,7 +2,7 @@
 """
 verify_phase7_8_portfolio.py
 Phase 7.8 Verification Suite: Contract Portfolio Intelligence & Executive Oversight
-DocuGuard AI
+Deciva
 """
 
 import sys

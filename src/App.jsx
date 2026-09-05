@@ -47,7 +47,7 @@ const RouteLoadingFallback = () => (
     <ThinkingLoader
       state="working"
       size={64}
-      caption="Loading DocuGuard chamber..."
+      caption="Loading Deciva chamber..."
       subcaption="Establishing isolated session and preparing secure workspace"
     />
   </div>
@@ -225,7 +225,7 @@ class AppErrorBoundary extends React.Component {
     return { hasError: true, error };
   }
   componentDidCatch(error, errorInfo) {
-    console.error('DocuGuard App Error Caught:', error, errorInfo);
+    console.error('Deciva App Error Caught:', error, errorInfo);
   }
   render() {
     if (this.state.hasError) {

@@ -1,4 +1,4 @@
-# DocuGuard AI — Incident Response Plan
+# Deciva — Incident Response Plan
 
 ---
 

@@ -663,8 +663,8 @@ const MIGRATIONS = [
         integration_id VARCHAR(36) NOT NULL REFERENCES enterprise_integrations(id) ON DELETE CASCADE,
         external_object_type VARCHAR(50) NOT NULL,
         external_object_id VARCHAR(255) NOT NULL,
-        docuguard_object_type VARCHAR(50) NOT NULL,
-        docuguard_object_id VARCHAR(36) NOT NULL,
+        deciva_object_type VARCHAR(50) NOT NULL,
+        deciva_object_id VARCHAR(36) NOT NULL,
         external_version VARCHAR(50),
         last_synced_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
         mapping_status VARCHAR(30) NOT NULL DEFAULT 'ACTIVE',
@@ -718,7 +718,7 @@ const MIGRATIONS = [
       CREATE INDEX IF NOT EXISTS idx_integrations_tenant ON enterprise_integrations(tenant_id, status);
       CREATE INDEX IF NOT EXISTS idx_sync_runs_integration ON integration_sync_runs(integration_id, started_at DESC);
       CREATE INDEX IF NOT EXISTS idx_sync_runs_tenant ON integration_sync_runs(tenant_id, status);
-      CREATE INDEX IF NOT EXISTS idx_obj_mappings_doc ON integration_object_mappings(docuguard_object_id);
+      CREATE INDEX IF NOT EXISTS idx_obj_mappings_doc ON integration_object_mappings(deciva_object_id);
       CREATE INDEX IF NOT EXISTS idx_obj_mappings_ext ON integration_object_mappings(integration_id, external_object_id);
       CREATE INDEX IF NOT EXISTS idx_outbox_pending ON integration_event_outbox(status, next_attempt_at) WHERE status = 'PENDING';
       CREATE INDEX IF NOT EXISTS idx_outbox_tenant ON integration_event_outbox(tenant_id, event_type);

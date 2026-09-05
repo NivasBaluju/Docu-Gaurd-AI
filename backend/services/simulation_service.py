@@ -222,7 +222,7 @@ def simulate_contract_scenario(document_id: str, scenario: str) -> Dict[str, Any
 
     if gemini_key:
         try:
-            prompt = f"""You are DocuGuard AI, an expert contract risk simulation engine.
+            prompt = f"""You are Deciva, an expert contract risk simulation engine.
 Analyze the following hypothetical scenario strictly based on the provided contract evidence.
 
 HYPOTHETICAL SCENARIO:

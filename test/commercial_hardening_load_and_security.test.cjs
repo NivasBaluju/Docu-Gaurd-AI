@@ -25,7 +25,7 @@ function percentile(arr, p) {
 
 async function runCommercialHardeningSuite() {
   console.log('================================================================');
-  console.log('DOCUGUARD AI — COMMERCIAL HARDENING LOAD & SECURITY SUITE');
+  console.log('DECIVA — COMMERCIAL HARDENING LOAD & SECURITY SUITE');
   console.log('================================================================\n');
 
   let passed = 0;
@@ -133,14 +133,14 @@ async function runCommercialHardeningSuite() {
     api_key: 'dg_live_998877665544332211',
     token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.secret',
     private_key: '-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkq...',
-    document_summary: 'Clean mutual NDA between Acme and DocuGuard'
+    document_summary: 'Clean mutual NDA between Acme and Deciva'
   };
   const scrubbed = scrubSensitiveData(dirtyObject);
   assert(scrubbed.password === '[SCRUBBED_FOR_AUDIT_SECURITY]', 'Password field automatically redacted');
   assert(scrubbed.api_key === '[SCRUBBED_FOR_AUDIT_SECURITY]', 'API Key field automatically redacted');
   assert(scrubbed.private_key === '[SCRUBBED_FOR_AUDIT_SECURITY]', 'Private Key field automatically redacted');
   assert(scrubbed.token === '[SCRUBBED_FOR_AUDIT_SECURITY]', 'Auth Token field automatically redacted');
-  assert(scrubbed.document_summary === 'Clean mutual NDA between Acme and DocuGuard', 'Non-sensitive document content preserved');
+  assert(scrubbed.document_summary === 'Clean mutual NDA between Acme and Deciva', 'Non-sensitive document content preserved');
 
   // Test Q.2: Legal Hold Deletion Protection
   console.log('  Testing Legal Hold Deletion Bypass Resistance...');

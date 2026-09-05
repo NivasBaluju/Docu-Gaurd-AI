@@ -74,7 +74,7 @@ export function Trust() {
               </RedactionReveal>
             </div>
             <p className="font-body text-body text-ink-soft mt-6 leading-relaxed">
-              Every analysis produced by DocuGuard is backed by verifiable statutory references, preserving non-repudiation and evidential authority in commercial dispute environments.
+              Every analysis produced by Deciva is backed by verifiable statutory references, preserving non-repudiation and evidential authority in commercial dispute environments.
             </p>
           </div>
         </div>

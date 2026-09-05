@@ -1,7 +1,7 @@
 const rateLimit = require('express-rate-limit');
 
 /**
- * Enterprise Rate Limiters for DocuGuard AI
+ * Enterprise Rate Limiters for Deciva
  * Protects against brute-force attacks, OTP enumeration, SMTP exhaustion, and AI quota drainage.
  */
 

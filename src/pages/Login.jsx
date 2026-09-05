@@ -107,7 +107,7 @@ export function Login() {
 
           <div className="text-center pt-6 border-t border-rule text-body-sm text-ink-soft flex flex-col gap-2">
             <p className="m-0">
-              New to DocuGuard?{' '}
+              New to Deciva?{' '}
               <Link to="/register" className="editorial-link text-ink font-medium">
                 Register enterprise account
               </Link>

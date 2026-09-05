@@ -11,7 +11,7 @@ export default function AiDegradedModeBanner() {
   const [isSimulated, setIsSimulated] = useState(false);
   const [isDismissed, setIsDismissed] = useState(() => {
     try {
-      return localStorage.getItem('docuguard_banner_dismissed') === 'true';
+      return localStorage.getItem('deciva_banner_dismissed') === 'true';
     } catch {
       return false;
     }
@@ -50,7 +50,7 @@ export default function AiDegradedModeBanner() {
   const handleDismiss = () => {
     setIsDismissed(true);
     try {
-      localStorage.setItem('docuguard_banner_dismissed', 'true');
+      localStorage.setItem('deciva_banner_dismissed', 'true');
     } catch {
       // ignore
     }
@@ -59,7 +59,7 @@ export default function AiDegradedModeBanner() {
   const handleUndismiss = () => {
     setIsDismissed(false);
     try {
-      localStorage.removeItem('docuguard_banner_dismissed');
+      localStorage.removeItem('deciva_banner_dismissed');
     } catch {
       // ignore
     }

@@ -1,5 +1,5 @@
 /**
- * Docu-Gaurd AI — Gemini API Integration Module
+ * Deciva — Gemini API Integration Module
  * ---------------------------------------------------------------------------
  * Uses Google Gemini API (GEMINI_API_KEY) to power the AI Chatbot and document analysis.
  * Fallbacks gracefully to local heuristic RAG engine if API key is missing or rate limited.
@@ -18,7 +18,7 @@ async function askGeminiOrFallback(question, documentText) {
   // List of models to try in sequence
   const models = ['gemini-1.5-flash', 'gemini-1.5-pro', 'gemini-2.0-flash', 'gemini-2.5-flash'];
 
-  const prompt = `You are Docu-Gaurd AI, an elite legal intelligence copilot.
+  const prompt = `You are Deciva, an elite legal intelligence copilot.
 Analyze the following document text and answer the user's question accurately, clearly, and concisely.
 
 DOCUMENT TEXT:

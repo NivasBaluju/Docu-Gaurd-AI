@@ -1,5 +1,5 @@
 /**
- * DocuGuard AI — Integration Health & Observability Service
+ * Deciva — Integration Health & Observability Service
  * ---------------------------------------------------------------------------
  * Computes live integration health diagnostics, reachability, outbox queue
  * depths, failure rates, and tenant-scoped operational metrics.

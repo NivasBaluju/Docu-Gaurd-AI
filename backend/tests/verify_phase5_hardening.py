@@ -42,7 +42,7 @@ print("  [PASS] Real ML inference verified across contract taxonomy!")
 # -------------------------------------------------------------
 print("\n[TEST 2] Authenticating with Node Gateway...")
 login_res = requests.post(f"{BASE_URL}/api/auth/login", json={
-    "email": "admin@docugaurd.ai",
+    "email": "admin@deciva.ai",
     "password": "Password123!"
 }).json()
 

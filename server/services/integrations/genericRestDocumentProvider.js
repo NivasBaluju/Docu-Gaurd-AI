@@ -1,5 +1,5 @@
 /**
- * DocuGuard AI — Generic Secure REST Document Provider
+ * Deciva — Generic Secure REST Document Provider
  * ---------------------------------------------------------------------------
  * Concrete implementation of IntegrationProvider for REST-based document systems,
  * virtual file repositories, and webhook-driven cloud content endpoints.
@@ -39,7 +39,7 @@ class GenericRestDocumentProvider extends IntegrationProvider {
         reachable: true,
         authenticated: Boolean(credentials?.apiKey || credentials?.token || config.mock),
         latency_ms: 12,
-        server_info: 'DocuGuard Generic REST Connector v1.0 (Simulation)'
+        server_info: 'Deciva Generic REST Connector v1.0 (Simulation)'
       };
     }
 

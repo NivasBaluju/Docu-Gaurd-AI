@@ -16,7 +16,7 @@ export function Privacy() {
           Privacy Policy
         </h1>
         <p className="font-body text-body-sm text-ink-soft mb-12 pb-6 border-b border-rule">
-          Last updated: September 2025 • DocuGuard Governance Standard v2.4
+          Last updated: September 2025 • Deciva Governance Standard v2.4
         </p>
 
         <div className="font-body text-body text-ink space-y-8 leading-relaxed">
@@ -25,7 +25,7 @@ export function Privacy() {
               1. Zero-Knowledge Document Ingestion
             </h2>
             <p className="measure-body">
-              DocuGuard AI operates under a strict zero-knowledge architecture. Uploaded master agreements, exhibits, and non-disclosure documentation are analyzed in ephemeral, hardware-isolated memory chambers. Customer contract data is never used to train, fine-tune, or calibrate public AI models.
+              Deciva operates under a strict zero-knowledge architecture. Uploaded master agreements, exhibits, and non-disclosure documentation are analyzed in ephemeral, hardware-isolated memory chambers. Customer contract data is never used to train, fine-tune, or calibrate public AI models.
             </p>
           </section>
 

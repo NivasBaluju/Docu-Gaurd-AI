@@ -2,7 +2,7 @@
 """
 verify_phase8_0_bulk_operations.py
 Phase 8.0 Verification Suite: Controlled Portfolio Operations & Bulk Triage Engine
-DocuGuard AI
+Deciva
 
 50 tests covering:
   - Schema integrity (portfolio_operation_batches table)
@@ -253,7 +253,7 @@ def canonical_preview_hash(operation, mode, action_ids, payload):
 
 def run_tests():
     print("\n" + "="*70)
-    print("  DocuGuard AI — Phase 8.0 Verification Suite")
+    print("  Deciva — Phase 8.0 Verification Suite")
     print("  Controlled Portfolio Operations & Bulk Triage Engine")
     print("="*70 + "\n")
 

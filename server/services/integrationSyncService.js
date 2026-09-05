@@ -1,5 +1,5 @@
 /**
- * DocuGuard AI — Enterprise Integration Synchronization Service
+ * Deciva — Enterprise Integration Synchronization Service
  * ---------------------------------------------------------------------------
  * Coordinates inbound synchronization, version conflict detection, idempotency,
  * and seamless integration bridges into Phase 10 Decision Intelligence,
@@ -112,7 +112,7 @@ const IntegrationSyncService = {
             }
 
             // External version is newer: process controlled document update
-            const docId = mapping.docuguard_object_id;
+            const docId = mapping.deciva_object_id;
             const textContent = canonical.content_text || '';
             const calculatedRisk = textContent ? riskScore(textContent).overall : 10;
             const contentHash = sha256(textContent);
@@ -170,7 +170,7 @@ const IntegrationSyncService = {
 
             updated++;
           } else {
-            // First-time import: insert document into DocuGuard core
+            // First-time import: insert document into Deciva core
             const docId = uuidv4();
             const textContent = canonical.content_text || '';
             const calculatedRisk = textContent ? riskScore(textContent).overall : 10;
@@ -201,7 +201,7 @@ const IntegrationSyncService = {
             await db.query(
               `INSERT INTO integration_object_mappings (
                 id, tenant_id, integration_id, external_object_type, external_object_id,
-                docuguard_object_type, docuguard_object_id, external_version,
+                deciva_object_type, deciva_object_id, external_version,
                 last_synced_at, mapping_status, metadata_json, created_at, updated_at
               ) VALUES ($1, $2, $3, 'document', $4, 'document', $5, $6, CURRENT_TIMESTAMP, 'ACTIVE', $7, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`,
               [

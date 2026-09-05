@@ -51,7 +51,7 @@ export function MobileMenu({ isOpen, onClose, navLinks = [], user = null, onOpen
           className="font-display text-2xl font-medium tracking-tight text-white no-underline"
           onClick={onClose}
         >
-          DocuGuard AI
+          Deciva
         </Link>
         <button
           type="button"
@@ -137,7 +137,7 @@ export function MobileMenu({ isOpen, onClose, navLinks = [], user = null, onOpen
           Executive Inquiries &amp; Zero-Trust Counsel
         </p>
         <p className="font-body text-heading-02 text-white font-medium mt-1">
-          briefings@docuguard.ai
+          briefings@deciva.ai
         </p>
         <p className="font-body text-micro text-neutral-400 mt-2">
           Hardware Enclave Processing • SHA-256 Audit Non-Repudiation

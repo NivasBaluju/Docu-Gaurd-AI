@@ -28,7 +28,7 @@ export function Insights() {
             Intelligence
           </h1>
           <p className="font-body text-body-lg text-ink-soft leading-relaxed">
-            Technical research and architectural specifications from the DocuGuard AI systems engineering team — covering zero-trust cryptography, continuous risk quantification, and autonomous negotiation mechanics.
+            Technical research and architectural specifications from the Deciva systems engineering team — covering zero-trust cryptography, continuous risk quantification, and autonomous negotiation mechanics.
           </p>
         </div>
 

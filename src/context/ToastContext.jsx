@@ -3,8 +3,8 @@ import { motion, AnimatePresence } from 'motion/react';
 import { toastVariants } from '../styles/motion';
 
 const ToastContext = createContext({
-  showToast: () => {},
-  toast: () => {}
+  showToast: () => { },
+  toast: () => { }
 });
 
 export const ToastProvider = ({ children }) => {

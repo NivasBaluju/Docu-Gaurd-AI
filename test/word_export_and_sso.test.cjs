@@ -52,7 +52,7 @@ async function runWordAndSsoTests() {
 
   const mammothResult = await mammoth.extractRawText({ path: docxRes.storage_path });
   assert(mammothResult.value.length > 200, `DOCX text extracted successfully via mammoth (${mammothResult.value.length} chars)`);
-  assert(mammothResult.value.includes('DOCUGUARD AI — REDLINE & NEGOTIATION EXPORT'), 'Document title preserved in DOCX header');
+  assert(mammothResult.value.includes('DECIVA — REDLINE & NEGOTIATION EXPORT'), 'Document title preserved in DOCX header');
   assert(mammothResult.value.includes('EXECUTIVE NEGOTIATION SUMMARY'), 'Side-by-side comparison tables preserved in DOCX');
 
   // Word Diff Test
@@ -69,7 +69,7 @@ async function runWordAndSsoTests() {
   // OIDC Config Validation
   const validOidc = validateOidcConfig({
     issuerUrl: 'https://login.microsoftonline.com/example-tenant/v2.0',
-    clientId: 'docuguard-azure-client',
+    clientId: 'deciva-azure-client',
     clientSecret: 'secret_value_123',
     authorizationEndpoint: 'https://login.microsoftonline.com/example-tenant/oauth2/v2.0/authorize',
     tokenEndpoint: 'https://login.microsoftonline.com/example-tenant/oauth2/v2.0/token'
@@ -81,7 +81,7 @@ async function runWordAndSsoTests() {
 
   // SAML 2.0 Config Validation
   const validSaml = validateSamlConfig({
-    ssoUrl: 'https://identity.okta.com/app/docuguard/sso/saml',
+    ssoUrl: 'https://identity.okta.com/app/deciva/sso/saml',
     entityId: 'http://www.okta.com/exk123',
     certificate: '-----BEGIN CERTIFICATE-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA0...\n-----END CERTIFICATE-----'
   });
@@ -95,13 +95,13 @@ async function runWordAndSsoTests() {
     providerName: 'Azure AD / Entra ID Enterprise OIDC',
     config: {
       issuerUrl: 'https://login.microsoftonline.com/example-tenant/v2.0',
-      clientId: 'docuguard-azure-client',
+      clientId: 'deciva-azure-client',
       clientSecret: 'secret_value_123',
       authorizationEndpoint: 'https://login.microsoftonline.com/example-tenant/oauth2/v2.0/authorize',
       tokenEndpoint: 'https://login.microsoftonline.com/example-tenant/oauth2/v2.0/token'
     },
     roleMappings: {
-      DocuGuard_Admin: 'legal_counsel',
+      Deciva_Admin: 'legal_counsel',
       Standard_Users: 'standard_user'
     },
     sessionPolicy: {
@@ -111,7 +111,7 @@ async function runWordAndSsoTests() {
     }
   });
 
-  const assignedRole = mapClaimsToRole('tenant-acme-corp', ['DocuGuard_Admin']);
+  const assignedRole = mapClaimsToRole('tenant-acme-corp', ['Deciva_Admin']);
   assert(assignedRole === 'legal_counsel', `Mapped group to enterprise role: ${assignedRole}`);
 
   // Session Policy

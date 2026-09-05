@@ -1,4 +1,4 @@
-# DocuGuard AI — Comprehensive Security Audit Report
+# Deciva — Comprehensive Security Audit Report
 **Assessment Frameworks Applied**: `007` (STRIDE Threat Model & Defense-in-Depth), `web-security-testing` (OWASP Top 10), `api-security-best-practices` (REST & Auth Hardening), `idor-testing` (Access Control & Tenant Isolation), `file-path-traversal` (Chamber & File Integrity), `database-security` (Transit & At-Rest Hardening).
 
 **Audit Date**: September 2026  
@@ -23,7 +23,7 @@
 
 ### SEC-01 [CRITICAL] Hardcoded Fallback Secret for JWT Token Signing
 - **Framework**: `007` (Threat Modeling: Elevation of Privilege / Spoofing)
-- **Location**: [`server/middleware/auth.js:6`](file:///c:/Users/DELL/Downloads/Docu-Gaurd%20AI/Docu-Gaurd%20AI/server/middleware/auth.js#L6)
+- **Location**: [`server/middleware/auth.js:6`](file:///c:/Users/DELL/Downloads/Deciva%20AI/Deciva%20AI/server/middleware/auth.js#L6)
 - **Vulnerable Code**:
   ```javascript
   const JWT_SECRET = process.env.JWT_SECRET || 'dev_insecure_secret_change_me';
@@ -44,10 +44,10 @@
 
 ### SEC-02 [CRITICAL] Hardcoded Fallback Encryption Key for AES-256-GCM Master Key
 - **Framework**: `007` (Cryptography / Information Disclosure)
-- **Location**: [`server/utils/crypto.js:6-7`](file:///c:/Users/DELL/Downloads/Docu-Gaurd%20AI/Docu-Gaurd%20AI/server/utils/crypto.js#L6-L7)
+- **Location**: [`server/utils/crypto.js:6-7`](file:///c:/Users/DELL/Downloads/Deciva%20AI/Deciva%20AI/server/utils/crypto.js#L6-L7)
 - **Vulnerable Code**:
   ```javascript
-  const rawKey = process.env.ENCRYPTION_KEY || process.env.AES_MASTER_KEY || 'docuguard-secret-encryption-key-32-bytes!!';
+  const rawKey = process.env.ENCRYPTION_KEY || process.env.AES_MASTER_KEY || 'deciva-secret-encryption-key-32-bytes!!';
   const MASTER_KEY = crypto.createHash('sha256').update(rawKey).digest();
   ```
 - **Drawback & Threat Scenario**:
@@ -66,10 +66,10 @@
 
 ### SEC-03 [HIGH] Mismatched & Predictable Inter-Service Secret Key Between Node and Flask
 - **Framework**: `007` (Inter-Service Authentication / Defense-in-Depth)
-- **Location**: [`server/routes/documents.js:15`](file:///c:/Users/DELL/Downloads/Docu-Gaurd%20AI/Docu-Gaurd%20AI/server/routes/documents.js#L15) & [`backend/app.py:39`](file:///c:/Users/DELL/Downloads/Docu-Gaurd%20AI/Docu-Gaurd%20AI/backend/app.py#L39)
+- **Location**: [`server/routes/documents.js:15`](file:///c:/Users/DELL/Downloads/Deciva%20AI/Deciva%20AI/server/routes/documents.js#L15) & [`backend/app.py:39`](file:///c:/Users/DELL/Downloads/Deciva%20AI/Deciva%20AI/backend/app.py#L39)
 - **Vulnerable Code**:
-  - In Node: `process.env.INTERNAL_SERVICE_KEY || 'docuguard-internal-key-change-me'`
-  - In Python: `internal_key = "docuguard-internal-service-secret-key-default"`
+  - In Node: `process.env.INTERNAL_SERVICE_KEY || 'deciva-internal-key-change-me'`
+  - In Python: `internal_key = "deciva-internal-service-secret-key-default"`
 - **Drawback & Threat Scenario**:
   The default fallback keys between the Node gateway and Flask microservice do not match. More critically, both run with known default strings. If the microservice is deployed in an internal subnet or container cluster where `INTERNAL_SERVICE_KEY` is omitted, attackers or compromised adjacent pods can send requests directly to Flask using the hardcoded key, completely bypassing Node.js authentication, rate-limiting, and audit logging.
 - **Defensive Remediation**:
@@ -79,7 +79,7 @@
 
 ### SEC-04 [MEDIUM] Unconfigured Reverse Proxy Trust (`trust proxy`)
 - **Framework**: `007` (Spoofing / Zero-Trust Perimeter)
-- **Location**: [`server/index.js`](file:///c:/Users/DELL/Downloads/Docu-Gaurd%20AI/Docu-Gaurd%20AI/server/index.js) & [`server/middleware/auth.js:8-12`](file:///c:/Users/DELL/Downloads/Docu-Gaurd%20AI/Docu-Gaurd%20AI/server/middleware/auth.js#L8-L12)
+- **Location**: [`server/index.js`](file:///c:/Users/DELL/Downloads/Deciva%20AI/Deciva%20AI/server/index.js) & [`server/middleware/auth.js:8-12`](file:///c:/Users/DELL/Downloads/Deciva%20AI/Deciva%20AI/server/middleware/auth.js#L8-L12)
 - **Vulnerable Code**:
   ```javascript
   const ip = req.ip || req.connection.remoteAddress;
@@ -96,7 +96,7 @@
 
 ### SEC-05 [LOW] Ephemeral RSA Key Generation on Read-Only/Serverless Filesystems
 - **Framework**: `007` (Non-Repudiation / Key Lifecycle Management)
-- **Location**: [`server/utils/crypto.js:68-75`](file:///c:/Users/DELL/Downloads/Docu-Gaurd%20AI/Docu-Gaurd%20AI/server/utils/crypto.js#L68-L75)
+- **Location**: [`server/utils/crypto.js:68-75`](file:///c:/Users/DELL/Downloads/Deciva%20AI/Deciva%20AI/server/utils/crypto.js#L68-L75)
 - **Vulnerable Code**:
   ```javascript
   // Filesystem read-only — generating ephemeral RSA keys
@@ -113,7 +113,7 @@
 
 ### SEC-06 [HIGH] Missing Critical HTTP Security Headers (CSP, HSTS, Permissions-Policy)
 - **Framework**: `web-security-testing` (OWASP A05:2021 Security Misconfiguration)
-- **Location**: [`server/index.js:51-56`](file:///c:/Users/DELL/Downloads/Docu-Gaurd%20AI/Docu-Gaurd%20AI/server/index.js#L51-L56)
+- **Location**: [`server/index.js:51-56`](file:///c:/Users/DELL/Downloads/Deciva%20AI/Deciva%20AI/server/index.js#L51-L56)
 - **Vulnerable Code**:
   ```javascript
   app.use((req, res, next) => {
@@ -141,14 +141,14 @@
 
 ### SEC-07 [MEDIUM] Persistent JWT Access Token Stored in Browser `localStorage`
 - **Framework**: `web-security-testing` (OWASP A07:2021 Identification and Authentication Failures)
-- **Location**: [`src/services/api.js:5-8`](file:///c:/Users/DELL/Downloads/Docu-Gaurd%20AI/Docu-Gaurd%20AI/src/services/api.js#L5-L8)
+- **Location**: [`src/services/api.js:5-8`](file:///c:/Users/DELL/Downloads/Deciva%20AI/Deciva%20AI/src/services/api.js#L5-L8)
 - **Vulnerable Code**:
   ```javascript
-  getToken() { return localStorage.getItem('docugaurd_token'); },
-  setToken(token) { localStorage.setItem('docugaurd_token', token); }
+  getToken() { return localStorage.getItem('deciva_token'); },
+  setToken(token) { localStorage.setItem('deciva_token', token); }
   ```
 - **Drawback & Threat Scenario**:
-  `localStorage` is universally readable by any JavaScript running within the application origin. If an XSS vulnerability occurs (via malicious document content, third-party libraries, or CDN compromise), the attacker can execute `localStorage.getItem('docugaurd_token')` and instantly exfiltrate the user's session token.
+  `localStorage` is universally readable by any JavaScript running within the application origin. If an XSS vulnerability occurs (via malicious document content, third-party libraries, or CDN compromise), the attacker can execute `localStorage.getItem('deciva_token')` and instantly exfiltrate the user's session token.
 - **Defensive Remediation**:
   Transition session authentication to an `httpOnly`, `Secure`, `SameSite=Strict` cookie, preventing client-side JavaScript from accessing token material.
 
@@ -156,7 +156,7 @@
 
 ### SEC-08 [MEDIUM] Unnecessary Use of `dangerouslySetInnerHTML` for Extracted Document Text
 - **Framework**: `web-security-testing` (OWASP A03:2021 Injection / Cross-Site Scripting)
-- **Location**: [`src/components/document/OverviewTab.jsx:93`](file:///c:/Users/DELL/Downloads/Docu-Gaurd%20AI/Docu-Gaurd%20AI/src/components/document/OverviewTab.jsx#L93)
+- **Location**: [`src/components/document/OverviewTab.jsx:93`](file:///c:/Users/DELL/Downloads/Deciva%20AI/Deciva%20AI/src/components/document/OverviewTab.jsx#L93)
 - **Vulnerable Code**:
   ```javascript
   <div
@@ -173,7 +173,7 @@
 
 ### SEC-09 [LOW] Permissive CORS Configuration on Backend & Python Service
 - **Framework**: `web-security-testing` (Cross-Origin Resource Sharing)
-- **Location**: [`backend/app.py:31`](file:///c:/Users/DELL/Downloads/Docu-Gaurd%20AI/Docu-Gaurd%20AI/backend/app.py#L31) & [`server/index.js:31-48`](file:///c:/Users/DELL/Downloads/Docu-Gaurd%20AI/Docu-Gaurd%20AI/server/index.js#L31-L48)
+- **Location**: [`backend/app.py:31`](file:///c:/Users/DELL/Downloads/Deciva%20AI/Deciva%20AI/backend/app.py#L31) & [`server/index.js:31-48`](file:///c:/Users/DELL/Downloads/Deciva%20AI/Deciva%20AI/server/index.js#L31-L48)
 - **Vulnerable Code**:
   ```python
   CORS(app, resources={r"/api/*": {"origins": "*"}})
@@ -189,10 +189,10 @@
 
 ### SEC-10 [CRITICAL] Complete Absence of Rate Limiting on Authentication & OTP Endpoints
 - **Framework**: `api-security-best-practices` (OWASP API4:2023 Unrestricted Resource Consumption)
-- **Location**: [`server/index.js`](file:///c:/Users/DELL/Downloads/Docu-Gaurd%20AI/Docu-Gaurd%20AI/server/index.js) & [`server/routes/auth.js:52, 114, 252`](file:///c:/Users/DELL/Downloads/Docu-Gaurd%20AI/Docu-Gaurd%20AI/server/routes/auth.js#L52)
+- **Location**: [`server/index.js`](file:///c:/Users/DELL/Downloads/Deciva%20AI/Deciva%20AI/server/index.js) & [`server/routes/auth.js:52, 114, 252`](file:///c:/Users/DELL/Downloads/Deciva%20AI/Deciva%20AI/server/routes/auth.js#L52)
 - **Drawback & Threat Scenario**:
   Endpoints `/api/auth/login`, `/api/auth/register`, `/api/auth/verify-otp`, and `/api/auth/totp/verify` have **zero request throttling**:
-  1. **Email Flooding / Denial-of-Service**: An attacker can send 50,000 requests to `/login` with target email addresses, causing DocuGuard to spam thousands of emails, burning SMTP quotas and risking domain blacklisting.
+  1. **Email Flooding / Denial-of-Service**: An attacker can send 50,000 requests to `/login` with target email addresses, causing Deciva to spam thousands of emails, burning SMTP quotas and risking domain blacklisting.
   2. **OTP Brute-Force**: 6-digit numeric OTP codes have only 1,000,000 possibilities. Without rate-limiting, an automated script can cycle through codes before the 10-minute expiry window lapses.
 - **Defensive Remediation**:
   Install `express-rate-limit` and configure strict sliding windows:
@@ -210,7 +210,7 @@
 
 ### SEC-11 [HIGH] Unthrottled Resource-Intensive AI & OCR Endpoints
 - **Framework**: `api-security-best-practices` (Financial Denial of Service / Resource Exhaustion)
-- **Location**: [`server/routes/documents.js:301, 320, 409, 465`](file:///c:/Users/DELL/Downloads/Docu-Gaurd%20AI/Docu-Gaurd%20AI/server/routes/documents.js#L301)
+- **Location**: [`server/routes/documents.js:301, 320, 409, 465`](file:///c:/Users/DELL/Downloads/Deciva%20AI/Deciva%20AI/server/routes/documents.js#L301)
 - **Drawback & Threat Scenario**:
   Endpoints `/api/documents/:id/chat`, `/simulate`, `/negotiate`, `/analyze`, and `/api/ai/*` trigger external LLM inference and heavy local NLP embeddings. Without per-user token-bucket rate limiting, an authorized user or rogue script can fire hundreds of concurrent prompts, draining API credits and causing backend service degradation.
 - **Defensive Remediation**:
@@ -220,7 +220,7 @@
 
 ### SEC-12 [MEDIUM] Use of Cryptographically Weak Pseudo-Random Generator for OTP Codes
 - **Framework**: `api-security-best-practices` (Cryptographic Failures)
-- **Location**: [`server/routes/auth.js:65, 127`](file:///c:/Users/DELL/Downloads/Docu-Gaurd%20AI/Docu-Gaurd%20AI/server/routes/auth.js#L65)
+- **Location**: [`server/routes/auth.js:65, 127`](file:///c:/Users/DELL/Downloads/Deciva%20AI/Deciva%20AI/server/routes/auth.js#L65)
 - **Vulnerable Code**:
   ```javascript
   const code = String(Math.floor(100000 + Math.random() * 900000));
@@ -238,7 +238,7 @@
 
 ### SEC-13 [MEDIUM] Missing MFA Verification Enforcement on Destructive Admin Routes
 - **Framework**: `api-security-best-practices` (Broken Access Control)
-- **Location**: [`server/routes/admin.js:108`](file:///c:/Users/DELL/Downloads/Docu-Gaurd%20AI/Docu-Gaurd%20AI/server/routes/admin.js#L108)
+- **Location**: [`server/routes/admin.js:108`](file:///c:/Users/DELL/Downloads/Deciva%20AI/Deciva%20AI/server/routes/admin.js#L108)
 - **Vulnerable Code**:
   ```javascript
   router.post('/quarantine-user/:id', requireAdmin, async (req, res) => { ... });
@@ -261,7 +261,7 @@
 
 ### SEC-14 [LOW] Excessive JSON Request Body Limit (10MB)
 - **Framework**: `api-security-best-practices` (Resource Management)
-- **Location**: [`server/index.js:25`](file:///c:/Users/DELL/Downloads/Docu-Gaurd%20AI/Docu-Gaurd%20AI/server/index.js#L25)
+- **Location**: [`server/index.js:25`](file:///c:/Users/DELL/Downloads/Deciva%20AI/Deciva%20AI/server/index.js#L25)
 - **Vulnerable Code**:
   ```javascript
   app.use(express.json({ limit: '10mb' }));
@@ -277,7 +277,7 @@
 
 ### SEC-15 [HIGH] Multi-Tenant Document Leak in Flask Microservice (`DocumentModel.get_all`)
 - **Framework**: `idor-testing` (OWASP API1:2023 Broken Object Level Authorization)
-- **Location**: [`backend/routes/documents.py:31-33`](file:///c:/Users/DELL/Downloads/Docu-Gaurd%20AI/Docu-Gaurd%20AI/backend/routes/documents.py#L31-L33)
+- **Location**: [`backend/routes/documents.py:31-33`](file:///c:/Users/DELL/Downloads/Deciva%20AI/Deciva%20AI/backend/routes/documents.py#L31-L33)
 - **Vulnerable Code**:
   ```python
   user_id = request.args.get('user_id')
@@ -297,7 +297,7 @@
 
 ### SEC-16 [MEDIUM] Global Blockchain Audit Verification Leaks System-Wide Integrity Status
 - **Framework**: `idor-testing` (Information Disclosure Across Tenants)
-- **Location**: [`server/routes/security.js:77-79`](file:///c:/Users/DELL/Downloads/Docu-Gaurd%20AI/Docu-Gaurd%20AI/server/routes/security.js#L77-L79)
+- **Location**: [`server/routes/security.js:77-79`](file:///c:/Users/DELL/Downloads/Deciva%20AI/Deciva%20AI/server/routes/security.js#L77-L79)
 - **Vulnerable Code**:
   ```javascript
   router.get('/audit/verify', requireAuth, async (req, res) => {
@@ -313,7 +313,7 @@
 
 ### SEC-17 [LOW] Unbounded Parameter Schema on Contract Template Generation
 - **Framework**: `idor-testing` (Input Validation / Business Logic)
-- **Location**: [`server/routes/contracts.js:15-33`](file:///c:/Users/DELL/Downloads/Docu-Gaurd%20AI/Docu-Gaurd%20AI/server/routes/contracts.js#L15-L33)
+- **Location**: [`server/routes/contracts.js:15-33`](file:///c:/Users/DELL/Downloads/Deciva%20AI/Deciva%20AI/server/routes/contracts.js#L15-L33)
 - **Drawback & Threat Scenario**:
   `req.body.params` allows arbitrary JSON keys and values of unlimited length to be passed into contract generation routines without strict schema validation or sanitization, allowing potential text-injection or database bloat in `params_json`.
 - **Defensive Remediation**:
@@ -325,7 +325,7 @@
 
 ### SEC-18 [HIGH] HTTP Response Splitting / Content-Disposition Header Injection via `doc.original_name`
 - **Framework**: `file-path-traversal` (Header Injection / CRLF Injection)
-- **Location**: [`server/routes/share.js:87`](file:///c:/Users/DELL/Downloads/Docu-Gaurd%20AI/Docu-Gaurd%20AI/server/routes/share.js#L87)
+- **Location**: [`server/routes/share.js:87`](file:///c:/Users/DELL/Downloads/Deciva%20AI/Deciva%20AI/server/routes/share.js#L87)
 - **Vulnerable Code**:
   ```javascript
   res.setHeader('Content-Disposition', `attachment; filename="${doc.original_name}"`);
@@ -345,7 +345,7 @@
 
 ### SEC-19 [MEDIUM] Missing Canonical Path Traversal Boundary Assertion on Uploaded Files
 - **Framework**: `file-path-traversal` (Path Traversal / Arbitrary File Access)
-- **Location**: [`server/routes/documents.js:189, 214`](file:///c:/Users/DELL/Downloads/Docu-Gaurd%20AI/Docu-Gaurd%20AI/server/routes/documents.js#L189) & [`server/routes/share.js:79`](file:///c:/Users/DELL/Downloads/Docu-Gaurd%20AI/Docu-Gaurd%20AI/server/routes/share.js#L79)
+- **Location**: [`server/routes/documents.js:189, 214`](file:///c:/Users/DELL/Downloads/Deciva%20AI/Deciva%20AI/server/routes/documents.js#L189) & [`server/routes/share.js:79`](file:///c:/Users/DELL/Downloads/Deciva%20AI/Deciva%20AI/server/routes/share.js#L79)
 - **Vulnerable Code**:
   ```javascript
   const filePath = path.join(uploadsDir, doc.filename);
@@ -365,7 +365,7 @@
 
 ### SEC-20 [MEDIUM] Upload Content-Type Trust Without Magic-Byte Verification
 - **Framework**: `file-path-traversal` (Unrestricted File Upload)
-- **Location**: [`server/routes/documents.js:40-44, 132`](file:///c:/Users/DELL/Downloads/Docu-Gaurd%20AI/Docu-Gaurd%20AI/server/routes/documents.js#L40-L44)
+- **Location**: [`server/routes/documents.js:40-44, 132`](file:///c:/Users/DELL/Downloads/Deciva%20AI/Deciva%20AI/server/routes/documents.js#L40-L44)
 - **Drawback & Threat Scenario**:
   The upload pipeline inspects `req.file.mimetype` and `path.extname(originalName)`. A client can spoof these headers to upload an executable, SVG with embedded script, or malicious archive under a `.pdf` or `.docx` extension.
 - **Defensive Remediation**:
@@ -377,7 +377,7 @@
 
 ### SEC-21 [CRITICAL] Insecure TLS Configuration (`rejectUnauthorized: false`) in PostgreSQL Pool
 - **Framework**: `database-security` (Data in Transit / Man-in-the-Middle)
-- **Location**: [`server/db.js:22`](file:///c:/Users/DELL/Downloads/Docu-Gaurd%20AI/Docu-Gaurd%20AI/server/db.js#L22)
+- **Location**: [`server/db.js:22`](file:///c:/Users/DELL/Downloads/Deciva%20AI/Deciva%20AI/server/db.js#L22)
 - **Vulnerable Code**:
   ```javascript
   const pool = new Pool({
@@ -401,7 +401,7 @@
 
 ### SEC-22 [CRITICAL] Plaintext Storage of TOTP Multi-Factor Authentication Secrets
 - **Framework**: `database-security` (Data at Rest / Credential Protection)
-- **Location**: [`server/db.js:49`](file:///c:/Users/DELL/Downloads/Docu-Gaurd%20AI/Docu-Gaurd%20AI/server/db.js#L49) & [`server/routes/auth.js:178`](file:///c:/Users/DELL/Downloads/Docu-Gaurd%20AI/Docu-Gaurd%20AI/server/routes/auth.js#L178)
+- **Location**: [`server/db.js:49`](file:///c:/Users/DELL/Downloads/Deciva%20AI/Deciva%20AI/server/db.js#L49) & [`server/routes/auth.js:178`](file:///c:/Users/DELL/Downloads/Deciva%20AI/Deciva%20AI/server/routes/auth.js#L178)
 - **Vulnerable Code**:
   ```javascript
   await db.query('UPDATE users SET totp_secret = $1 WHERE id = $2', [secret, user.id]);
@@ -419,7 +419,7 @@
 
 ### SEC-23 [MEDIUM] Lack of Database Query Error Redaction
 - **Framework**: `database-security` (Error Handling / Information Disclosure)
-- **Location**: [`server/db.js:30-32`](file:///c:/Users/DELL/Downloads/Docu-Gaurd%20AI/Docu-Gaurd%20AI/server/db.js#L30-L32) & route error handlers
+- **Location**: [`server/db.js:30-32`](file:///c:/Users/DELL/Downloads/Deciva%20AI/Deciva%20AI/server/db.js#L30-L32) & route error handlers
 - **Drawback & Threat Scenario**:
   When a database query fails, raw PostgreSQL error messages (which may contain column names, table schemas, or query fragments) are printed to logs and occasionally surfaced in 500 error responses during development, aiding attacker reconnaissance.
 - **Defensive Remediation**:
@@ -429,7 +429,7 @@
 
 ### SEC-24 [LOW] Unrestricted Database Connection Pool Size on Serverless Deployments
 - **Framework**: `database-security` (Availability / Resource Exhaustion)
-- **Location**: [`server/db.js:23`](file:///c:/Users/DELL/Downloads/Docu-Gaurd%20AI/Docu-Gaurd%20AI/server/db.js#L23)
+- **Location**: [`server/db.js:23`](file:///c:/Users/DELL/Downloads/Deciva%20AI/Deciva%20AI/server/db.js#L23)
 - **Vulnerable Code**:
   ```javascript
   max: 30

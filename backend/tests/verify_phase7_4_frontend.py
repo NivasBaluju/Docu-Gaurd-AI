@@ -398,7 +398,7 @@ def run_tests():
     print("\n[TEST 20] Verifying Production Frontend Build (npm run build)...")
     build_cmd = subprocess.run(
         ["npm", "run", "build"],
-        cwd="c:\\Users\\DELL\\Downloads\\Docu-Gaurd AI\\Docu-Gaurd AI",
+        cwd="c:\\Users\\DELL\\Downloads\\Deciva\\Deciva",
         capture_output=True,
         text=True,
         shell=True

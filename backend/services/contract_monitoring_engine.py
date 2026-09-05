@@ -1,5 +1,5 @@
 """
-DocuGuard AI — Continuous Contract Monitoring & Lifecycle Engine (Phase 11)
+Deciva — Continuous Contract Monitoring & Lifecycle Engine (Phase 11)
 ---------------------------------------------------------------------------
 Deterministic, evidence-grounded portfolio monitoring, change detection,
 risk delta tracking, and contract lifecycle state evaluation.

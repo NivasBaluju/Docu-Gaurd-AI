@@ -1,5 +1,5 @@
 /**
- * DocuGuard AI — Enterprise Integrations REST API
+ * Deciva — Enterprise Integrations REST API
  * ---------------------------------------------------------------------------
  * Provides endpoints for integration lifecycle management, connection diagnostics,
  * synchronization runs, outbox events, object mappings, and secure webhook ingestion.

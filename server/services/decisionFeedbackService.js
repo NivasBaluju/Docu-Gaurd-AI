@@ -1,5 +1,5 @@
 /**
- * DocuGuard AI — Human Decision Feedback Telemetry Service
+ * Deciva — Human Decision Feedback Telemetry Service
  * Post-Phase-15 Commercial Hardening
  *
  * Captures human vs AI decision disagreement telemetry for analytical governance

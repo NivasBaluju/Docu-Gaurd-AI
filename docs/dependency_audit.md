@@ -1,4 +1,4 @@
-# DocuGuard AI — Dependency & Supply Chain Audit
+# Deciva — Dependency & Supply Chain Audit
 
 ---
 

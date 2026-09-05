@@ -2,7 +2,7 @@
 """
 verify_phase8_1_governed_operations.py
 Phase 8.1 Verification Suite: Governed Operations & Approval Control
-DocuGuard AI
+Deciva
 
 45 tests covering:
   - Schema integrity: approval columns and indexes on portfolio_operation_batches

@@ -24,7 +24,7 @@ def format_grounded_prompt(question: str, sources: List[Dict[str, Any]]) -> str:
 
     context_str = "\n".join(context_blocks)
 
-    return f"""You are DocuGuard AI, an institutional contract document assistant.
+    return f"""You are Deciva, an institutional contract document assistant.
 Answer ONLY using the provided document context.
 
 Strict Rules:

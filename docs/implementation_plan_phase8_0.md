@@ -2,7 +2,7 @@
 
 ## Background & Architectural Context
 
-Phase 8.0 is a major architectural transition. All previous phases (7.1–7.9) were strictly **read-only observers**. Phase 8.0 introduces the first **write operations originating from the Portfolio layer**, turning DocuGuard AI from an observer into a controlled operator.
+Phase 8.0 is a major architectural transition. All previous phases (7.1–7.9) were strictly **read-only observers**. Phase 8.0 introduces the first **write operations originating from the Portfolio layer**, turning Deciva from an observer into a controlled operator.
 
 ### Existing Infrastructure Inspected
 
@@ -10,11 +10,11 @@ Before planning, the following files were inspected:
 
 | File | Key Finding |
 |---|---|
-| [`server/services/actionWorkflowService.js`](file:///c:/Users/DELL/Downloads/Docu-Gaurd%20AI/Docu-Gaurd%20AI/server/services/actionWorkflowService.js) | Contains **exact transition engine, authorization pattern, and audit emission** to reuse |
-| [`server/db.js`](file:///c:/Users/DELL/Downloads/Docu-Gaurd%20AI/Docu-Gaurd%20AI/server/db.js) | Full schema: `contract_actions`, `contract_action_decisions`, `contract_action_activity` |
-| [`server/routes/contractActions.js`](file:///c:/Users/DELL/Downloads/Docu-Gaurd%20AI/Docu-Gaurd%20AI/server/routes/contractActions.js) | `authorizeDocument()` and `authorizeAction()` helpers; per-action auth pattern |
-| [`server/middleware/auth.js`](file:///c:/Users/DELL/Downloads/Docu-Gaurd%20AI/Docu-Gaurd%20AI/server/middleware/auth.js) | `requireAuth` → JWT verify → session check → zero-trust score → `req.user` |
-| [`server/routes/portfolioAnalytics.js`](file:///c:/Users/DELL/Downloads/Docu-Gaurd%20AI/Docu-Gaurd%20AI/server/routes/portfolioAnalytics.js) | Existing portfolio GET-only endpoints; operations route goes here |
+| [`server/services/actionWorkflowService.js`](file:///c:/Users/DELL/Downloads/Deciva%20AI/Deciva%20AI/server/services/actionWorkflowService.js) | Contains **exact transition engine, authorization pattern, and audit emission** to reuse |
+| [`server/db.js`](file:///c:/Users/DELL/Downloads/Deciva%20AI/Deciva%20AI/server/db.js) | Full schema: `contract_actions`, `contract_action_decisions`, `contract_action_activity` |
+| [`server/routes/contractActions.js`](file:///c:/Users/DELL/Downloads/Deciva%20AI/Deciva%20AI/server/routes/contractActions.js) | `authorizeDocument()` and `authorizeAction()` helpers; per-action auth pattern |
+| [`server/middleware/auth.js`](file:///c:/Users/DELL/Downloads/Deciva%20AI/Deciva%20AI/server/middleware/auth.js) | `requireAuth` → JWT verify → session check → zero-trust score → `req.user` |
+| [`server/routes/portfolioAnalytics.js`](file:///c:/Users/DELL/Downloads/Deciva%20AI/Deciva%20AI/server/routes/portfolioAnalytics.js) | Existing portfolio GET-only endpoints; operations route goes here |
 
 ---
 
@@ -283,7 +283,7 @@ Returns paginated list of past batch operations for the authenticated user.
 ---
 
 ### New Schema Migration
-#### [MODIFY] [`server/db.js`](file:///c:/Users/DELL/Downloads/Docu-Gaurd%20AI/Docu-Gaurd%20AI/server/db.js)
+#### [MODIFY] [`server/db.js`](file:///c:/Users/DELL/Downloads/Deciva%20AI/Deciva%20AI/server/db.js)
 - Add `CREATE TABLE IF NOT EXISTS portfolio_operation_batches` and its indexes inside `initDb()`.
 
 ---
@@ -321,7 +321,7 @@ Returns paginated list of past batch operations for the authenticated user.
 ---
 
 ### Mount Route
-#### [MODIFY] [`server/index.js`](file:///c:/Users/DELL/Downloads/Docu-Gaurd%20AI/Docu-Gaurd%20AI/server/index.js)
+#### [MODIFY] [`server/index.js`](file:///c:/Users/DELL/Downloads/Deciva%20AI/Deciva%20AI/server/index.js)
 - Mount `portfolioOperations` router at `/api/portfolio/operations`.
 
 ---

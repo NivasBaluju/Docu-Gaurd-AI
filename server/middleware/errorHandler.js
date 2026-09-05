@@ -1,7 +1,7 @@
 const { v4: uuidv4 } = require('uuid');
 
 /**
- * Standardized Production Error Handler for DocuGuard AI.
+ * Standardized Production Error Handler for Deciva.
  * Ensures consistent response envelopes: { ok: false, error: message, code, requestId }
  * Suppresses internal stack traces and raw database errors in production.
  */

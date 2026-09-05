@@ -1,5 +1,5 @@
 /**
- * DocuGuard AI — Enterprise Credential Vault Service
+ * Deciva — Enterprise Credential Vault Service
  * ---------------------------------------------------------------------------
  * Provides zero-plaintext cryptographic secret storage using AES-256-GCM.
  * Protects API tokens, webhook signing secrets, and OAuth credentials.

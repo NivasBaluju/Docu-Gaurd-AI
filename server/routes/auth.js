@@ -187,7 +187,7 @@ router.post('/mfa/totp/setup', async (req, res) => {
     const secret = authenticator.generateSecret();
     const encryptedSecret = encryptSecret(secret);
     await db.query('UPDATE users SET totp_secret = $1 WHERE id = $2', [encryptedSecret, user.id]);
-    const otpauth = authenticator.keyuri(user.email, 'Docu-Gaurd AI', secret);
+    const otpauth = authenticator.keyuri(user.email, 'Deciva', secret);
     const qrDataUrl = await QRCode.toDataURL(otpauth);
     res.json({ secret, qrDataUrl });
   } catch (err) {

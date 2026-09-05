@@ -43,7 +43,7 @@ def create_app():
     if not raw_internal_key:
         if env == "production":
             raise RuntimeError("CRITICAL SECURITY VIOLATION: INTERNAL_SERVICE_KEY environment variable must be set in production.")
-        internal_key = "docuguard-internal-service-secret-key-default"
+        internal_key = "deciva-internal-service-secret-key-default"
     else:
         internal_key = raw_internal_key
 
@@ -92,7 +92,7 @@ def create_app():
     def health_live():
         return jsonify({
             "status": "live",
-            "service": "DocuGuard Flask Backend",
+            "service": "Deciva Flask Backend",
             "correlationId": getattr(g, 'correlation_id', None)
         }), 200
 
@@ -102,7 +102,7 @@ def create_app():
         db_ok, db_msg = test_connection()
         return jsonify({
             "status": "online" if db_ok else "degraded",
-            "service": "DocuGuard Flask Backend",
+            "service": "Deciva Flask Backend",
             "correlationId": getattr(g, 'correlation_id', None),
             "postgres": {
                 "connected": db_ok,
@@ -113,7 +113,7 @@ def create_app():
     @app.route('/', methods=['GET'])
     def index():
         return jsonify({
-            "message": "DocuGuard AI Flask Backend API",
+            "message": "Deciva Flask Backend API",
             "endpoints": [
                 "/api/health",
                 "/api/documents"
@@ -127,6 +127,6 @@ app = create_app()
 
 if __name__ == '__main__':
     port = int(os.getenv("FLASK_PORT", 5001))
-    print(f">> DocuGuard Flask Server starting on http://127.0.0.1:{port}")
+    print(f">> Deciva Flask Server starting on http://127.0.0.1:{port}")
     app.run(host='0.0.0.0', port=port, debug=False, threaded=True)
 

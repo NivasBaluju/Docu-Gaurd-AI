@@ -1,8 +1,8 @@
-# DocuGuard AI — Enterprise Integrations & Secure System Connectors
+# Deciva — Enterprise Integrations & Secure System Connectors
 
 ## 1. Overview & Architecture
 
-Phase 14 equips DocuGuard AI with an enterprise-grade interoperability boundary, connecting internal contract governance to external document repositories, CRM/ERP systems, and webhook endpoints.
+Phase 14 equips Deciva with an enterprise-grade interoperability boundary, connecting internal contract governance to external document repositories, CRM/ERP systems, and webhook endpoints.
 
 External systems connect via a **Canonical Normalization Boundary**:
 
@@ -25,7 +25,7 @@ External systems connect via a **Canonical Normalization Boundary**:
                               │
                               ▼
                  ┌─────────────────────────┐
-                 │     DocuGuard Core      │
+                 │     Deciva Core      │
                  │                         │
                  │ Evidence                │
                  │ Decision Intelligence   │

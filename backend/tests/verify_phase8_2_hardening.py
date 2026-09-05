@@ -2,7 +2,7 @@
 """
 verify_phase8_2_hardening.py
 Phase 8.2 Enterprise Governance Closure & Production Hardening Verification Suite
-DocuGuard AI
+Deciva
 
 60+ Comprehensive Tests across 8 Hardening Sections:
   1. Security Boundary: Document Listing Scoping & Cross-Tenant IDOR Prevention
@@ -73,7 +73,7 @@ def get_db():
 
 NODE_BASE_URL = os.environ.get("NODE_API_URL", "http://localhost:5000")
 FLASK_BASE_URL = os.environ.get("FLASK_API_URL", "http://127.0.0.1:5001")
-INTERNAL_SERVICE_KEY = os.environ.get("INTERNAL_SERVICE_KEY", "docuguard-internal-microservice-secret-key-soc2-vault")
+INTERNAL_SERVICE_KEY = os.environ.get("INTERNAL_SERVICE_KEY", "deciva-internal-microservice-secret-key-soc2-vault")
 
 total_tests = 0
 passed_tests = 0
@@ -183,7 +183,7 @@ def create_action(conn, doc_id, title="Test Action", category="COMPLIANCE", prio
 
 def run_all_tests():
     print("================================================================================")
-    print("DOCUGUARD AI - PHASE 8.2 ENTERPRISE HARDENING & GOVERNANCE VERIFICATION")
+    print("DECIVA - PHASE 8.2 ENTERPRISE HARDENING & GOVERNANCE VERIFICATION")
     print("================================================================================")
 
     wait_for_server()

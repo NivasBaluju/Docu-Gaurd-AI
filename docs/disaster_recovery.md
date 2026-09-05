@@ -1,4 +1,4 @@
-# DocuGuard AI — Disaster Recovery & Business Continuity Plan
+# Deciva — Disaster Recovery & Business Continuity Plan
 
 ---
 
@@ -30,7 +30,7 @@ Prior to any restore operation, `verifyBackup(backupId)` recomputes the SHA-256 
 
 ## 3. Isolated Disaster Recovery Testing
 
-To ensure backups are genuinely recoverable, DocuGuard AI mandates routine restore testing into isolated target environments without touching production tables.
+To ensure backups are genuinely recoverable, Deciva mandates routine restore testing into isolated target environments without touching production tables.
 
 ### Execution:
 ```bash

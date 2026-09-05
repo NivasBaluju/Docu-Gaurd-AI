@@ -120,7 +120,7 @@ async function createBackup({ tenantId = null, type = 'FULL_DATABASE', createdBy
     if (externalChecksum !== checksum) {
       throw new EnterpriseError(ERROR_CODES.RECOVERY_ERROR, 'External backup replication checksum mismatch');
     }
-    const externalDestinationUri = process.env.BACKUP_EXTERNAL_DESTINATION_URI || `s3://docuguard-enterprise-vault-dr/${externalFileName}`;
+    const externalDestinationUri = process.env.BACKUP_EXTERNAL_DESTINATION_URI || `s3://deciva-enterprise-vault-dr/${externalFileName}`;
 
     const metadata = {
       description,

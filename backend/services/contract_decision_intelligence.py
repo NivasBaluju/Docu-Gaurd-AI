@@ -1,5 +1,5 @@
 """
-DocuGuard AI — Unified Contract Decision Intelligence Service (Phase 10)
+Deciva — Unified Contract Decision Intelligence Service (Phase 10)
 -------------------------------------------------------------------------
 Pure deterministic decision intelligence engine.
 Implements the core decision lifecycle:

@@ -1,5 +1,5 @@
 /**
- * DocuGuard AI — Enterprise Integration Security Service
+ * Deciva — Enterprise Integration Security Service
  * ---------------------------------------------------------------------------
  * Enforces Zero-Trust boundaries, HMAC-SHA256 webhook signature validation,
  * timestamp replay protection, tenant scoping, and non-destructive payload validation.

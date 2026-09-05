@@ -25,7 +25,7 @@ export function Accessibility() {
               1. Color Contrast &amp; Palette Discipline
             </h2>
             <p className="measure-body">
-              DocuGuard AI is built upon an 8-color high-contrast monochrome palette. The primary text pair (Ink #0A0A0A on Paper #FAF9F6) achieves an 18.2:1 contrast ratio, surpassing WCAG AAA requirements. Color is never used as the sole conveyor of information or system state.
+              Deciva is built upon an 8-color high-contrast monochrome palette. The primary text pair (Ink #0A0A0A on Paper #FAF9F6) achieves an 18.2:1 contrast ratio, surpassing WCAG AAA requirements. Color is never used as the sole conveyor of information or system state.
             </p>
           </section>
 

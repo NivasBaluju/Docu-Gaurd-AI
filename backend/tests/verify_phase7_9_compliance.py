@@ -2,7 +2,7 @@
 """
 verify_phase7_9_compliance.py
 Phase 7.9 Verification Suite: Enterprise Compliance Audit & Integrity-Verifiable Evidence Export
-DocuGuard AI
+Deciva
 """
 
 import sys

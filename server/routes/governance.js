@@ -1,5 +1,5 @@
 /**
- * DocuGuard AI — Governance & Compliance Routes (Phase 13)
+ * Deciva — Governance & Compliance Routes (Phase 13)
  * ---------------------------------------------------------------------------
  * Exposes enterprise REST APIs for policy management, versioning,
  * control configuration, compliance evaluations, dry-runs, and exception governance.

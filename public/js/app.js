@@ -1,5 +1,5 @@
 // =============================================================================
-// Docu-Gaurd AI — Frontend Application
+// Deciva — Frontend Application
 // Premium White Aesthetic · Playfair Display + Inter
 // =============================================================================
 
@@ -304,7 +304,7 @@ Router.register('#/register', async () => {
             <div class="avc-icon">
               <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5" width="22" height="22"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
             </div>
-            <span class="avc-brand">Docu-Gaurd AI</span>
+            <span class="avc-brand">Deciva</span>
           </div>
           <div class="auth-visual-quote">
             <div class="auth-visual-mark">"</div>
@@ -367,7 +367,7 @@ Router.register('#/login', async () => {
             <div class="avc-icon">
               <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5" width="22" height="22"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
             </div>
-            <span class="avc-brand">Docu-Gaurd AI</span>
+            <span class="avc-brand">Deciva</span>
           </div>
           <div class="auth-visual-quote">
             <div class="auth-visual-mark">"</div>
@@ -435,7 +435,7 @@ Router.register('#/mfa', async () => {
             <div class="avc-icon">
               <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5" width="22" height="22"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
             </div>
-            <span class="avc-brand">Docu-Gaurd AI</span>
+            <span class="avc-brand">Deciva</span>
           </div>
           <div class="auth-visual-quote">
             <div class="auth-visual-mark">"</div>

@@ -1,7 +1,7 @@
 # Phase 8.0: Controlled Portfolio Operations & Bulk Triage Engine — Walkthrough
 
 ## Executive Summary
-Phase 8.0 transitions **DocuGuard AI** from observational portfolio oversight (**See → Understand → Export**) into governed, atomic execution (**See → Validate → Preview → Execute → Audit**).
+Phase 8.0 transitions **Deciva** from observational portfolio oversight (**See → Understand → Export**) into governed, atomic execution (**See → Validate → Preview → Execute → Audit**).
 
 It introduces a zero-data-loss bulk triage architecture where **no bulk operation mutates data until authorization, validation, and execution rules have all passed**. The execution pipeline enforces strict preview binding, canonical SHA-256 preview hashing, idempotency enforcement, and auditable execution receipts.
 
@@ -38,7 +38,7 @@ It introduces a zero-data-loss bulk triage architecture where **no bulk operatio
 - **`BULK_DEADLINE`**: Batch-update or clear due dates across selected active actions.
 - **`BULK_TRANSITION`**: Governed status transitions (e.g., `IN_REVIEW -> RESOLVED`, `OPEN -> DISMISSED`) using `isValidTransition()` as single source of truth.
 
-### 2. Database Schema Migrations ([`server/db.js`](file:///c:/Users/DELL/Downloads/Docu-Gaurd%20AI/Docu-Gaurd%20AI/server/db.js))
+### 2. Database Schema Migrations ([`server/db.js`](file:///c:/Users/DELL/Downloads/Deciva%20AI/Deciva%20AI/server/db.js))
 - Added `portfolio_operation_batches` table with:
   - `id`, `user_id`, `operation_type`, `status`, `mode`
   - `requested_count`, `eligible_count`, `executed_count`, `blocked_count`
@@ -48,12 +48,12 @@ It introduces a zero-data-loss bulk triage architecture where **no bulk operatio
 - Indexes on `(user_id, status)`, `(user_id, created_at DESC)`, and `(preview_hash)`.
 - Unique constraint on `(user_id, idempotency_key)`.
 
-### 3. Service Layer ([`server/services/bulkOperationsService.js`](file:///c:/Users/DELL/Downloads/Docu-Gaurd%20AI/Docu-Gaurd%20AI/server/services/bulkOperationsService.js))
+### 3. Service Layer ([`server/services/bulkOperationsService.js`](file:///c:/Users/DELL/Downloads/Deciva%20AI/Deciva%20AI/server/services/bulkOperationsService.js))
 - `previewBulkOperation(user, { operation, mode, actionIds, payload })`: Input validation, per-action eligibility check, preview record creation, canonical hashing.
 - `executeBulkOperation(user, previewId, idempotencyKey)`: Row-level locking (`SELECT ... FOR UPDATE`), transaction isolation, per-action mutation and audit logging.
 - `getBatchHistory(user, { page, limit })`: User-scoped paginated history.
 
-### 4. REST Endpoints ([`server/routes/portfolioOperations.js`](file:///c:/Users/DELL/Downloads/Docu-Gaurd%20AI/Docu-Gaurd%20AI/server/routes/portfolioOperations.js))
+### 4. REST Endpoints ([`server/routes/portfolioOperations.js`](file:///c:/Users/DELL/Downloads/Deciva%20AI/Deciva%20AI/server/routes/portfolioOperations.js))
 - `POST /api/portfolio/operations/preview` — Generates preview with eligible/blocked classifications.
 - `POST /api/portfolio/operations/:previewId/execute` — Atomically executes pre-validated batch.
 - `GET /api/portfolio/operations/history` — Retrieves past batch operations for user.
@@ -68,7 +68,7 @@ It introduces a zero-data-loss bulk triage architecture where **no bulk operatio
 
 ## Verification & Test Results
 
-### 1. Dedicated Phase 8.0 Verification Suite ([`backend/tests/verify_phase8_0_bulk_operations.py`](file:///c:/Users/DELL/Downloads/Docu-Gaurd%20AI/Docu-Gaurd%20AI/backend/tests/verify_phase8_0_bulk_operations.py))
+### 1. Dedicated Phase 8.0 Verification Suite ([`backend/tests/verify_phase8_0_bulk_operations.py`](file:///c:/Users/DELL/Downloads/Deciva%20AI/Deciva%20AI/backend/tests/verify_phase8_0_bulk_operations.py))
 - **50 / 50 Tests Passed (100%)**
 
 | Section | Description | Tests | Result |

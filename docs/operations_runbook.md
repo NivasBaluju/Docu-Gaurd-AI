@@ -1,4 +1,4 @@
-# DocuGuard AI — Enterprise Operations Runbook
+# Deciva — Enterprise Operations Runbook
 
 ---
 
@@ -16,7 +16,7 @@ Operators must monitor the three standard health probes:
 
 ## 2. Background Job Management
 
-Tracked in [`server/services/jobExecutionService.js`](file:///c:/Users/DELL/Downloads/Docu-Gaurd%20AI/Docu-Gaurd%20AI/server/services/jobExecutionService.js):
+Tracked in [`server/services/jobExecutionService.js`](file:///c:/Users/DELL/Downloads/Deciva%20AI/Deciva%20AI/server/services/jobExecutionService.js):
 * **Status Inspection:** `GET /api/admin/jobs?status=FAILED`
 * **Retrying Failed Jobs:** `POST /api/admin/jobs/:id/retry`
 * **Idempotency Guarantee:** Jobs enforce `idempotency_key`. Concurrent invocations will safely skip rather than duplicate records.

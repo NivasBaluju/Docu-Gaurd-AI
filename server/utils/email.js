@@ -6,7 +6,7 @@ function getSmtpConfig() {
   const port = Number(process.env.SMTP_PORT) || 465;
   const user = process.env.SMTP_USER || process.env.EMAIL_USER;
   const pass = process.env.SMTP_PASS || process.env.EMAIL_PASS;
-  const from = process.env.SMTP_FROM || `"Docu-Gaurd AI" <${user || 'no-reply@docu-gaurd.ai'}>`;
+  const from = process.env.SMTP_FROM || `"Deciva" <${user || 'no-reply@deciva.ai'}>`;
 
   if (!user || !pass) {
     return null;
@@ -44,7 +44,7 @@ async function sendOtpEmail(toEmail, code) {
   const html = `
     <div style="font-family: Arial, sans-serif; background-color: #0b0f19; color: #e2e8f0; padding: 30px; border-radius: 12px; max-width: 500px; margin: 0 auto; border: 1px solid #1e293b;">
       <div style="text-align: center; margin-bottom: 20px;">
-        <h2 style="color: #38bdf8; margin: 0; font-size: 24px;">Docu-Gaurd AI</h2>
+        <h2 style="color: #38bdf8; margin: 0; font-size: 24px;">Deciva</h2>
         <p style="color: #94a3b8; font-size: 13px; margin-top: 4px;">Enterprise AI Legal Copilot — SOC Security</p>
       </div>
       <div style="background-color: #1e293b; padding: 20px; border-radius: 8px; text-align: center;">
@@ -62,8 +62,8 @@ async function sendOtpEmail(toEmail, code) {
     await mailer.transporter.sendMail({
       from: mailer.from,
       to: toEmail,
-      subject: `[Docu-Gaurd AI] Verification Code: ${code}`,
-      text: `Your Docu-Gaurd AI verification code is: ${code}. It expires in 10 minutes.`,
+      subject: `[Deciva] Verification Code: ${code}`,
+      text: `Your Deciva verification code is: ${code}. It expires in 10 minutes.`,
       html
     });
     return { devMode: false, success: true };
@@ -81,8 +81,8 @@ async function sendWelcomeEmail(toEmail, name) {
 
   const html = `
     <div style="font-family: Arial, sans-serif; background-color: #0b0f19; color: #e2e8f0; padding: 30px; border-radius: 12px; max-width: 550px; margin: 0 auto; border: 1px solid #1e293b;">
-      <h2 style="color: #38bdf8; margin-top: 0;">Welcome to Docu-Gaurd AI, ${name}!</h2>
-      <p style="color: #cbd5e1; line-height: 1.6;">Your enterprise account is ready. Docu-Gaurd AI provides SOC-grade security with AES-256 encryption, zero-trust session scoring, and automated AI legal contract analysis.</p>
+      <h2 style="color: #38bdf8; margin-top: 0;">Welcome to Deciva, ${name}!</h2>
+      <p style="color: #cbd5e1; line-height: 1.6;">Your enterprise account is ready. Deciva provides SOC-grade security with AES-256 encryption, zero-trust session scoring, and automated AI legal contract analysis.</p>
       <div style="background-color: #1e293b; padding: 15px; border-radius: 8px; margin: 20px 0;">
         <h4 style="color: #38bdf8; margin-top: 0;">Getting Started:</h4>
         <ul style="color: #94a3b8; padding-left: 20px; margin: 0;">
@@ -91,7 +91,7 @@ async function sendWelcomeEmail(toEmail, name) {
           <li>Generate custom legal contracts with cryptographic RSA signatures.</li>
         </ul>
       </div>
-      <p style="font-size: 12px; color: #64748b; text-align: center; margin-top: 25px;">Docu-Gaurd AI Security Operations</p>
+      <p style="font-size: 12px; color: #64748b; text-align: center; margin-top: 25px;">Deciva Security Operations</p>
     </div>
   `;
 
@@ -99,8 +99,8 @@ async function sendWelcomeEmail(toEmail, name) {
     await mailer.transporter.sendMail({
       from: mailer.from,
       to: toEmail,
-      subject: 'Welcome to Docu-Gaurd AI',
-      text: `Welcome to Docu-Gaurd AI, ${name}! Your account is initialized.`,
+      subject: 'Welcome to Deciva',
+      text: `Welcome to Deciva, ${name}! Your account is initialized.`,
       html
     });
   } catch (err) {
@@ -115,8 +115,8 @@ async function sendSecurityAlertEmail(toEmail, alertType, details) {
 
   const html = `
     <div style="font-family: Arial, sans-serif; background-color: #0b0f19; color: #e2e8f0; padding: 30px; border-radius: 12px; max-width: 550px; margin: 0 auto; border: 1px solid #ef4444;">
-      <h2 style="color: #ef4444; margin-top: 0;">⚠️ Docu-Gaurd Security Alert</h2>
-      <p style="color: #cbd5e1;">A security event was detected on your Docu-Gaurd AI account:</p>
+      <h2 style="color: #ef4444; margin-top: 0;">⚠️ Deciva Security Alert</h2>
+      <p style="color: #cbd5e1;">A security event was detected on your Deciva account:</p>
       <div style="background-color: #1e293b; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #ef4444;">
         <p style="margin: 0; color: #f87171; font-weight: bold;">Alert: ${alertType}</p>
         <p style="margin: 5px 0 0 0; color: #94a3b8; font-size: 13px;">${details}</p>
@@ -129,7 +129,7 @@ async function sendSecurityAlertEmail(toEmail, alertType, details) {
     await mailer.transporter.sendMail({
       from: mailer.from,
       to: toEmail,
-      subject: `[Security Alert] Docu-Gaurd AI: ${alertType}`,
+      subject: `[Security Alert] Deciva: ${alertType}`,
       text: `Security Alert: ${alertType} - ${details}`,
       html
     });

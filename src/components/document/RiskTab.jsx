@@ -104,7 +104,7 @@ export const RiskTab = ({ doc, refreshTrigger }) => {
             Explainable Risk Attribution
           </div>
           <p className="text-mid small mb-16">
-            DocuGuard decouples confirmed textual hazards from clause omissions to prevent false inflation:
+            Deciva decouples confirmed textual hazards from clause omissions to prevent false inflation:
           </p>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>

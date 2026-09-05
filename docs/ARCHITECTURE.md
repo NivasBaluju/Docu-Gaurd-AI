@@ -1,10 +1,10 @@
-# DocuGuard AI — Enterprise System Architecture Specification
+# Deciva — Enterprise System Architecture Specification
 
 ---
 
 ## 1. Executive Summary & Architectural Hierarchy
 
-DocuGuard AI is a production-grade contract intelligence, governance, and operational resilience platform. Following the successful completion of Phases 10 through 15, the platform operates on a strictly layered, unidirectional pipeline:
+Deciva is a production-grade contract intelligence, governance, and operational resilience platform. Following the successful completion of Phases 10 through 15, the platform operates on a strictly layered, unidirectional pipeline:
 
 ```text
                   ┌─────────────────────────────┐

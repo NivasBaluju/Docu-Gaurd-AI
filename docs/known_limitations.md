@@ -1,4 +1,4 @@
-# DocuGuard AI — Known Limitations Register
+# Deciva — Known Limitations Register
 
 ---
 

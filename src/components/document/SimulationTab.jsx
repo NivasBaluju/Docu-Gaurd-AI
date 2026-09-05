@@ -181,7 +181,7 @@ export const SimulationTab = ({ doc }) => {
               </div>
               <p className="text-mid small mt-8" style={{ lineHeight: '1.6' }}>
                 {activeSimulation.simulationAnalysis?.potentialImpact ||
-                  'The scenario could not be grounded in detected contract provisions. DocuGuard AI strictly prevents ungrounded speculative hallucinations.'}
+                  'The scenario could not be grounded in detected contract provisions. Deciva strictly prevents ungrounded speculative hallucinations.'}
               </p>
             </div>
           ) : (

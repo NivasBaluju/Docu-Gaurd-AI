@@ -1,5 +1,5 @@
 /**
- * DocuGuard AI — Contract Decision Intelligence Service (Phase 10)
+ * Deciva — Contract Decision Intelligence Service (Phase 10)
  * ---------------------------------------------------------------------------
  * Coordinates unified contract decision intelligence between the Node.js API
  * gateway and the Python Flask intelligence microservice.
@@ -24,7 +24,7 @@ const logger = require('../utils/logger');
 const FLASK_HOST = process.env.FLASK_HOST || '127.0.0.1';
 const FLASK_PORT = process.env.FLASK_PORT || 5001;
 const AI_MICROSERVICE_URL = (process.env.AI_MICROSERVICE_URL || `http://${FLASK_HOST}:${FLASK_PORT}`).replace(/\/+$/, '');
-const INTERNAL_KEY = process.env.INTERNAL_SERVICE_KEY || 'docuguard-internal-service-secret-key-default';
+const INTERNAL_KEY = process.env.INTERNAL_SERVICE_KEY || 'deciva-internal-service-secret-key-default';
 
 const DECISION_DISCLAIMER = "This decision intelligence brief is grounded in detected contract evidence and deterministic decision logic. It provides structured guidance and does not constitute formal legal counsel.";
 const CONFLICT_DISCLAIMER = "Potential conflict requiring review — not an absolute legal conclusion.";

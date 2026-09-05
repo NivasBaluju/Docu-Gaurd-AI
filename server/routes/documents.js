@@ -39,7 +39,7 @@ const { recordAiTelemetry } = require('../utils/aiTelemetry');
 const logger = require('../utils/logger');
 
 const AI_MICROSERVICE_URL = (process.env.AI_MICROSERVICE_URL || 'http://127.0.0.1:5001').replace(/\/+$/, '');
-const INTERNAL_SERVICE_KEY = process.env.INTERNAL_SERVICE_KEY || 'docuguard-internal-service-secret-key-default';
+const INTERNAL_SERVICE_KEY = process.env.INTERNAL_SERVICE_KEY || 'deciva-internal-service-secret-key-default';
 
 function getInternalHeaders(reqOrExtra = {}, extraHeaders = {}) {
   let req = null;
@@ -170,7 +170,7 @@ function fallbackGetAnalysis(doc) {
       checklistScore: clauses.checklistScore
     },
     deadlines,
-    executiveSummary: `Contract evaluation executed via DocuGuard zero-trust legal engine. Detected ${clauses.detected.length} core clauses, ${deadlines.length} key milestones, with calculated portfolio risk of ${riskObj.score}/100 (${riskObj.level}).`
+    executiveSummary: `Contract evaluation executed via Deciva zero-trust legal engine. Detected ${clauses.detected.length} core clauses, ${deadlines.length} key milestones, with calculated portfolio risk of ${riskObj.score}/100 (${riskObj.level}).`
   };
 }
 
@@ -708,7 +708,7 @@ router.post('/:id/analyze', requireAuth, aiLimiter, async (req, res) => {
           documentId: req.params.id,
           operationType: 'ANALYSIS',
           provider: 'flask-nlp',
-          model: 'docuguard-analyzer',
+          model: 'deciva-analyzer',
           durationMs: Date.now() - startTime,
           status: 'SUCCESS',
           groundedStatus: 'GROUNDED'
@@ -736,7 +736,7 @@ router.post('/:id/analyze', requireAuth, aiLimiter, async (req, res) => {
       documentId: req.params.id,
       operationType: 'ANALYSIS',
       provider: 'node-rules',
-      model: 'docuguard-rules',
+      model: 'deciva-rules',
       durationMs: Date.now() - startTime,
       status: 'SUCCESS',
       groundedStatus: 'GROUNDED',
@@ -769,7 +769,7 @@ router.post('/:id/chat', requireAuth, aiLimiter, async (req, res) => {
 
     let ragData = null;
     let provider = 'flask-nlp';
-    let model = 'docuguard-rag';
+    let model = 'deciva-rag';
     let fallbackUsed = false;
 
     try {
@@ -782,7 +782,7 @@ router.post('/:id/chat', requireAuth, aiLimiter, async (req, res) => {
       if (flaskRes.ok) {
         ragData = await flaskRes.json();
         provider = ragData.provider || 'flask-nlp';
-        model = ragData.model || 'docuguard-rag';
+        model = ragData.model || 'deciva-rag';
       }
     } catch (proxyErr) {
       console.warn('Document chat microservice proxy notice:', proxyErr.message);
@@ -801,7 +801,7 @@ router.post('/:id/chat', requireAuth, aiLimiter, async (req, res) => {
         fallbackUsed: true
       };
       provider = geminiResult.provider || 'gemini-fallback';
-      model = geminiResult.model || 'docuguard-hybrid';
+      model = geminiResult.model || 'deciva-hybrid';
     }
 
     const durationMs = Date.now() - startTime;
@@ -910,7 +910,7 @@ router.post('/:id/negotiate', requireAuth, aiLimiter, async (req, res) => {
 
     let negData = null;
     let provider = 'flask-nlp';
-    let model = 'docuguard-redliner';
+    let model = 'deciva-redliner';
     let fallbackUsed = false;
 
     try {
@@ -930,7 +930,7 @@ router.post('/:id/negotiate', requireAuth, aiLimiter, async (req, res) => {
     if (!negData) {
       fallbackUsed = true;
       provider = 'node-rules';
-      model = 'docuguard-redliner-fallback';
+      model = 'deciva-redliner-fallback';
       negData = fallbackNegotiate(authCheck.document, clauseId, clauseType, mode);
     }
 
@@ -1128,7 +1128,7 @@ router.post('/:id/simulate', requireAuth, aiLimiter, async (req, res) => {
 
     let simData = null;
     let provider = 'flask-nlp';
-    let model = 'docuguard-simulator';
+    let model = 'deciva-simulator';
     let fallbackUsed = false;
 
     try {
@@ -1148,7 +1148,7 @@ router.post('/:id/simulate', requireAuth, aiLimiter, async (req, res) => {
     if (!simData) {
       fallbackUsed = true;
       provider = 'node-rules';
-      model = 'docuguard-simulator-fallback';
+      model = 'deciva-simulator-fallback';
       simData = fallbackSimulate(authCheck.document, scenario);
     }
 
@@ -1245,7 +1245,7 @@ router.get('/:id/intelligence', requireAuth, async (req, res) => {
 
     let intelData = null;
     let provider = 'flask-nlp';
-    let model = 'docuguard-intelligence';
+    let model = 'deciva-intelligence';
     let fallbackUsed = false;
 
     try {
@@ -1263,7 +1263,7 @@ router.get('/:id/intelligence', requireAuth, async (req, res) => {
     if (!intelData) {
       fallbackUsed = true;
       provider = 'node-rules';
-      model = 'docuguard-intelligence-fallback';
+      model = 'deciva-intelligence-fallback';
       intelData = fallbackGetIntelligence(authCheck.document);
     }
 

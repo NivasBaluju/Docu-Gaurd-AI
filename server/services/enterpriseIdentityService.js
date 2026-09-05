@@ -12,7 +12,7 @@ const { EnterpriseError, ERROR_CODES } = require('../utils/errorTaxonomy');
 const { recordAudit } = require('../utils/audit');
 
 const SUPPORTED_PROTOCOLS = ['OIDC', 'SAML_2.0'];
-const DOCUGUARD_ROLES = ['admin', 'legal_counsel', 'compliance_officer', 'auditor', 'standard_user'];
+const DECIVA_ROLES = ['admin', 'legal_counsel', 'compliance_officer', 'auditor', 'standard_user'];
 
 // In-memory tenant IDP configurations (can be extended with database persistence)
 const IDP_CONFIGS = new Map();
@@ -77,8 +77,8 @@ async function configureTenantIdp({ tenantId, protocol, providerName, config, ro
   // Validate role mappings
   const validatedMappings = {};
   for (const [idpGroup, role] of Object.entries(roleMappings)) {
-    if (!DOCUGUARD_ROLES.includes(role)) {
-      throw new EnterpriseError(ERROR_CODES.VALIDATION_ERROR, `Invalid target DocuGuard role '${role}'. Supported: ${DOCUGUARD_ROLES.join(', ')}`);
+    if (!DECIVA_ROLES.includes(role)) {
+      throw new EnterpriseError(ERROR_CODES.VALIDATION_ERROR, `Invalid target Deciva role '${role}'. Supported: ${DECIVA_ROLES.join(', ')}`);
     }
     validatedMappings[idpGroup] = role;
   }
@@ -116,7 +116,7 @@ async function configureTenantIdp({ tenantId, protocol, providerName, config, ro
 }
 
 /**
- * Maps incoming IdP claims (groups/roles) to authoritative DocuGuard RBAC role.
+ * Maps incoming IdP claims (groups/roles) to authoritative Deciva RBAC role.
  */
 function mapClaimsToRole(tenantId, idpGroups = []) {
   const idp = IDP_CONFIGS.get(tenantId);
@@ -209,7 +209,7 @@ function getTenantIdp(tenantId) {
 
 module.exports = {
   SUPPORTED_PROTOCOLS,
-  DOCUGUARD_ROLES,
+  DECIVA_ROLES,
   validateOidcConfig,
   validateSamlConfig,
   configureTenantIdp,

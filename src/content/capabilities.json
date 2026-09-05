@@ -3,7 +3,7 @@
     "slug": "contract-diligence",
     "name": "Contract Diligence & Examination",
     "indexLine": "Deep structural clause extraction, statutory reference verification, and deviation scoring.",
-    "overview": "DocuGuard AI parses master agreements, indentures, and commercial covenants with structural precision. Rather than summarizing text superficially, it constructs a complete dependency graph of mutual obligations, carve-outs, and statutory liabilities against Delaware Chancery, Uniform Commercial Code, and English Common Law baselines.",
+    "overview": "Deciva parses master agreements, indentures, and commercial covenants with structural precision. Rather than summarizing text superficially, it constructs a complete dependency graph of mutual obligations, carve-outs, and statutory liabilities against Delaware Chancery, Uniform Commercial Code, and English Common Law baselines.",
     "services": [
       "Automated clause segmentation & classification",
       "Statutory precedent & jurisdictional cross-referencing",
@@ -16,7 +16,7 @@
     "slug": "risk-radar",
     "name": "Autonomous Risk Radar",
     "indexLine": "Real-time exposure modeling against corporate policy baselines with declassification reveals.",
-    "overview": "Uncapped indemnities, unilateral termination rights, and asymmetric liability clauses expose enterprises to catastrophic balance sheet risk. DocuGuard's Risk Radar continuously scans contract language for non-standard commitments, declassifying hidden exposures with mathematical severity scoring before execution.",
+    "overview": "Uncapped indemnities, unilateral termination rights, and asymmetric liability clauses expose enterprises to catastrophic balance sheet risk. Deciva's Risk Radar continuously scans contract language for non-standard commitments, declassifying hidden exposures with mathematical severity scoring before execution.",
     "services": [
       "Uncapped liability & consequential damage detection",
       "Unilateral termination & notice window auditing",
@@ -42,7 +42,7 @@
     "slug": "portfolio-governance",
     "name": "Portfolio Health & Governance",
     "indexLine": "Continuous multi-contract surveillance with deterministic policy rollback and batch execution.",
-    "overview": "Enterprise risk lives across thousands of distributed agreements. DocuGuard computes an explainable 88.4 Portfolio Health Index, continuously monitoring SLA deadlines, renewal windows, and governing bulk operations through a deterministic policy engine with atomic zero-mutation rollback.",
+    "overview": "Enterprise risk lives across thousands of distributed agreements. Deciva computes an explainable 88.4 Portfolio Health Index, continuously monitoring SLA deadlines, renewal windows, and governing bulk operations through a deterministic policy engine with atomic zero-mutation rollback.",
     "services": [
       "Explainable portfolio health scoring",
       "Deterministic bulk operation governance (Phase 8.1)",
@@ -55,7 +55,7 @@
     "slug": "compliance-audit",
     "name": "Cryptographic Audit Ledger",
     "indexLine": "Hardware-grade non-repudiation with SHA-256 block verification and RFC-4180 export.",
-    "overview": "Every contract mutation, AI suggestion, and administrative approval is permanently anchored in a tamper-evident cryptographic ledger. DocuGuard enables stateless third-party verification of evidence manifests, providing unalterable mathematical proof of compliance for regulators and courts.",
+    "overview": "Every contract mutation, AI suggestion, and administrative approval is permanently anchored in a tamper-evident cryptographic ledger. Deciva enables stateless third-party verification of evidence manifests, providing unalterable mathematical proof of compliance for regulators and courts.",
     "services": [
       "Append-only SHA-256 block ledger",
       "Stateless evidence verification endpoint",
@@ -68,7 +68,7 @@
     "slug": "regulatory-crosscheck",
     "name": "Jurisdictional Regulatory Cross-Check",
     "indexLine": "Statutory compliance cross-checks across GDPR, SOC 2, and cross-border antitrust guidelines.",
-    "overview": "Global commerce crosses conflicting regulatory regimes. DocuGuard continuously cross-references contract provisions against active European Union GDPR Article 28 data processing mandates, FTC/DOJ merger guidelines, and statutory cure periods to eliminate compliance exposure before signing.",
+    "overview": "Global commerce crosses conflicting regulatory regimes. Deciva continuously cross-references contract provisions against active European Union GDPR Article 28 data processing mandates, FTC/DOJ merger guidelines, and statutory cure periods to eliminate compliance exposure before signing.",
     "services": [
       "EU GDPR Article 28 data processing auditing",
       "US FTC/DOJ merger guidelines compliance",

@@ -392,7 +392,7 @@ SAFE_ANALYSIS_ERROR_MESSAGE = "Document analysis could not be completed. Please 
 
 def analyze_document(doc_id: str, document_text: str, persist_to_db: bool = True) -> Dict[str, Any]:
     """
-    Central AI Analysis Orchestrator for DocuGuard AI.
+    Central AI Analysis Orchestrator for Deciva.
     Executes:
       1. Set status to PROCESSING
       2. Segmentation

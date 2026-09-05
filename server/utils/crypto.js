@@ -3,13 +3,13 @@ const fs = require('fs');
 const path = require('path');
 
 // --- AES-256-GCM master key management -------------------------------------
-const DEFAULT_KEY_FALLBACK = 'docuguard-secret-encryption-key-32-bytes!!';
+const DEFAULT_KEY_FALLBACK = 'deciva-secret-encryption-key-32-bytes!!';
 let rawKey = process.env.ENCRYPTION_KEY || process.env.AES_MASTER_KEY;
 
 if (!rawKey || rawKey === DEFAULT_KEY_FALLBACK) {
   if (process.env.JWT_SECRET && process.env.JWT_SECRET !== 'dev_insecure_secret_change_me') {
     // Deterministically derive a cryptographically secure 256-bit AES key from configured JWT_SECRET
-    rawKey = crypto.createHmac('sha256', 'docuguard-encryption-salt-v1').update(process.env.JWT_SECRET).digest('hex');
+    rawKey = crypto.createHmac('sha256', 'deciva-encryption-salt-v1').update(process.env.JWT_SECRET).digest('hex');
     console.log('[SECURITY] Safely derived AES master key from configured JWT_SECRET.');
   } else {
     rawKey = DEFAULT_KEY_FALLBACK;

@@ -1,10 +1,10 @@
-# DocuGuard AI — Enterprise Integration & Interoperability Guide
+# Deciva — Enterprise Integration & Interoperability Guide
 
 ---
 
 ## 1. Overview & Integration Architecture
 
-Phase 14 established the enterprise integration and interoperability layer. DocuGuard AI integrates with external systems via canonical adapters, durable transactional outbox delivery, and cryptographic webhook verification.
+Phase 14 established the enterprise integration and interoperability layer. Deciva integrates with external systems via canonical adapters, durable transactional outbox delivery, and cryptographic webhook verification.
 
 Supported Enterprise Connectors:
 * **Salesforce:** Contract & Account synchronizer.
@@ -27,6 +27,6 @@ To prevent loss of outbound notifications and avoid dual-write race conditions:
 
 ## 3. Inbound Webhook Idempotency & Verification
 
-* Inbound webhooks must supply an `X-DocuGuard-Idempotency-Key` or provider event ID.
+* Inbound webhooks must supply an `X-Deciva-Idempotency-Key` or provider event ID.
 * Duplicate events are recognized by `integration_idempotency_keys` and returned HTTP 200 without reprocessing.
 * External payload signatures are verified against HMAC keys stored in the Credential Vault.

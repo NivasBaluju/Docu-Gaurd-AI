@@ -325,7 +325,7 @@ export default function IntegrationConsole() {
               <div className="text-center py-12 border border-dashed border-rule rounded">
                 <div className="font-display text-lg text-ink font-medium">No Integrations Configured</div>
                 <p className="font-body text-xs text-muted mt-1 max-w-md mx-auto">
-                  DocuGuard AI can connect directly to external contract repositories and business systems via secure REST endpoints.
+                  Deciva can connect directly to external contract repositories and business systems via secure REST endpoints.
                 </p>
                 {isAdmin && (
                   <button
@@ -529,7 +529,7 @@ export default function IntegrationConsole() {
               External Object Identity Mappings
             </h3>
             <p className="font-body text-xs text-muted mb-4">
-              Deterministic foreign-key references linking external IDs to internal DocuGuard contracts.
+              Deterministic foreign-key references linking external IDs to internal Deciva contracts.
             </p>
 
             {mappings.length === 0 ? (
@@ -542,7 +542,7 @@ export default function IntegrationConsole() {
                   <thead className="bg-subtle border-b border-rule">
                     <tr>
                       <th className="p-3">External ID</th>
-                      <th className="p-3">DocuGuard Doc ID</th>
+                      <th className="p-3">Deciva Doc ID</th>
                       <th className="p-3 text-center">Ext Version</th>
                       <th className="p-3">Last Synced</th>
                     </tr>
@@ -551,7 +551,7 @@ export default function IntegrationConsole() {
                     {mappings.map((m) => (
                       <tr key={m.id} className="hover:bg-subtle/30">
                         <td className="p-3 font-bold text-ink">{m.external_object_id}</td>
-                        <td className="p-3 text-muted">{m.docuguard_object_id}</td>
+                        <td className="p-3 text-muted">{m.deciva_object_id}</td>
                         <td className="p-3 text-center">{m.external_version}</td>
                         <td className="p-3 text-muted">{new Date(m.last_synced_at).toLocaleString()}</td>
                       </tr>
@@ -640,7 +640,7 @@ export default function IntegrationConsole() {
                   className="w-full px-3 py-2 rounded bg-subtle border border-rule text-ink font-body text-sm focus:outline-none focus:border-ink"
                 />
                 <p className="font-body text-xs text-muted mt-1">
-                  Secrets are stored in DocuGuard's AES-256-GCM encrypted vault and never logged or exposed in plaintext.
+                  Secrets are stored in Deciva's AES-256-GCM encrypted vault and never logged or exposed in plaintext.
                 </p>
               </div>
 

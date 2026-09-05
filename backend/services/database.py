@@ -9,7 +9,7 @@ load_dotenv()
 def get_db_url():
     url = os.getenv("DATABASE_URL", "")
     if not url:
-        return "postgresql://localhost/docuguard"
+        return "postgresql://localhost/deciva"
     try:
         parsed = urllib.parse.urlparse(url)
         query_params = urllib.parse.parse_qs(parsed.query)

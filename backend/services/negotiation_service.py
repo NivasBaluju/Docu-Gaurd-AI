@@ -41,7 +41,7 @@ def format_negotiation_prompt(clause_text: str, clause_type: str, mode: str, ris
     obj_str = "\n".join([f"- {o.replace('_', ' ').title()}" for o in objectives])
     risk_str = "; ".join(risk_context) if risk_context else "Standard contract risk review"
 
-    return f"""You are DocuGuard AI, an expert contract negotiation co-pilot.
+    return f"""You are Deciva, an expert contract negotiation co-pilot.
 Analyze the following original contract clause and propose a negotiated redline revision based on the selected negotiation posture.
 
 ORIGINAL CLAUSE (DOCUMENT FACT):

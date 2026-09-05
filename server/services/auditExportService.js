@@ -81,7 +81,7 @@ async function generateCryptographicAuditExport({ documentId = null, tenantId = 
     sha256: docRecord?.sha256 || 'SHA-256 NOT_ASSESSED',
     risk_score: docRecord?.risk_score ?? 'NOT_ASSESSED',
     analysis_status: docRecord?.analysis_status || 'UNKNOWN',
-    confidentiality_notice: 'DocuGuard AI Authoritative Evidence-Backed Audit Package'
+    confidentiality_notice: 'Deciva Authoritative Evidence-Backed Audit Package'
   };
 
   // 2. Decision Timeline
@@ -223,7 +223,7 @@ async function generateCryptographicAuditExport({ documentId = null, tenantId = 
   const manifest = {
     export_id: exportId,
     generated_at: new Date().toISOString(),
-    generator: 'DocuGuard AI Enterprise Audit Exporter v2.0',
+    generator: 'Deciva Enterprise Audit Exporter v2.0',
     secret_scrubbing_applied: true,
     file_checksums: {}
   };

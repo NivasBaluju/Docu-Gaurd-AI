@@ -1,10 +1,10 @@
-# DocuGuard AI — Security Architecture & Threat Model
+# Deciva — Security Architecture & Threat Model
 
 ---
 
 ## 1. Security Principles
 
-DocuGuard AI operates under strict enterprise defense-in-depth principles:
+Deciva operates under strict enterprise defense-in-depth principles:
 1. **Zero Plaintext Secrets:** Webhook secrets, database passwords, and external API tokens are encrypted with AES-256-GCM.
 2. **Timing-Safe Cryptography:** HMAC signatures are compared using constant-time algorithms (`crypto.timingSafeEqual`).
 3. **Strict Tenancy Isolation:** All business entities (documents, workflows, policies, integrations) are isolated by `tenant_id`. Cross-tenant queries return HTTP 403.
@@ -15,7 +15,7 @@ DocuGuard AI operates under strict enterprise defense-in-depth principles:
 
 ## 2. Cryptographic Credential Vault
 
-Implemented in [`server/services/credentialVaultService.js`](file:///c:/Users/DELL/Downloads/Docu-Gaurd%20AI/Docu-Gaurd%20AI/server/services/credentialVaultService.js):
+Implemented in [`server/services/credentialVaultService.js`](file:///c:/Users/DELL/Downloads/Deciva%20AI/Deciva%20AI/server/services/credentialVaultService.js):
 * **Algorithm:** Authenticated AES-256-GCM with randomized 16-byte initialization vectors (IVs) and authentication tags.
 * **Key Derivation:** Master key derived via SHA-256 from `ENCRYPTION_KEY`.
 * **Zero Leakage:** Passwords and keys are never printed in console logs or error messages.
@@ -25,9 +25,9 @@ Implemented in [`server/services/credentialVaultService.js`](file:///c:/Users/DE
 
 ## 3. Webhook Replay & Injection Defense
 
-Implemented in [`server/services/integrationSecurityService.js`](file:///c:/Users/DELL/Downloads/Docu-Gaurd%20AI/Docu-Gaurd%20AI/server/services/integrationSecurityService.js):
+Implemented in [`server/services/integrationSecurityService.js`](file:///c:/Users/DELL/Downloads/Deciva%20AI/Deciva%20AI/server/services/integrationSecurityService.js):
 * **HMAC-SHA256 Signature:** Computed over raw request body buffers (`req.rawBody`) to prevent whitespace manipulation.
-* **Replay Protection Window:** Mandates `X-DocuGuard-Timestamp` within $\pm 300\text{s}$ tolerance of server time.
+* **Replay Protection Window:** Mandates `X-Deciva-Timestamp` within $\pm 300\text{s}$ tolerance of server time.
 * **Non-Destructive Validation:** Rejects dangerous structure (prototype pollution, illegal characters) without altering legal contract evidence.
 
 ---

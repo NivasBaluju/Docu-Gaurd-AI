@@ -1,5 +1,5 @@
 /**
- * DocuGuard AI — Enterprise AI Telemetry Service
+ * Deciva — Enterprise AI Telemetry Service
  * ---------------------------------------------------------------------------
  * Asynchronously records non-invasive, privacy-safe AI operational telemetry.
  * Under NO circumstances does this service store raw contract text, prompts, or PII.

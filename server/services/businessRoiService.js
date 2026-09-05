@@ -1,5 +1,5 @@
 /**
- * DocuGuard AI — Business ROI Analytics Engine
+ * Deciva — Business ROI Analytics Engine
  * Post-Phase-15 Commercial Hardening
  *
  * Provides transparent, honest business value metrics.

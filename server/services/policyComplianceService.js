@@ -1,5 +1,5 @@
 /**
- * DocuGuard AI — Enterprise Policy, Compliance & Governance Control Engine (Phase 13)
+ * Deciva — Enterprise Policy, Compliance & Governance Control Engine (Phase 13)
  * ---------------------------------------------------------------------------
  * Enforces deterministic organizational contract policies, controls, exact clause
  * evidence quotes, explainable compliance scoring, dry-runs, and exception governance

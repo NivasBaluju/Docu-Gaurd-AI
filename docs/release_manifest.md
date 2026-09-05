@@ -1,10 +1,10 @@
-# DocuGuard AI — Release Manifest
+# Deciva — Release Manifest
 
 ---
 
 ## 1. Release Identification
 
-* **Product:** DocuGuard AI Enterprise
+* **Product:** Deciva Enterprise
 * **Application Version:** `1.0.0-phase15.enterprise`
 * **Schema Version:** `20260905_013`
 * **Release Date:** September 2026

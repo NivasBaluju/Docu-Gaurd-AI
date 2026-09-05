@@ -1,5 +1,5 @@
 /**
- * Docu-Gaurd AI Engine
+ * Deciva Engine
  * ---------------------------------------------------------------------------
  * A fast, fully offline, rule/heuristic-based NLP engine that powers clause
  * extraction, plain-language simplification, RAG-style Q&A, negotiation
@@ -122,21 +122,21 @@ function ragAnswer(question, docText) {
   // 1. Conversational Greetings & AI Info
   if (/^(hey|hello|hi|greetings|good morning|good afternoon|good evening|hey there|hola|sup)\b/i.test(qLower)) {
     return {
-      answer: "Hello! I am Docu-Gaurd AI, your intelligent legal copilot. I have analyzed this document and am ready to answer your questions. You can ask me about the contracting parties, payment terms, termination clauses, governing law, risks, or any specific provision!",
+      answer: "Hello! I am Deciva, your intelligent legal copilot. I have analyzed this document and am ready to answer your questions. You can ask me about the contracting parties, payment terms, termination clauses, governing law, risks, or any specific provision!",
       confidence: 1.0,
       grounded: true,
       groundingStatus: 'CONVERSATIONAL',
-      sources: [{ text: "Docu-Gaurd Assistant", pageRef: "General" }]
+      sources: [{ text: "Deciva Assistant", pageRef: "General" }]
     };
   }
 
   if (/^(who are you|what can you do|help|what is your name)\b/i.test(qLower)) {
     return {
-      answer: "I am Docu-Gaurd AI, an enterprise-grade AI legal copilot. I analyze contracts, extract key clauses, identify risk exposure, evaluate compliance, and answer natural language questions about your legal documents.",
+      answer: "I am Deciva, an enterprise-grade AI legal copilot. I analyze contracts, extract key clauses, identify risk exposure, evaluate compliance, and answer natural language questions about your legal documents.",
       confidence: 1.0,
       grounded: true,
       groundingStatus: 'CONVERSATIONAL',
-      sources: [{ text: "Docu-Gaurd Assistant", pageRef: "General" }]
+      sources: [{ text: "Deciva Assistant", pageRef: "General" }]
     };
   }
 

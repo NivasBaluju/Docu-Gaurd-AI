@@ -65,17 +65,17 @@ export function Contact() {
               <div className="space-y-4 font-body text-body-sm text-ink-soft">
                 <div>
                   <p className="text-ink font-medium">Enterprise &amp; Executive Briefings</p>
-                  <p>briefings@docuguard.ai</p>
+                  <p>briefings@deciva.ai</p>
                   <p className="text-ink-soft text-micro mt-0.5">Encrypted dispatch • 1 business day SLA</p>
                 </div>
                 <div>
                   <p className="text-ink font-medium">Statutory &amp; Regulatory Inquiries</p>
-                  <p>legal@docuguard.ai</p>
+                  <p>legal@deciva.ai</p>
                   <p className="text-ink-soft text-micro mt-0.5">Delaware Chancery, UCC &amp; EU GDPR compliance</p>
                 </div>
                 <div>
                   <p className="text-ink font-medium">Zero-Trust Security &amp; Audit Operations</p>
-                  <p>security@docuguard.ai</p>
+                  <p>security@deciva.ai</p>
                   <p className="text-ink-soft text-micro mt-0.5">SHA-256 ledger verification &amp; SOC 2 reports</p>
                 </div>
               </div>

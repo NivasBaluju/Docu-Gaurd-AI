@@ -120,13 +120,13 @@ export const IntelligenceTab = ({ doc, refreshTrigger }) => {
       });
     }
 
-    briefMd += `---\n*DocuGuard AI Deterministic Decision Intelligence Engine. ${activeData.disclaimer}*\n`;
+    briefMd += `---\n*Deciva Deterministic Decision Intelligence Engine. ${activeData.disclaimer}*\n`;
 
     const blob = new Blob([briefMd], { type: 'text/markdown;charset=utf-8' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = `DocuGuard_Decision_Brief_${docName.replace(/\.[^/.]+$/, '')}_${dateStr}.md`;
+    link.download = `Deciva_Decision_Brief_${docName.replace(/\.[^/.]+$/, '')}_${dateStr}.md`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);

@@ -1,5 +1,5 @@
 /**
- * DocuGuard AI — Abstract Integration Provider Interface
+ * Deciva — Abstract Integration Provider Interface
  * ---------------------------------------------------------------------------
  * Defines the canonical contract that all enterprise connectors must fulfill.
  * Future connectors (SharePoint, Salesforce, Box, Ironclad, Google Drive)

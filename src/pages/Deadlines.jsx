@@ -182,7 +182,7 @@ export const Deadlines = () => {
                 No Contract Deadlines Detected
               </h2>
               <p style={{ fontSize: '13px', color: '#A1A1AA', maxWidth: '440px', margin: '0 auto 20px', lineHeight: 1.5 }}>
-                Upload your legal agreements, NDAs, or contracts. DocuGuard AI will automatically extract and map your account's critical expiry, renewal, and notice milestones here.
+                Upload your legal agreements, NDAs, or contracts. Deciva will automatically extract and map your account's critical expiry, renewal, and notice milestones here.
               </p>
               <Link to="/upload" className="btn btn-primary" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
                 <Icon.document width={14} height={14} /> Upload First Document

@@ -1,7 +1,7 @@
 {
-  "name": "docu-gaurd-ai",
+  "name": "deciva-ai",
   "version": "1.0.0",
-  "description": "Docu-Gaurd AI — Enterprise AI Legal Copilot with SOC-grade security",
+  "description": "Deciva — Enterprise AI Legal Copilot with SOC-grade security",
   "main": "server/index.js",
   "type": "commonjs",
   "scripts": {

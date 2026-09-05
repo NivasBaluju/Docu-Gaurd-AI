@@ -27,7 +27,7 @@ def run_tests():
     print("=" * 70)
 
     # Step 1: Login & token acquisition
-    login_res = requests.post(f"{BASE_URL}/api/auth/login", json={"email": "admin@docugaurd.ai", "password": "Password123!"}).json()
+    login_res = requests.post(f"{BASE_URL}/api/auth/login", json={"email": "admin@deciva.ai", "password": "Password123!"}).json()
     if login_res.get("mfaRequired"):
         pre_token = login_res.get("preToken")
         conn = get_db_connection()
@@ -152,7 +152,7 @@ def run_tests():
     print("  [PASS] 4a: Invalid JWT rejected with HTTP 401.")
 
     # 4b. Cross-User Access Attempt (User 2 trying to chat with User 1's doc)
-    user2_email = f"user2_{uuid.uuid4().hex[:6]}@docuguard.ai"
+    user2_email = f"user2_{uuid.uuid4().hex[:6]}@deciva.ai"
     reg_res = requests.post(f"{BASE_URL}/api/auth/register", json={
         "name": "User 2",
         "email": user2_email,

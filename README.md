@@ -1,4 +1,4 @@
-# Docu-Gaurd AI — Enterprise AI Legal Copilot
+# Deciva — Enterprise AI Legal Copilot
 
 A full-stack, security-first AI legal copilot: clause extraction, plain-language
 translation, a RAG chatbot, a negotiation assistant, a compliance checker, a
@@ -21,7 +21,7 @@ in Claude for deeper analysis.
 ## 2. Setup
 
 ```bash
-cd docu-gaurd-ai
+cd deciva-ai
 npm install
 cp .env.example .env
 ```
@@ -98,7 +98,7 @@ emails, fill in `SMTP_HOST`, `SMTP_USER`, `SMTP_PASS`, etc. in `.env`
 ## 8. Project structure
 
 ```
-docu-gaurd-ai/
+deciva-ai/
   server/
     index.js              Express app entrypoint
     db.js                 PostgreSQL connection pool and schema initialization (pg)

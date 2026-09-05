@@ -53,11 +53,11 @@ export function InsightDetail() {
             <PullQuote
               quote={article.content[1] || article.dek}
               attribution={article.author}
-              subattribution="DocuGuard AI Systems Architecture & Research"
+              subattribution="Deciva Systems Architecture & Research"
             />
 
             <p className="measure-body">
-              Enterprise legal and operations teams can leverage these capabilities directly within the DocuGuard authenticated workspace or configure custom automated continuous surveillance pipelines.
+              Enterprise legal and operations teams can leverage these capabilities directly within the Deciva authenticated workspace or configure custom automated continuous surveillance pipelines.
             </p>
           </div>
 
@@ -71,7 +71,7 @@ export function InsightDetail() {
                 {article.author}
               </h3>
               <p className="font-body text-body-sm text-ink-soft mt-1 max-w-md leading-relaxed">
-                Conducts core systems engineering, applied zero-trust cryptography, and algorithmic contract intelligence for the DocuGuard AI enterprise platform.
+                Conducts core systems engineering, applied zero-trust cryptography, and algorithmic contract intelligence for the Deciva enterprise platform.
               </p>
             </div>
           </div>

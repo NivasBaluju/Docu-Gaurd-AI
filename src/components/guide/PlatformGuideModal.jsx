@@ -76,7 +76,7 @@ export const PlatformGuideModal = ({ isOpen, onClose, initialSection = 'WORKFLOW
         <div className="flex items-center justify-between px-6 py-5 border-b border-rule bg-[#0C0C12]">
           <div className="flex items-center gap-3">
             <span id="guide-title" className="font-display text-xl text-white font-semibold">
-              DocuGuard AI — System Guide &amp; Architecture Tour
+              Deciva — System Guide &amp; Architecture Tour
             </span>
             <span className="text-micro bg-white/10 text-zinc-300 px-2.5 py-0.5 border border-rule uppercase tracking-wider font-mono">
               Reference Manual
@@ -136,10 +136,10 @@ export const PlatformGuideModal = ({ isOpen, onClose, initialSection = 'WORKFLOW
                   Section 01 • Operational Walkthrough
                 </span>
                 <h3 className="font-display text-2xl text-white font-medium">
-                  How to Use DocuGuard AI From Start to Finish
+                  How to Use Deciva From Start to Finish
                 </h3>
                 <p className="text-zinc-300 text-body mt-2">
-                  DocuGuard is structured as an executive decision pipeline. You do not need to be a corporate lawyer or developer to navigate your enterprise agreements. Follow these 5 progressive stages:
+                  Deciva is structured as an executive decision pipeline. You do not need to be a corporate lawyer or developer to navigate your enterprise agreements. Follow these 5 progressive stages:
                 </p>
               </div>
 
@@ -229,7 +229,7 @@ export const PlatformGuideModal = ({ isOpen, onClose, initialSection = 'WORKFLOW
                     Decision Intelligence &amp; Statutory Cross-Checking
                   </h3>
                   <p className="text-zinc-300 text-body mt-2">
-                    Unlike generic chatbots that summarize text with hallucinated opinions, DocuGuard uses a deterministic, mathematically grounded intelligence architecture.
+                    Unlike generic chatbots that summarize text with hallucinated opinions, Deciva uses a deterministic, mathematically grounded intelligence architecture.
                   </p>
                 </div>
 
@@ -285,7 +285,7 @@ export const PlatformGuideModal = ({ isOpen, onClose, initialSection = 'WORKFLOW
                     Continuous Surveillance, Deadlines &amp; Approvals
                   </h3>
                   <p className="text-zinc-300 text-body mt-2">
-                    Agreements do not end when signed. DocuGuard continuously monitors active contractual commitments to prevent balance-sheet surprises, surprise auto-renewals, and compliance breaches.
+                    Agreements do not end when signed. Deciva continuously monitors active contractual commitments to prevent balance-sheet surprises, surprise auto-renewals, and compliance breaches.
                   </p>
                 </div>
 
@@ -347,7 +347,7 @@ export const PlatformGuideModal = ({ isOpen, onClose, initialSection = 'WORKFLOW
                     Complete Technology Stack &amp; Backend Architecture
                   </h3>
                   <p className="text-zinc-300 text-body mt-2">
-                    DocuGuard is engineered as an enterprise-grade multi-tier system with strict separation of concerns, transactional integrity, and hardware-level cryptographic controls.
+                    Deciva is engineered as an enterprise-grade multi-tier system with strict separation of concerns, transactional integrity, and hardware-level cryptographic controls.
                   </p>
                 </div>
 
@@ -426,7 +426,7 @@ Node.js Express API Server [:5000]
                     Zero-Trust Enclaves, Immutable Audit &amp; Disaster Recovery
                   </h3>
                   <p className="text-zinc-300 text-body mt-2">
-                    DocuGuard is engineered so that no administrator, rogue insider, or external counterparty can alter historical legal records undetected.
+                    Deciva is engineered so that no administrator, rogue insider, or external counterparty can alter historical legal records undetected.
                   </p>
                 </div>
 

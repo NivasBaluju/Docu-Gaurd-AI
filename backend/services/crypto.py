@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Generate or read 256-bit encryption key
-_RAW_KEY = os.getenv("ENCRYPTION_KEY", "docuguard-secret-encryption-key-32-bytes!!")
+_RAW_KEY = os.getenv("ENCRYPTION_KEY", "deciva-secret-encryption-key-32-bytes!!")
 _KEY = hashlib.sha256(_RAW_KEY.encode('utf-8')).digest()
 
 def sha256_buffer(data: bytes) -> str:

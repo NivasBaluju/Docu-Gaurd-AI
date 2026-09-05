@@ -1,10 +1,10 @@
-# DocuGuard AI — Enterprise Data Portability Specification
+# Deciva — Enterprise Data Portability Specification
 
 ---
 
 ## 1. Specification Overview
 
-This document specifies the format, integrity rules, secret-scrubbing standards, and referential-integrity guarantees for tenant data export and import within DocuGuard AI (`server/services/dataExportService.js`, `server/services/dataImportService.js`).
+This document specifies the format, integrity rules, secret-scrubbing standards, and referential-integrity guarantees for tenant data export and import within Deciva (`server/services/dataExportService.js`, `server/services/dataImportService.js`).
 
 ---
 

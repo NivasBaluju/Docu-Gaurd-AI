@@ -7,7 +7,7 @@
 const BASE_URL = '/api/admin';
 
 function getAuthHeaders() {
-  const token = localStorage.getItem('docuguard_token');
+  const token = localStorage.getItem('deciva_token');
   return {
     'Content-Type': 'application/json',
     ...(token ? { Authorization: `Bearer ${token}` } : {})

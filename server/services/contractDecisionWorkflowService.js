@@ -1,5 +1,5 @@
 /**
- * DocuGuard AI — Contract Decision Workflow Service (Phase 12)
+ * Deciva — Contract Decision Workflow Service (Phase 12)
  * ---------------------------------------------------------------------------
  * Coordinates enterprise human-in-the-loop decision governance, deterministic
  * approval policy enforcement, collaborative multi-reviewer workflows,

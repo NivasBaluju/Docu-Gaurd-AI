@@ -1,10 +1,10 @@
-# DocuGuard AI — Audit & Regulatory Compliance Guide
+# Deciva — Audit & Regulatory Compliance Guide
 
 ---
 
 ## 1. Compliance Architecture & Framework Alignment
 
-DocuGuard AI provides enterprise contract compliance alignment across major regulatory frameworks:
+Deciva provides enterprise contract compliance alignment across major regulatory frameworks:
 * **GDPR (General Data Protection Regulation):** Right to be forgotten, data portability, data minimization, consent tracking.
 * **SOC 2 Type II:** Security, availability, processing integrity, confidentiality, and privacy trust principles.
 * **ISO 27001:** Information security management and cryptographic controls.
