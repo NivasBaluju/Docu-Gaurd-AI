@@ -1,8 +1,14 @@
 import os
 import sys
 
-# Ensure root directory is on Python path
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+# Ensure both backend directory and project root are on Python path
+BACKEND_DIR = os.path.abspath(os.path.dirname(__file__))
+PROJECT_ROOT = os.path.abspath(os.path.join(BACKEND_DIR, '..'))
+
+for p in [BACKEND_DIR, PROJECT_ROOT]:
+    if p not in sys.path:
+        sys.path.insert(0, p)
+
 
 import hmac
 from flask import Flask, jsonify, request
