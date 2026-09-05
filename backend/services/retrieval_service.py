@@ -1,8 +1,13 @@
 import os
 import re
 from typing import List, Dict, Any, Tuple
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.metrics.pairwise import cosine_similarity
+try:
+    from sklearn.feature_extraction.text import TfidfVectorizer
+    from sklearn.metrics.pairwise import cosine_similarity
+    SKLEARN_AVAILABLE = True
+except ImportError:
+    SKLEARN_AVAILABLE = False
+
 
 try:
     from backend.services.database import get_db_connection
@@ -70,6 +75,18 @@ def retrieve_relevant_segments(
             return [], {"topScore": 0.0, "grounded": False, "count": 0}
 
         segment_texts = [r["segment_text"] for r in rows]
+
+        if not SKLEARN_AVAILABLE:
+            q_tokens = set(re.findall(r'\w+', (query or '').lower()))
+            scored = []
+            for r in rows:
+                seg_tokens = set(re.findall(r'\w+', (r.get("segment_text") or '').lower()))
+                overlap = len(q_tokens & seg_tokens) / max(1, len(q_tokens))
+                if overlap >= 0.1:
+                    scored.append((overlap, r))
+            scored.sort(key=lambda x: x[0], reverse=True)
+            top = scored[:top_k]
+            return [t[1] for t in top], {"topScore": round(top[0][0], 2) if top else 0.0, "grounded": bool(top), "count": len(top)}
 
         # 2. Vectorize segment corpus and user question
         vectorizer = TfidfVectorizer(

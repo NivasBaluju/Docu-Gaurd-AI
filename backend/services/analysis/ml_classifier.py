@@ -1,8 +1,14 @@
 import os
 from typing import Dict, Any, List, Optional
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.linear_model import LogisticRegression
-from sklearn.pipeline import Pipeline
+
+try:
+    from sklearn.feature_extraction.text import TfidfVectorizer
+    from sklearn.linear_model import LogisticRegression
+    from sklearn.pipeline import Pipeline
+    SKLEARN_AVAILABLE = True
+except ImportError:
+    SKLEARN_AVAILABLE = False
+
 
 # Comprehensive Legal Clause Training Dataset
 TRAINING_DATA = [
@@ -82,13 +88,19 @@ class LegalClauseMLClassifier:
         return cls._instance
 
     def __init__(self):
-        self.model = Pipeline([
-            ('tfidf', TfidfVectorizer(ngram_range=(1, 2), max_features=4000, sublinear_tf=True)),
-            ('clf', LogisticRegression(C=3.0, max_iter=500, class_weight='balanced'))
-        ])
-        self._train_baseline()
+        if SKLEARN_AVAILABLE:
+            self.model = Pipeline([
+                ('tfidf', TfidfVectorizer(ngram_range=(1, 2), max_features=4000, sublinear_tf=True)),
+                ('clf', LogisticRegression(C=3.0, max_iter=500, class_weight='balanced'))
+            ])
+            self._train_baseline()
+        else:
+            self.model = None
+            self.classes_ = []
 
     def _train_baseline(self):
+        if not SKLEARN_AVAILABLE or not self.model:
+            return
         texts, labels = zip(*TRAINING_DATA)
         self.model.fit(texts, labels)
         self.classes_ = self.model.classes_
@@ -98,6 +110,9 @@ class LegalClauseMLClassifier:
         Runs ML inference on a text segment.
         Returns predicted label, probability confidence, and top candidate distributions.
         """
+        if not SKLEARN_AVAILABLE or not self.model:
+            return None
+
         if not segment_text or len(segment_text.strip()) < 15:
             return None
 
