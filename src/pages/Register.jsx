@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Api from '../services/api';
+import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import FormField from '../components/ui/FormField';
 import Button from '../components/ui/Button';
@@ -17,8 +18,15 @@ export function Register() {
   const [fieldErrors, setFieldErrors] = useState({ name: '', email: '' });
   const [submitting, setSubmitting] = useState(false);
 
+  const { user, loading, isAuthenticated } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
+
+  React.useEffect(() => {
+    if (!loading && (user || isAuthenticated)) {
+      navigate('/dashboard', { replace: true });
+    }
+  }, [user, loading, isAuthenticated, navigate]);
 
   const handleNameChange = (e) => {
     setName(e.target.value);
@@ -70,6 +78,14 @@ export function Register() {
       setSubmitting(false);
     }
   };
+
+  if (loading || user || isAuthenticated) {
+    return (
+      <div className="w-full min-h-[85vh] bg-transparent flex items-center justify-center">
+        <div className="spinner"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full min-h-[85vh] bg-transparent flex items-center justify-center py-16 px-4">

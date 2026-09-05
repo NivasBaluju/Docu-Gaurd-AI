@@ -24,8 +24,9 @@ export function Mfa() {
   const [thresholdOpen, setThresholdOpen] = useState(false);
   const [thresholdStatus, setThresholdStatus] = useState('validating');
   const [authPayload, setAuthPayload] = useState(null);
+  const isCompletingRef = React.useRef(false);
 
-  const { login } = useAuth();
+  const { user, login, isAuthenticated } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -33,10 +34,14 @@ export function Mfa() {
   const authEmail = sessionStorage.getItem('authEmail');
 
   useEffect(() => {
-    if (!preToken) {
+    if (user || isAuthenticated) {
+      navigate('/dashboard', { replace: true });
+      return;
+    }
+    if (!preToken && !isCompletingRef.current && !thresholdOpen && !authPayload) {
       navigate('/login', { replace: true });
     }
-  }, [preToken, navigate]);
+  }, [preToken, user, isAuthenticated, thresholdOpen, authPayload, navigate]);
 
   useEffect(() => {
     if (resendCooldown <= 0) return;
@@ -97,16 +102,22 @@ export function Mfa() {
   };
 
   const handleThresholdComplete = async () => {
-    if (!authPayload) return;
-    sessionStorage.removeItem('preToken');
-    sessionStorage.removeItem('authEmail');
-    sessionStorage.removeItem('backupPass');
-    await login(authPayload.token, authPayload.user);
-    toast('Identity confirmed — workspace initialized', 'ok');
-    navigate('/dashboard');
+    if (!authPayload || isCompletingRef.current) return;
+    isCompletingRef.current = true;
+    try {
+      await login(authPayload.token, authPayload.user);
+      sessionStorage.removeItem('preToken');
+      sessionStorage.removeItem('authEmail');
+      sessionStorage.removeItem('backupPass');
+      toast('Identity confirmed — workspace initialized', 'ok');
+      navigate('/dashboard', { replace: true });
+    } catch (err) {
+      isCompletingRef.current = false;
+      toast(err.message || 'Failed to initialize session', 'error');
+    }
   };
 
-  if (!preToken) return null;
+  if (!preToken && !isCompletingRef.current && !thresholdOpen && !authPayload) return null;
 
   return (
     <div className="w-full min-h-[85vh] bg-paper flex items-center justify-center py-20 px-6">

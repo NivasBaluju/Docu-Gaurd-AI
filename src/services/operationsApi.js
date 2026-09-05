@@ -4,10 +4,12 @@
  * Lifecycle, Retention, Legal Holds, and System Integrity.
  */
 
+import Api from './api';
+
 const BASE_URL = '/api/admin';
 
 function getAuthHeaders() {
-  const token = localStorage.getItem('deciva_token');
+  const token = Api.getToken();
   return {
     'Content-Type': 'application/json',
     ...(token ? { Authorization: `Bearer ${token}` } : {})

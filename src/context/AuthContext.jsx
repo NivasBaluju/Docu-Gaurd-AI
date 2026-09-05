@@ -24,9 +24,12 @@ export const AuthProvider = ({ children }) => {
       setTrust(trustData ? trustData.score : 100);
       return userData;
     } catch (err) {
-      Api.clearToken();
-      setUser(null);
-      setTrust(null);
+      // Only clear token if server explicitly rejected auth (401/403)
+      if (err && (err.status === 401 || err.status === 403)) {
+        Api.clearToken();
+        setUser(null);
+        setTrust(null);
+      }
       return null;
     } finally {
       setLoading(false);
@@ -34,6 +37,13 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   useEffect(() => {
+    // Proactively clear any legacy persistent localStorage tokens so closing the tab/browser terminates the session
+    try {
+      localStorage.removeItem('deciva_token');
+      localStorage.removeItem('docugaurd_token');
+      localStorage.removeItem('token');
+    } catch (e) {}
+
     refreshMe();
   }, [refreshMe]);
 
@@ -41,8 +51,13 @@ export const AuthProvider = ({ children }) => {
     Api.setToken(token);
     if (userData) {
       setUser(userData);
+      setLoading(false);
     }
-    await refreshMe();
+    try {
+      await refreshMe();
+    } catch (e) {
+      // Preserve active credentials if refreshMe had a transient network blip
+    }
   }, [refreshMe]);
 
   const logout = useCallback(async () => {
@@ -52,11 +67,15 @@ export const AuthProvider = ({ children }) => {
       // Ignore network errors during logout
     }
     Api.clearToken();
-    localStorage.removeItem('token');
-    localStorage.removeItem('docugaurd_token');
-    sessionStorage.clear();
+    try {
+      localStorage.removeItem('token');
+      localStorage.removeItem('deciva_token');
+      localStorage.removeItem('docugaurd_token');
+      sessionStorage.clear();
+    } catch (e) {}
     setUser(null);
     setTrust(null);
+    setLoading(false);
     toast('Signed out securely', 'ok');
   }, [toast]);
 

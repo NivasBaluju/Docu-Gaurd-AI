@@ -53,6 +53,17 @@ const RouteLoadingFallback = () => (
   </div>
 );
 
+const GuestRoute = ({ children }) => {
+  const { user, loading } = useAuth();
+  if (loading) {
+    return <RouteLoadingFallback />;
+  }
+  if (user) {
+    return <Navigate to="/dashboard" replace />;
+  }
+  return children;
+};
+
 const AppContent = () => {
   const { user } = useAuth();
   const location = useLocation();
@@ -98,9 +109,30 @@ const AppContent = () => {
             <Route path="/accessibility" element={<Accessibility />} />
 
             {/* Authentication Routes */}
-            <Route path="/register" element={<Register />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/mfa" element={<Mfa />} />
+            <Route
+              path="/register"
+              element={
+                <GuestRoute>
+                  <Register />
+                </GuestRoute>
+              }
+            />
+            <Route
+              path="/login"
+              element={
+                <GuestRoute>
+                  <Login />
+                </GuestRoute>
+              }
+            />
+            <Route
+              path="/mfa"
+              element={
+                <GuestRoute>
+                  <Mfa />
+                </GuestRoute>
+              }
+            />
 
             {/* Protected Enterprise Portal Routes (Preserved 100%) */}
             <Route

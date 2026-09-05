@@ -1,14 +1,25 @@
-const TOKEN_KEY = 'docugaurd_token';
+const TOKEN_KEY = 'deciva_token';
 
 export const Api = {
   getToken() {
-    return localStorage.getItem(TOKEN_KEY);
+    // sessionStorage ensures the user is automatically logged out when the tab or browser is closed
+    return sessionStorage.getItem(TOKEN_KEY);
   },
   setToken(token) {
-    localStorage.setItem(TOKEN_KEY, token);
+    sessionStorage.setItem(TOKEN_KEY, token);
+    try {
+      localStorage.removeItem(TOKEN_KEY);
+      localStorage.removeItem('docugaurd_token');
+      localStorage.removeItem('token');
+    } catch (e) {}
   },
   clearToken() {
-    localStorage.removeItem(TOKEN_KEY);
+    sessionStorage.removeItem(TOKEN_KEY);
+    try {
+      localStorage.removeItem(TOKEN_KEY);
+      localStorage.removeItem('docugaurd_token');
+      localStorage.removeItem('token');
+    } catch (e) {}
   },
 
   async request(method, url, body, isForm = false, timeoutMs = 30000) {

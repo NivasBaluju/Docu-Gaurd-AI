@@ -1,9 +1,15 @@
 const Api = (() => {
   const TOKEN_KEY = 'deciva_token';
 
-  function getToken() { return localStorage.getItem(TOKEN_KEY); }
-  function setToken(t) { localStorage.setItem(TOKEN_KEY, t); }
-  function clearToken() { localStorage.removeItem(TOKEN_KEY); }
+  function getToken() { return sessionStorage.getItem(TOKEN_KEY); }
+  function setToken(t) {
+    sessionStorage.setItem(TOKEN_KEY, t);
+    try { localStorage.removeItem(TOKEN_KEY); } catch (e) {}
+  }
+  function clearToken() {
+    sessionStorage.removeItem(TOKEN_KEY);
+    try { localStorage.removeItem(TOKEN_KEY); } catch (e) {}
+  }
 
   async function request(method, url, body, isForm = false, timeoutMs = 30000) {
     const headers = {};
