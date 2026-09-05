@@ -11,3 +11,4 @@ scratch/
 __pycache__/
 *.py[cod]
 *$py.class
+TECHNICAL_ARCHITECTURE_DEEP_DIVE.md
